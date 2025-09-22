@@ -1,0 +1,77 @@
+{
+  "name": "@fluxez/node-sdk",
+  "version": "1.0.0",
+  "description": "Official Node.js SDK for Fluxez - Complete platform SDK with AI, workflows, email, storage, and multi-database support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "playground": "cd playground && npm run dev",
+    "playground:build": "cd playground && npm run build",
+    "example": "node examples/01-quick-start.js",
+    "examples": "for file in examples/*.js; do echo \"Running $file...\"; node \"$file\" || true; done",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "fluxez",
+    "database",
+    "query-builder",
+    "postgresql",
+    "elasticsearch",
+    "clickhouse",
+    "qdrant",
+    "redis",
+    "storage",
+    "email",
+    "sqs",
+    "queue",
+    "ai",
+    "brain",
+    "workflow",
+    "automation",
+    "multi-tenant",
+    "api-sdk"
+  ],
+  "author": "Fluxez",
+  "license": "MIT",
+  "bin": {
+    "fluxez": "./bin/fluxez.js"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^0.2.10",
+    "@elastic/elasticsearch": "^8.13.1",
+    "@qdrant/qdrant-js": "^1.9.0",
+    "@types/eventsource": "^1.1.15",
+    "axios": "^1.6.7",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.1",
+    "dotenv": "^17.2.2",
+    "eventsource": "^4.0.0",
+    "form-data": "^4.0.0",
+    "ioredis": "^5.3.2",
+    "lodash": "^4.17.21",
+    "mime-types": "^2.1.35",
+    "socket.io-client": "^4.8.1",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/commander": "^2.12.0",
+    "@types/lodash": "^4.14.202",
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "^20.11.19",
+    "@types/ws": "^8.18.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fluxez/node-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fluxez/node-sdk/issues"
+  },
+  "homepage": "https://github.com/fluxez/node-sdk"
+}

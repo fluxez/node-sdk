@@ -1,0 +1,1 @@
+{"version":3,"file":"cli.d.ts","sourceRoot":"","sources":["../../src/migration/cli.ts"],"names":[],"mappings":";AASA,cAAM,YAAY;IAChB,OAAO,CAAC,MAAM,CAAY;IAC1B,OAAO,CAAC,QAAQ,CAAW;;IAW3B,OAAO,CAAC,SAAS;IAqCX,GAAG,IAAI,OAAO,CAAC,IAAI,CAAC;YAkCZ,uBAAuB;YAkDvB,aAAa;YA8Bb,UAAU;YAsBV,QAAQ;YAqBR,eAAe;YA6Bf,KAAK;IAanB,OAAO,CAAC,QAAQ;CAiCjB;AAWD,OAAO,EAAE,YAAY,EAAE,CAAC"}
