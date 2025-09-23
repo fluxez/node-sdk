@@ -182,7 +182,7 @@ export class FluxezClient {
    * Health check
    */
   public async health(): Promise<{ status: string; version: string }> {
-    const response = await this.httpClient.get('/api/health');
+    const response = await this.httpClient.get('/health');
     return response.data;
   }
 }

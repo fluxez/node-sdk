@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthClient = void 0;
+const constants_1 = require("../constants");
 class AuthClient {
     constructor(httpClient, config, logger) {
         this.currentUser = null;
@@ -13,7 +14,7 @@ class AuthClient {
      */
     async login(credentials) {
         this.logger.debug('Logging in', { email: credentials.email });
-        const response = await this.httpClient.post('/api/auth/login', credentials);
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.LOGIN, credentials);
         const token = response.data;
         // Store current user
         this.currentUser = token.user;
@@ -28,7 +29,7 @@ class AuthClient {
      */
     async register(data) {
         this.logger.debug('Registering user', { email: data.email });
-        const response = await this.httpClient.post('/api/auth/register', data);
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.REGISTER, data);
         return response.data;
     }
     /**
@@ -36,7 +37,7 @@ class AuthClient {
      */
     async refresh(refreshToken) {
         this.logger.debug('Refreshing token');
-        const response = await this.httpClient.post('/api/auth/refresh', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.REFRESH, {
             refreshToken,
         });
         const token = response.data;
@@ -52,7 +53,7 @@ class AuthClient {
     async logout() {
         this.logger.debug('Logging out');
         try {
-            await this.httpClient.post('/api/auth/logout');
+            await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.LOGOUT);
         }
         catch (error) {
             this.logger.error('Logout failed', error);
@@ -69,7 +70,7 @@ class AuthClient {
         if (this.currentUser) {
             return this.currentUser;
         }
-        const response = await this.httpClient.get('/api/auth/me');
+        const response = await this.httpClient.get('/tenant-auth/me');
         this.currentUser = response.data;
         return response.data;
     }
@@ -77,21 +78,21 @@ class AuthClient {
      * Get user by ID (admin only)
      */
     async getUserById(userId) {
-        const response = await this.httpClient.get(`/api/auth/users/${userId}`);
+        const response = await this.httpClient.get(`/tenant-auth/users/${userId}`);
         return response.data;
     }
     /**
      * Update user (admin only)
      */
     async updateUser(userId, data) {
-        const response = await this.httpClient.patch(`/api/auth/users/${userId}`, data);
+        const response = await this.httpClient.patch(`/tenant-auth/users/${userId}`, data);
         return response.data;
     }
     /**
      * List users (admin only)
      */
     async listUsers(options) {
-        const response = await this.httpClient.get('/api/auth/users', {
+        const response = await this.httpClient.get('/tenant-auth/users', {
             params: options
         });
         return response.data;
@@ -106,7 +107,7 @@ class AuthClient {
      * Update user profile
      */
     async updateProfile(data) {
-        const response = await this.httpClient.patch('/api/auth/profile', data);
+        const response = await this.httpClient.patch('/tenant-auth/profile', data);
         this.currentUser = response.data;
         return response.data;
     }
@@ -114,50 +115,50 @@ class AuthClient {
      * Request password reset
      */
     async requestPasswordReset(email) {
-        await this.httpClient.post('/api/auth/password/reset', { email });
+        await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.FORGOT_PASSWORD, { email });
     }
     /**
      * Reset password with token
      */
     async resetPassword(request) {
-        await this.httpClient.post('/api/auth/password/reset/confirm', request);
+        await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.RESET_PASSWORD, request);
     }
     /**
      * Change password
      */
     async changePassword(request) {
-        await this.httpClient.post('/api/auth/password/change', request);
+        await this.httpClient.post('/tenant-auth/password/change', request);
     }
     /**
      * Request email verification
      */
     async requestEmailVerification() {
-        await this.httpClient.post('/api/auth/email/verify');
+        await this.httpClient.post('/tenant-auth/email/verify/request');
     }
     /**
      * Verify email with token
      */
     async verifyEmail(token) {
-        await this.httpClient.post('/api/auth/email/verify/confirm', { token });
+        await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.VERIFY_EMAIL, { token });
     }
     /**
      * Enable two-factor authentication
      */
     async enable2FA() {
-        const response = await this.httpClient.post('/api/auth/2fa/enable');
+        const response = await this.httpClient.post('/tenant-auth/2fa/enable');
         return response.data;
     }
     /**
      * Disable two-factor authentication
      */
     async disable2FA(code) {
-        await this.httpClient.post('/api/auth/2fa/disable', { code });
+        await this.httpClient.post('/tenant-auth/2fa/disable', { code });
     }
     /**
      * Verify 2FA code
      */
     async verify2FA(code) {
-        const response = await this.httpClient.post('/api/auth/2fa/verify', { code });
+        const response = await this.httpClient.post('/tenant-auth/2fa/verify', { code });
         return response.data;
     }
     // Organization management
@@ -165,14 +166,14 @@ class AuthClient {
      * Create organization
      */
     async createOrganization(data) {
-        const response = await this.httpClient.post('/api/organization/create', data);
+        const response = await this.httpClient.post('/organization/create', data);
         return response.data;
     }
     /**
      * Get user's organizations
      */
     async getOrganizations() {
-        const response = await this.httpClient.get('/api/organization/my');
+        const response = await this.httpClient.get('/organization/my');
         return response.data;
     }
     /**
@@ -186,14 +187,14 @@ class AuthClient {
      * Create project
      */
     async createProject(data) {
-        const response = await this.httpClient.post('/api/project/create', data);
+        const response = await this.httpClient.post('/project/create', data);
         return response.data;
     }
     /**
      * Get project details
      */
     async getProject(projectId) {
-        const response = await this.httpClient.get(`/api/project/${projectId}`);
+        const response = await this.httpClient.get(`/project/${projectId}`);
         return response.data;
     }
     /**
@@ -207,14 +208,14 @@ class AuthClient {
      * Create API key
      */
     async createApiKey(data) {
-        const response = await this.httpClient.post('/api/api-key/create', data);
+        const response = await this.httpClient.post('/api-key/create', data);
         return response.data;
     }
     /**
      * List API keys
      */
     async listApiKeys(projectId) {
-        const response = await this.httpClient.get('/api/api-key/list', {
+        const response = await this.httpClient.get('/api-key/list', {
             params: { projectId },
         });
         return response.data;
@@ -223,14 +224,14 @@ class AuthClient {
      * Revoke API key
      */
     async revokeApiKey(keyId) {
-        await this.httpClient.delete(`/api/api-key/${keyId}`);
+        await this.httpClient.delete(`/api-key/${keyId}`);
     }
     /**
      * Validate API key
      */
     async validateApiKey(apiKey) {
         try {
-            const response = await this.httpClient.post('/api/api-key/validate', {
+            const response = await this.httpClient.post('/api-key/validate', {
                 apiKey,
             });
             return response.data.valid === true;
@@ -244,14 +245,14 @@ class AuthClient {
      * Login with OAuth provider
      */
     async socialLogin(provider) {
-        const response = await this.httpClient.get(`/api/auth/social/${provider}`);
+        const response = await this.httpClient.get(`${constants_1.API_ENDPOINTS.TENANT_AUTH.SOCIAL}/${provider}`);
         return response.data.authUrl;
     }
     /**
      * Handle OAuth callback
      */
     async socialCallback(provider, code) {
-        const response = await this.httpClient.post(`/api/auth/social/${provider}/callback`, {
+        const response = await this.httpClient.post(`${constants_1.API_ENDPOINTS.TENANT_AUTH.SOCIAL}/${provider}/callback`, {
             code,
         });
         return response.data;
@@ -261,20 +262,20 @@ class AuthClient {
      * Get active sessions
      */
     async getSessions() {
-        const response = await this.httpClient.get('/api/auth/sessions');
+        const response = await this.httpClient.get('/tenant-auth/sessions');
         return response.data;
     }
     /**
      * Revoke session
      */
     async revokeSession(sessionId) {
-        await this.httpClient.delete(`/api/auth/sessions/${sessionId}`);
+        await this.httpClient.delete(`/tenant-auth/sessions/${sessionId}`);
     }
     /**
      * Revoke all sessions
      */
     async revokeAllSessions() {
-        await this.httpClient.delete('/api/auth/sessions');
+        await this.httpClient.delete('/tenant-auth/sessions');
     }
 }
 exports.AuthClient = AuthClient;
