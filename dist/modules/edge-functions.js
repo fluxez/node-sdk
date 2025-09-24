@@ -13,7 +13,7 @@ class EdgeFunctionsClient {
     async create(options) {
         try {
             this.logger.debug('Creating edge function', { name: options.name });
-            const response = await this.httpClient.post('/api/v1/edge-functions', options);
+            const response = await this.httpClient.post('/edge-functions', options);
             this.logger.info('Edge function created successfully', {
                 id: response.data.id,
                 name: options.name
@@ -30,7 +30,7 @@ class EdgeFunctionsClient {
      */
     async list(options) {
         try {
-            const response = await this.httpClient.get('/api/v1/edge-functions', { params: options });
+            const response = await this.httpClient.get('/edge-functions', { params: options });
             return response.data;
         }
         catch (error) {
@@ -43,7 +43,7 @@ class EdgeFunctionsClient {
      */
     async get(functionId) {
         try {
-            const response = await this.httpClient.get(`/api/v1/edge-functions/${functionId}`);
+            const response = await this.httpClient.get(`/edge-functions/${functionId}`);
             return response.data;
         }
         catch (error) {
@@ -57,7 +57,7 @@ class EdgeFunctionsClient {
     async update(functionId, updates) {
         try {
             this.logger.debug('Updating edge function', { functionId, updates });
-            const response = await this.httpClient.put(`/api/v1/edge-functions/${functionId}`, updates);
+            const response = await this.httpClient.put(`/edge-functions/${functionId}`, updates);
             this.logger.info('Edge function updated successfully', { functionId });
             return response.data;
         }
@@ -71,7 +71,7 @@ class EdgeFunctionsClient {
      */
     async delete(functionId) {
         try {
-            const response = await this.httpClient.delete(`/api/v1/edge-functions/${functionId}`);
+            const response = await this.httpClient.delete(`/edge-functions/${functionId}`);
             this.logger.info('Edge function deleted successfully', { functionId });
             return response.data;
         }
@@ -86,7 +86,7 @@ class EdgeFunctionsClient {
     async deploy(functionId) {
         try {
             this.logger.debug('Deploying edge function', { functionId });
-            const response = await this.httpClient.post(`/api/v1/edge-functions/${functionId}/deploy`);
+            const response = await this.httpClient.post(`/edge-functions/${functionId}/deploy`);
             this.logger.info('Edge function deployment started', {
                 functionId,
                 deploymentId: response.data.id
@@ -104,7 +104,7 @@ class EdgeFunctionsClient {
     async execute(functionId, options) {
         try {
             this.logger.debug('Executing edge function', { functionId, options });
-            const response = await this.httpClient.post(`/api/v1/edge-functions/${functionId}/execute`, {
+            const response = await this.httpClient.post(`/edge-functions/${functionId}/execute`, {
                 input: options?.input,
                 timeout: options?.timeout,
                 async: options?.async,
@@ -154,7 +154,7 @@ class EdgeFunctionsClient {
      */
     async getExecution(executionId) {
         try {
-            const response = await this.httpClient.get(`/api/v1/edge-functions/executions/${executionId}`);
+            const response = await this.httpClient.get(`/edge-functions/executions/${executionId}`);
             return response.data;
         }
         catch (error) {
@@ -167,7 +167,7 @@ class EdgeFunctionsClient {
      */
     async getExecutions(functionId, options) {
         try {
-            const response = await this.httpClient.get(`/api/v1/edge-functions/${functionId}/executions`, {
+            const response = await this.httpClient.get(`/edge-functions/${functionId}/executions`, {
                 params: options
             });
             return response.data;
@@ -182,7 +182,7 @@ class EdgeFunctionsClient {
      */
     async getLogs(functionId, options) {
         try {
-            const response = await this.httpClient.get(`/api/v1/edge-functions/${functionId}/logs`, {
+            const response = await this.httpClient.get(`/edge-functions/${functionId}/logs`, {
                 params: options
             });
             return response.data || [];
@@ -197,7 +197,7 @@ class EdgeFunctionsClient {
      */
     async getDeployments(functionId) {
         try {
-            const response = await this.httpClient.get(`/api/v1/edge-functions/${functionId}/deployments`);
+            const response = await this.httpClient.get(`/edge-functions/${functionId}/deployments`);
             return response.data || [];
         }
         catch (error) {
@@ -211,7 +211,7 @@ class EdgeFunctionsClient {
     async rollback(functionId, deploymentId) {
         try {
             this.logger.debug('Rolling back edge function', { functionId, deploymentId });
-            const response = await this.httpClient.post(`/api/v1/edge-functions/${functionId}/rollback`, {
+            const response = await this.httpClient.post(`/edge-functions/${functionId}/rollback`, {
                 deployment_id: deploymentId,
             });
             this.logger.info('Edge function rolled back', { functionId, deploymentId });
@@ -227,7 +227,7 @@ class EdgeFunctionsClient {
      */
     async updateEnvironment(functionId, variables) {
         try {
-            const response = await this.httpClient.put(`/api/v1/edge-functions/${functionId}/environment`, {
+            const response = await this.httpClient.put(`/edge-functions/${functionId}/environment`, {
                 variables,
             });
             this.logger.info('Edge function environment updated', { functionId });
@@ -243,7 +243,7 @@ class EdgeFunctionsClient {
      */
     async setStatus(functionId, status) {
         try {
-            const response = await this.httpClient.put(`/api/v1/edge-functions/${functionId}/status`, {
+            const response = await this.httpClient.put(`/edge-functions/${functionId}/status`, {
                 status,
             });
             this.logger.info('Edge function status updated', { functionId, status });
@@ -259,7 +259,7 @@ class EdgeFunctionsClient {
      */
     async getStats(options) {
         try {
-            const response = await this.httpClient.get('/api/v1/edge-functions/stats', { params: options });
+            const response = await this.httpClient.get('/edge-functions/stats', { params: options });
             return response.data;
         }
         catch (error) {
@@ -272,7 +272,7 @@ class EdgeFunctionsClient {
      */
     async createWebhook(functionId, config) {
         try {
-            const response = await this.httpClient.post(`/api/v1/edge-functions/${functionId}/webhooks`, config);
+            const response = await this.httpClient.post(`/edge-functions/${functionId}/webhooks`, config);
             this.logger.info('Webhook created for edge function', {
                 functionId,
                 webhookUrl: response.data.webhook_url
@@ -289,7 +289,7 @@ class EdgeFunctionsClient {
      */
     async createSchedule(functionId, config) {
         try {
-            const response = await this.httpClient.post(`/api/v1/edge-functions/${functionId}/schedules`, config);
+            const response = await this.httpClient.post(`/edge-functions/${functionId}/schedules`, config);
             this.logger.info('Schedule created for edge function', {
                 functionId,
                 scheduleId: response.data.schedule_id,

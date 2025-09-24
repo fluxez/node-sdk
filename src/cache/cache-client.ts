@@ -30,7 +30,7 @@ export class CacheClient {
     this.logger.debug('Getting cache', { key: fullKey });
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'get',
         key: fullKey,
       });
@@ -56,7 +56,7 @@ export class CacheClient {
     this.logger.debug('Setting cache', { key: fullKey, ttl });
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'set',
         key: fullKey,
         value,
@@ -80,7 +80,7 @@ export class CacheClient {
     this.logger.debug('Deleting cache', { key: fullKey });
     
     try {
-      const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+      const response = await this.httpClient.delete('/cache/invalidate', {
         data: { keys: [fullKey] },
       });
       
@@ -98,7 +98,7 @@ export class CacheClient {
     const fullKeys = keys.map(key => this.buildKey(key));
     
     try {
-      const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+      const response = await this.httpClient.delete('/cache/invalidate', {
         data: { keys: fullKeys },
       });
       
@@ -116,7 +116,7 @@ export class CacheClient {
     const fullKey = this.buildKey(key);
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'exists',
         key: fullKey,
       });
@@ -135,7 +135,7 @@ export class CacheClient {
     const fullKey = this.buildKey(key);
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'ttl',
         key: fullKey,
       });
@@ -154,7 +154,7 @@ export class CacheClient {
     const fullKey = this.buildKey(key);
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'expire',
         key: fullKey,
         ttl: seconds,
@@ -174,7 +174,7 @@ export class CacheClient {
     const fullKeys = keys.map(key => this.buildKey(key));
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'mget',
         keys: fullKeys,
       });
@@ -199,7 +199,7 @@ export class CacheClient {
     }));
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'mset',
         items: fullItems,
         ttl: ttl || this.config.cache?.ttl,
@@ -219,7 +219,7 @@ export class CacheClient {
     const fullKey = this.buildKey(key);
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'incr',
         key: fullKey,
         value: by,
@@ -239,7 +239,7 @@ export class CacheClient {
     const fullKey = this.buildKey(key);
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'decr',
         key: fullKey,
         value: by,
@@ -259,7 +259,7 @@ export class CacheClient {
     const fullKey = this.buildKey(key);
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'sadd',
         key: fullKey,
         members,
@@ -279,7 +279,7 @@ export class CacheClient {
     const fullKey = this.buildKey(key);
     
     try {
-      const response = await this.httpClient.post('/api/v1/cache/operation', {
+      const response = await this.httpClient.post('/cache/operation', {
         operation: 'smembers',
         key: fullKey,
       });
@@ -296,7 +296,7 @@ export class CacheClient {
    */
   public async invalidateByPattern(pattern: string): Promise<number> {
     try {
-      const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+      const response = await this.httpClient.delete('/cache/invalidate', {
         data: { pattern: this.buildKey(pattern) },
       });
       
@@ -312,7 +312,7 @@ export class CacheClient {
    */
   public async invalidateByTags(tags: string[]): Promise<number> {
     try {
-      const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+      const response = await this.httpClient.delete('/cache/invalidate', {
         data: { tags },
       });
       
@@ -328,7 +328,7 @@ export class CacheClient {
    */
   public async clear(): Promise<boolean> {
     try {
-      const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+      const response = await this.httpClient.delete('/cache/invalidate', {
         data: { all: true },
       });
       
@@ -344,7 +344,7 @@ export class CacheClient {
    */
   public async stats(): Promise<CacheStats> {
     try {
-      const response = await this.httpClient.get('/api/v1/cache/stats');
+      const response = await this.httpClient.get('/cache/stats');
       return response.data;
     } catch (error) {
       this.logger.error('Cache stats failed', error);

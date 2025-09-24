@@ -1,6 +1,6 @@
 {
   "name": "@fluxez/node-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official Node.js SDK for Fluxez - Complete platform SDK with AI, workflows, email, storage, and multi-database support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -159,7 +159,7 @@ class RealtimeClient {
      */
     async joinPresence(channel, presenceData) {
         try {
-            await this.httpClient.post('/api/v1/realtime/presence/join', {
+            await this.httpClient.post('/realtime/presence/join', {
                 channel,
                 presence_data: presenceData,
             });
@@ -178,7 +178,7 @@ class RealtimeClient {
      */
     async leavePresence(channel) {
         try {
-            await this.httpClient.post('/api/v1/realtime/presence/leave', {
+            await this.httpClient.post('/realtime/presence/leave', {
                 channel,
             });
             this.unsubscribe(channel);
@@ -194,7 +194,7 @@ class RealtimeClient {
      */
     async getPresence(channel) {
         try {
-            const response = await this.httpClient.get(`/api/v1/realtime/presence/${channel}`);
+            const response = await this.httpClient.get(`/realtime/presence/${channel}`);
             return response.data || [];
         }
         catch (error) {

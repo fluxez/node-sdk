@@ -30,7 +30,7 @@ export class SearchClient {
   public async search<T = any>(query: SearchQuery): Promise<SearchResult<T>> {
     this.logger.debug('Executing search', query);
     
-    const response = await this.httpClient.post('/api/v1/search', query);
+    const response = await this.httpClient.post('/search', query);
     
     return {
       hits: response.data.hits || [],
@@ -47,7 +47,7 @@ export class SearchClient {
   public async vectorSearch<T = any>(query: VectorSearchQuery): Promise<VectorSearchResult<T>> {
     this.logger.debug('Executing vector search', query);
     
-    const response = await this.httpClient.post('/api/v1/search/vector', query);
+    const response = await this.httpClient.post('/search/vector', query);
     
     return {
       hits: response.data.hits || [],
@@ -275,7 +275,7 @@ export class SearchClient {
    * Aggregation query
    */
   public async aggregate(query: AggregationQuery): Promise<AggregationResult> {
-    const response = await this.httpClient.post('/api/v1/search/aggregate', query);
+    const response = await this.httpClient.post('/search/aggregate', query);
     return response.data;
   }
   
@@ -283,7 +283,7 @@ export class SearchClient {
    * Get search suggestions
    */
   public async suggest(query: SuggestQuery): Promise<SuggestResult> {
-    const response = await this.httpClient.post('/api/v1/search/suggest', query);
+    const response = await this.httpClient.post('/search/suggest', query);
     return response.data;
   }
   
@@ -358,7 +358,7 @@ export class SearchClient {
    * Delete documents by query
    */
   public async deleteByQuery(query: SearchQuery): Promise<{ deleted: number }> {
-    const response = await this.httpClient.post('/api/v1/search/delete-by-query', query);
+    const response = await this.httpClient.post('/search/delete-by-query', query);
     return response.data;
   }
   
@@ -370,7 +370,7 @@ export class SearchClient {
     destination: string,
     query?: SearchQuery
   ): Promise<{ indexed: number }> {
-    const response = await this.httpClient.post('/api/v1/search/reindex', {
+    const response = await this.httpClient.post('/search/reindex', {
       source,
       destination,
       query,
@@ -386,7 +386,7 @@ export class SearchClient {
     mappings?: any,
     settings?: any
   ): Promise<{ created: boolean }> {
-    const response = await this.httpClient.post('/api/v1/search/index', {
+    const response = await this.httpClient.post('/search/index', {
       name,
       mappings,
       settings,
@@ -398,7 +398,7 @@ export class SearchClient {
    * Delete a search index
    */
   public async deleteIndex(name: string): Promise<{ deleted: boolean }> {
-    const response = await this.httpClient.delete(`/api/v1/search/index/${name}`);
+    const response = await this.httpClient.delete(`/search/index/${name}`);
     return response.data;
   }
   
@@ -406,7 +406,7 @@ export class SearchClient {
    * Get index information
    */
   public async getIndex(name: string): Promise<any> {
-    const response = await this.httpClient.get(`/api/v1/search/index/${name}`);
+    const response = await this.httpClient.get(`/search/index/${name}`);
     return response.data;
   }
 }

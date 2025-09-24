@@ -15,7 +15,7 @@ class CacheClient {
         const fullKey = this.buildKey(key);
         this.logger.debug('Getting cache', { key: fullKey });
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'get',
                 key: fullKey,
             });
@@ -34,7 +34,7 @@ class CacheClient {
         const ttl = options.ttl || this.config.cache?.ttl || 3600;
         this.logger.debug('Setting cache', { key: fullKey, ttl });
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'set',
                 key: fullKey,
                 value,
@@ -56,7 +56,7 @@ class CacheClient {
         const fullKey = this.buildKey(key);
         this.logger.debug('Deleting cache', { key: fullKey });
         try {
-            const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+            const response = await this.httpClient.delete('/cache/invalidate', {
                 data: { keys: [fullKey] },
             });
             return response.data.deleted > 0;
@@ -72,7 +72,7 @@ class CacheClient {
     async deleteMany(keys) {
         const fullKeys = keys.map(key => this.buildKey(key));
         try {
-            const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+            const response = await this.httpClient.delete('/cache/invalidate', {
                 data: { keys: fullKeys },
             });
             return response.data.deleted || 0;
@@ -88,7 +88,7 @@ class CacheClient {
     async exists(key) {
         const fullKey = this.buildKey(key);
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'exists',
                 key: fullKey,
             });
@@ -105,7 +105,7 @@ class CacheClient {
     async ttl(key) {
         const fullKey = this.buildKey(key);
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'ttl',
                 key: fullKey,
             });
@@ -122,7 +122,7 @@ class CacheClient {
     async expire(key, seconds) {
         const fullKey = this.buildKey(key);
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'expire',
                 key: fullKey,
                 ttl: seconds,
@@ -140,7 +140,7 @@ class CacheClient {
     async mget(keys) {
         const fullKeys = keys.map(key => this.buildKey(key));
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'mget',
                 keys: fullKeys,
             });
@@ -160,7 +160,7 @@ class CacheClient {
             value: item.value,
         }));
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'mset',
                 items: fullItems,
                 ttl: ttl || this.config.cache?.ttl,
@@ -178,7 +178,7 @@ class CacheClient {
     async incr(key, by = 1) {
         const fullKey = this.buildKey(key);
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'incr',
                 key: fullKey,
                 value: by,
@@ -196,7 +196,7 @@ class CacheClient {
     async decr(key, by = 1) {
         const fullKey = this.buildKey(key);
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'decr',
                 key: fullKey,
                 value: by,
@@ -214,7 +214,7 @@ class CacheClient {
     async sadd(key, members) {
         const fullKey = this.buildKey(key);
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'sadd',
                 key: fullKey,
                 members,
@@ -232,7 +232,7 @@ class CacheClient {
     async smembers(key) {
         const fullKey = this.buildKey(key);
         try {
-            const response = await this.httpClient.post('/api/v1/cache/operation', {
+            const response = await this.httpClient.post('/cache/operation', {
                 operation: 'smembers',
                 key: fullKey,
             });
@@ -248,7 +248,7 @@ class CacheClient {
      */
     async invalidateByPattern(pattern) {
         try {
-            const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+            const response = await this.httpClient.delete('/cache/invalidate', {
                 data: { pattern: this.buildKey(pattern) },
             });
             return response.data.deleted || 0;
@@ -263,7 +263,7 @@ class CacheClient {
      */
     async invalidateByTags(tags) {
         try {
-            const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+            const response = await this.httpClient.delete('/cache/invalidate', {
                 data: { tags },
             });
             return response.data.deleted || 0;
@@ -278,7 +278,7 @@ class CacheClient {
      */
     async clear() {
         try {
-            const response = await this.httpClient.delete('/api/v1/cache/invalidate', {
+            const response = await this.httpClient.delete('/cache/invalidate', {
                 data: { all: true },
             });
             return response.data.success === true;
@@ -293,7 +293,7 @@ class CacheClient {
      */
     async stats() {
         try {
-            const response = await this.httpClient.get('/api/v1/cache/stats');
+            const response = await this.httpClient.get('/cache/stats');
             return response.data;
         }
         catch (error) {

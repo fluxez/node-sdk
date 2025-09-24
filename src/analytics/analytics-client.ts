@@ -72,7 +72,7 @@ export class AnalyticsClient {
     this.eventQueue = [];
     
     try {
-      await this.httpClient.post('/api/v1/analytics/track', { events });
+      await this.httpClient.post('/analytics/track', { events });
       this.logger.info(`Flushed ${events.length} analytics events`);
     } catch (error) {
       // Re-queue events on failure
@@ -88,7 +88,7 @@ export class AnalyticsClient {
   public async query(query: AnalyticsQuery): Promise<AnalyticsResult> {
     this.logger.debug('Executing analytics query', query);
     
-    const response = await this.httpClient.post('/api/v1/analytics/query', query);
+    const response = await this.httpClient.post('/analytics/query', query);
     return response.data;
   }
   
@@ -121,7 +121,7 @@ export class AnalyticsClient {
    * Get funnel analysis
    */
   public async funnel(query: FunnelQuery): Promise<FunnelResult> {
-    const response = await this.httpClient.post('/api/v1/analytics/funnel', query);
+    const response = await this.httpClient.post('/analytics/funnel', query);
     return response.data;
   }
   
@@ -129,7 +129,7 @@ export class AnalyticsClient {
    * Get cohort analysis
    */
   public async cohort(query: CohortQuery): Promise<CohortResult> {
-    const response = await this.httpClient.post('/api/v1/analytics/cohort', query);
+    const response = await this.httpClient.post('/analytics/cohort', query);
     return response.data;
   }
   
@@ -137,7 +137,7 @@ export class AnalyticsClient {
    * Get metric value
    */
   public async metric(query: MetricQuery): Promise<MetricResult> {
-    const response = await this.httpClient.post('/api/v1/analytics/metric', query);
+    const response = await this.httpClient.post('/analytics/metric', query);
     return response.data;
   }
   
@@ -145,7 +145,7 @@ export class AnalyticsClient {
    * Get real-time analytics
    */
   public async realtime(metric: string): Promise<any> {
-    const response = await this.httpClient.get(`/api/v1/analytics/realtime/${metric}`);
+    const response = await this.httpClient.get(`/analytics/realtime/${metric}`);
     return response.data;
   }
   
@@ -156,7 +156,7 @@ export class AnalyticsClient {
     metrics?: string[];
     timeRange?: { start: string; end: string };
   }): Promise<any> {
-    const response = await this.httpClient.get(`/api/v1/analytics/user/${userId}`, {
+    const response = await this.httpClient.get(`/analytics/user/${userId}`, {
       params: options,
     });
     return response.data;
@@ -166,7 +166,7 @@ export class AnalyticsClient {
    * Get session analytics
    */
   public async sessionAnalytics(sessionId: string): Promise<any> {
-    const response = await this.httpClient.get(`/api/v1/analytics/session/${sessionId}`);
+    const response = await this.httpClient.get(`/analytics/session/${sessionId}`);
     return response.data;
   }
   
@@ -177,7 +177,7 @@ export class AnalyticsClient {
     timeRange?: { start: string; end: string };
     metrics?: string[];
   }): Promise<any> {
-    const response = await this.httpClient.post('/api/v1/analytics/page', {
+    const response = await this.httpClient.post('/analytics/page', {
       page,
       ...options,
     });
@@ -195,7 +195,7 @@ export class AnalyticsClient {
       filters?: Record<string, any>;
     }
   ): Promise<number> {
-    const response = await this.httpClient.post('/api/v1/analytics/conversion', {
+    const response = await this.httpClient.post('/analytics/conversion', {
       startEvent,
       endEvent,
       ...options,
@@ -212,7 +212,7 @@ export class AnalyticsClient {
     timeRange: { start: string; end: string };
     interval: 'day' | 'week' | 'month';
   }): Promise<any> {
-    const response = await this.httpClient.post('/api/v1/analytics/retention', options);
+    const response = await this.httpClient.post('/analytics/retention', options);
     return response.data;
   }
   
@@ -220,7 +220,7 @@ export class AnalyticsClient {
    * Export analytics data
    */
   public async export(query: AnalyticsQuery, format: 'csv' | 'json' = 'json'): Promise<any> {
-    const response = await this.httpClient.post('/api/v1/analytics/export', {
+    const response = await this.httpClient.post('/analytics/export', {
       ...query,
       format,
     }, {

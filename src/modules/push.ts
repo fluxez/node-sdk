@@ -122,7 +122,7 @@ export class PushClient {
     try {
       this.logger.debug('Sending push notification', options);
       
-      const response = await this.httpClient.post('/api/v1/push/send', options);
+      const response = await this.httpClient.post('/push/send', options);
       
       this.logger.info('Push notification sent successfully', {
         message_id: response.data.message_id,
@@ -201,7 +201,7 @@ export class PushClient {
     try {
       this.logger.debug('Scheduling push notification', options);
       
-      const response = await this.httpClient.post('/api/v1/push/schedule', options);
+      const response = await this.httpClient.post('/push/schedule', options);
       
       this.logger.info('Push notification scheduled', {
         campaign_id: response.data.campaign_id,
@@ -225,7 +225,7 @@ export class PushClient {
     scheduled_at?: Date | string;
   }): Promise<PushCampaign> {
     try {
-      const response = await this.httpClient.post('/api/v1/push/campaigns', campaign);
+      const response = await this.httpClient.post('/push/campaigns', campaign);
       
       this.logger.info('Push campaign created', { id: response.data.id, name: campaign.name });
       
@@ -248,7 +248,7 @@ export class PushClient {
     total: number;
   }> {
     try {
-      const response = await this.httpClient.get('/api/v1/push/campaigns', { params: options });
+      const response = await this.httpClient.get('/push/campaigns', { params: options });
       return response.data;
     } catch (error) {
       this.logger.error('Failed to get push campaigns', error);
@@ -261,7 +261,7 @@ export class PushClient {
    */
   async getCampaign(campaignId: string): Promise<PushCampaign> {
     try {
-      const response = await this.httpClient.get(`/api/v1/push/campaigns/${campaignId}`);
+      const response = await this.httpClient.get(`/push/campaigns/${campaignId}`);
       return response.data;
     } catch (error) {
       this.logger.error('Failed to get push campaign', error);
@@ -274,7 +274,7 @@ export class PushClient {
    */
   async cancelCampaign(campaignId: string): Promise<{ success: boolean }> {
     try {
-      const response = await this.httpClient.post(`/api/v1/push/campaigns/${campaignId}/cancel`);
+      const response = await this.httpClient.post(`/push/campaigns/${campaignId}/cancel`);
       
       this.logger.info('Push campaign cancelled', { campaignId });
       
@@ -293,7 +293,7 @@ export class PushClient {
     device_id: string;
   }> {
     try {
-      const response = await this.httpClient.post('/api/v1/push/devices', registration);
+      const response = await this.httpClient.post('/push/devices', registration);
       
       this.logger.info('Device registered for push notifications', {
         device_id: response.data.device_id,
@@ -312,7 +312,7 @@ export class PushClient {
    */
   async unregisterDevice(deviceToken: string): Promise<{ success: boolean }> {
     try {
-      const response = await this.httpClient.delete(`/api/v1/push/devices/${deviceToken}`);
+      const response = await this.httpClient.delete(`/push/devices/${deviceToken}`);
       
       this.logger.info('Device unregistered', { deviceToken });
       
@@ -328,7 +328,7 @@ export class PushClient {
    */
   async updateDeviceTags(deviceToken: string, tags: string[]): Promise<{ success: boolean }> {
     try {
-      const response = await this.httpClient.put(`/api/v1/push/devices/${deviceToken}/tags`, { tags });
+      const response = await this.httpClient.put(`/push/devices/${deviceToken}/tags`, { tags });
       
       this.logger.info('Device tags updated', { deviceToken, tags });
       
@@ -350,7 +350,7 @@ export class PushClient {
     variables?: string[];
   }): Promise<PushTemplate> {
     try {
-      const response = await this.httpClient.post('/api/v1/push/templates', template);
+      const response = await this.httpClient.post('/push/templates', template);
       
       this.logger.info('Push template created', { id: response.data.id, name: template.name });
       
@@ -366,7 +366,7 @@ export class PushClient {
    */
   async getTemplates(): Promise<PushTemplate[]> {
     try {
-      const response = await this.httpClient.get('/api/v1/push/templates');
+      const response = await this.httpClient.get('/push/templates');
       return response.data || [];
     } catch (error) {
       this.logger.error('Failed to get push templates', error);
@@ -387,7 +387,7 @@ export class PushClient {
     sent_count: number;
   }> {
     try {
-      const response = await this.httpClient.post(`/api/v1/push/templates/${templateId}/send`, options);
+      const response = await this.httpClient.post(`/push/templates/${templateId}/send`, options);
       
       this.logger.info('Template push notification sent', {
         template_id: templateId,
@@ -410,7 +410,7 @@ export class PushClient {
     campaign_id?: string;
   }): Promise<PushStats> {
     try {
-      const response = await this.httpClient.get('/api/v1/push/stats', { params: options });
+      const response = await this.httpClient.get('/push/stats', { params: options });
       return response.data;
     } catch (error) {
       this.logger.error('Failed to get push stats', error);
@@ -430,7 +430,7 @@ export class PushClient {
     }>;
   }> {
     try {
-      const response = await this.httpClient.post('/api/v1/push/test', {
+      const response = await this.httpClient.post('/push/test', {
         notification,
         test_devices: testDevices,
       });

@@ -6,9 +6,7 @@ export interface LoginCredentials {
 export interface RegisterData {
     email: string;
     password: string;
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
+    name: string;
     metadata?: Record<string, any>;
 }
 export interface AuthToken {

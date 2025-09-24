@@ -128,7 +128,7 @@ class FluxezClient {
      * Execute raw SQL query
      */
     async raw(sql, params) {
-        const response = await this.httpClient.post('/api/v1/query', {
+        const response = await this.httpClient.post('/query', {
             sql,
             params,
         });
@@ -138,7 +138,7 @@ class FluxezClient {
      * Execute natural language query
      */
     async natural(query) {
-        const response = await this.httpClient.post('/api/v1/query/natural', {
+        const response = await this.httpClient.post('/query/natural', {
             query,
         });
         return response.data;

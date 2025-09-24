@@ -602,7 +602,7 @@ export class QueryBuilder {
     
     this.logger.debug('Executing query', query);
     
-    const response = await this.httpClient.post('/api/v1/execute', query);
+    const response = await this.httpClient.post('/query/execute', query);
     
     return {
       data: response.data.rows || response.data.data || response.data,

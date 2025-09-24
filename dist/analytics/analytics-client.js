@@ -46,7 +46,7 @@ class AnalyticsClient {
         const events = [...this.eventQueue];
         this.eventQueue = [];
         try {
-            await this.httpClient.post('/api/v1/analytics/track', { events });
+            await this.httpClient.post('/analytics/track', { events });
             this.logger.info(`Flushed ${events.length} analytics events`);
         }
         catch (error) {
@@ -61,7 +61,7 @@ class AnalyticsClient {
      */
     async query(query) {
         this.logger.debug('Executing analytics query', query);
-        const response = await this.httpClient.post('/api/v1/analytics/query', query);
+        const response = await this.httpClient.post('/analytics/query', query);
         return response.data;
     }
     /**
@@ -90,35 +90,35 @@ class AnalyticsClient {
      * Get funnel analysis
      */
     async funnel(query) {
-        const response = await this.httpClient.post('/api/v1/analytics/funnel', query);
+        const response = await this.httpClient.post('/analytics/funnel', query);
         return response.data;
     }
     /**
      * Get cohort analysis
      */
     async cohort(query) {
-        const response = await this.httpClient.post('/api/v1/analytics/cohort', query);
+        const response = await this.httpClient.post('/analytics/cohort', query);
         return response.data;
     }
     /**
      * Get metric value
      */
     async metric(query) {
-        const response = await this.httpClient.post('/api/v1/analytics/metric', query);
+        const response = await this.httpClient.post('/analytics/metric', query);
         return response.data;
     }
     /**
      * Get real-time analytics
      */
     async realtime(metric) {
-        const response = await this.httpClient.get(`/api/v1/analytics/realtime/${metric}`);
+        const response = await this.httpClient.get(`/analytics/realtime/${metric}`);
         return response.data;
     }
     /**
      * Get user analytics
      */
     async userAnalytics(userId, options) {
-        const response = await this.httpClient.get(`/api/v1/analytics/user/${userId}`, {
+        const response = await this.httpClient.get(`/analytics/user/${userId}`, {
             params: options,
         });
         return response.data;
@@ -127,14 +127,14 @@ class AnalyticsClient {
      * Get session analytics
      */
     async sessionAnalytics(sessionId) {
-        const response = await this.httpClient.get(`/api/v1/analytics/session/${sessionId}`);
+        const response = await this.httpClient.get(`/analytics/session/${sessionId}`);
         return response.data;
     }
     /**
      * Get page analytics
      */
     async pageAnalytics(page, options) {
-        const response = await this.httpClient.post('/api/v1/analytics/page', {
+        const response = await this.httpClient.post('/analytics/page', {
             page,
             ...options,
         });
@@ -144,7 +144,7 @@ class AnalyticsClient {
      * Get conversion rate
      */
     async conversionRate(startEvent, endEvent, options) {
-        const response = await this.httpClient.post('/api/v1/analytics/conversion', {
+        const response = await this.httpClient.post('/analytics/conversion', {
             startEvent,
             endEvent,
             ...options,
@@ -155,14 +155,14 @@ class AnalyticsClient {
      * Get retention analysis
      */
     async retention(options) {
-        const response = await this.httpClient.post('/api/v1/analytics/retention', options);
+        const response = await this.httpClient.post('/analytics/retention', options);
         return response.data;
     }
     /**
      * Export analytics data
      */
     async export(query, format = 'json') {
-        const response = await this.httpClient.post('/api/v1/analytics/export', {
+        const response = await this.httpClient.post('/analytics/export', {
             ...query,
             format,
         }, {

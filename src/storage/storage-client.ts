@@ -102,12 +102,15 @@ export class StorageClient {
         }
       );
 
-      if (!response.data.success) {
+      // Handle both response formats: with success wrapper and direct data
+      if (response.data && (response.data.success === false)) {
         throw new Error(response.data.message || 'Upload failed');
       }
 
       this.logger.debug('File uploaded successfully', { path: filePath });
-      return response.data.data!;
+
+      // Return data directly if no success wrapper, otherwise return data.data
+      return response.data.data || response.data;
 
     } catch (error: any) {
       this.logger.error('Upload failed', { error: error.message, path: filePath });

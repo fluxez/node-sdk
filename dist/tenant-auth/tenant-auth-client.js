@@ -15,14 +15,14 @@ class TenantAuthClient {
      */
     async register(data) {
         this.logger.debug('Registering tenant user', { email: data.email });
-        return this.makeRequest(() => this.httpClient.post('/api/v1/tenant-auth/register', data));
+        return this.makeRequest(() => this.httpClient.post('/tenant-auth/register', data));
     }
     /**
      * Login tenant user
      */
     async login(credentials) {
         this.logger.debug('Logging in tenant user', { email: credentials.email });
-        const response = await this.httpClient.post('/api/v1/tenant-auth/login', credentials);
+        const response = await this.httpClient.post('/tenant-auth/login', credentials);
         const authResponse = response.data;
         // Store current user
         this.currentUser = authResponse.user;
@@ -38,7 +38,7 @@ class TenantAuthClient {
     async logout(data) {
         this.logger.debug('Logging out tenant user');
         try {
-            await this.httpClient.post('/api/v1/tenant-auth/logout', data || {});
+            await this.httpClient.post('/tenant-auth/logout', data || {});
         }
         catch (error) {
             this.logger.error('Tenant logout failed', error);
@@ -52,7 +52,7 @@ class TenantAuthClient {
      */
     async verifyEmail(data) {
         this.logger.debug('Verifying tenant email');
-        const response = await this.httpClient.post('/api/v1/tenant-auth/verify-email', data);
+        const response = await this.httpClient.post('/tenant-auth/verify-email', data);
         return response.data;
     }
     /**
@@ -60,7 +60,7 @@ class TenantAuthClient {
      */
     async forgotPassword(data) {
         this.logger.debug('Requesting tenant password reset', { email: data.email });
-        const response = await this.httpClient.post('/api/v1/tenant-auth/forgot-password', data);
+        const response = await this.httpClient.post('/tenant-auth/forgot-password', data);
         return response.data;
     }
     /**
@@ -68,7 +68,7 @@ class TenantAuthClient {
      */
     async resetPassword(data) {
         this.logger.debug('Resetting tenant password');
-        const response = await this.httpClient.post('/api/v1/tenant-auth/reset-password', data);
+        const response = await this.httpClient.post('/tenant-auth/reset-password', data);
         return response.data;
     }
     /**
@@ -76,7 +76,7 @@ class TenantAuthClient {
      */
     async refreshToken(data) {
         this.logger.debug('Refreshing tenant token');
-        const response = await this.httpClient.post('/api/v1/tenant-auth/refresh', data);
+        const response = await this.httpClient.post('/tenant-auth/refresh', data);
         const authResponse = response.data;
         // Update client authentication
         if (authResponse.accessToken) {
@@ -90,7 +90,7 @@ class TenantAuthClient {
      */
     async socialAuth(data) {
         this.logger.debug('Social auth for tenant', { provider: data.provider });
-        const response = await this.httpClient.post('/api/v1/tenant-auth/social', data);
+        const response = await this.httpClient.post('/tenant-auth/social', data);
         const authResponse = response.data;
         // Store current user
         this.currentUser = authResponse.user;
@@ -105,7 +105,7 @@ class TenantAuthClient {
      */
     async linkSocial(data) {
         this.logger.debug('Linking social account', { provider: data.provider });
-        const response = await this.httpClient.post('/api/v1/tenant-auth/social/link', data);
+        const response = await this.httpClient.post('/tenant-auth/social/link', data);
         return response.data;
     }
     /**
@@ -113,7 +113,7 @@ class TenantAuthClient {
      */
     async getSocialProviders() {
         this.logger.debug('Getting social providers');
-        const response = await this.httpClient.get('/api/v1/tenant-auth/social/providers');
+        const response = await this.httpClient.get('/tenant-auth/social/providers');
         return response.data;
     }
     /**
@@ -121,7 +121,7 @@ class TenantAuthClient {
      */
     async configureSocialProvider(data) {
         this.logger.debug('Configuring social provider', { provider: data.provider });
-        const response = await this.httpClient.post('/api/v1/tenant-auth/social/configure', data);
+        const response = await this.httpClient.post('/tenant-auth/social/configure', data);
         return response.data;
     }
     // Team management operations
@@ -130,7 +130,7 @@ class TenantAuthClient {
      */
     async createTeam(data) {
         this.logger.debug('Creating team', { name: data.name });
-        const response = await this.httpClient.post('/api/v1/tenant-auth/teams', data);
+        const response = await this.httpClient.post('/tenant-auth/teams', data);
         return response.data;
     }
     /**
@@ -138,7 +138,7 @@ class TenantAuthClient {
      */
     async getTeams() {
         this.logger.debug('Getting user teams');
-        const response = await this.httpClient.get('/api/v1/tenant-auth/teams');
+        const response = await this.httpClient.get('/tenant-auth/teams');
         return response.data;
     }
     /**
@@ -146,7 +146,7 @@ class TenantAuthClient {
      */
     async inviteMember(data) {
         this.logger.debug('Inviting team member', { email: data.email, teamId: data.teamId });
-        const response = await this.httpClient.post('/api/v1/tenant-auth/teams/invite', data);
+        const response = await this.httpClient.post('/tenant-auth/teams/invite', data);
         return response.data;
     }
     /**
@@ -154,7 +154,7 @@ class TenantAuthClient {
      */
     async acceptInvitation(data) {
         this.logger.debug('Accepting team invitation');
-        const response = await this.httpClient.post('/api/v1/tenant-auth/teams/accept-invitation', data);
+        const response = await this.httpClient.post('/tenant-auth/teams/accept-invitation', data);
         return response.data;
     }
     /**
@@ -162,7 +162,7 @@ class TenantAuthClient {
      */
     async removeMember(data) {
         this.logger.debug('Removing team member', { teamId: data.teamId, userId: data.userId });
-        const response = await this.httpClient.delete('/api/v1/tenant-auth/teams/member', { data });
+        const response = await this.httpClient.delete('/tenant-auth/teams/member', { data });
         return response.data;
     }
     /**
@@ -170,7 +170,7 @@ class TenantAuthClient {
      */
     async updateMemberRole(data) {
         this.logger.debug('Updating member role', { teamId: data.teamId, userId: data.userId, role: data.newRole });
-        const response = await this.httpClient.put('/api/v1/tenant-auth/teams/member/role', data);
+        const response = await this.httpClient.put('/tenant-auth/teams/member/role', data);
         return response.data;
     }
     /**
@@ -178,7 +178,7 @@ class TenantAuthClient {
      */
     async getTeamMembers(teamId) {
         this.logger.debug('Getting team members', { teamId });
-        const response = await this.httpClient.get(`/api/v1/tenant-auth/teams/${teamId}/members`);
+        const response = await this.httpClient.get(`/tenant-auth/teams/${teamId}/members`);
         return response.data;
     }
     // Utility methods

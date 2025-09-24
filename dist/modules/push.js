@@ -13,7 +13,7 @@ class PushClient {
     async send(options) {
         try {
             this.logger.debug('Sending push notification', options);
-            const response = await this.httpClient.post('/api/v1/push/send', options);
+            const response = await this.httpClient.post('/push/send', options);
             this.logger.info('Push notification sent successfully', {
                 message_id: response.data.message_id,
                 sent_count: response.data.sent_count
@@ -67,7 +67,7 @@ class PushClient {
     async schedule(options) {
         try {
             this.logger.debug('Scheduling push notification', options);
-            const response = await this.httpClient.post('/api/v1/push/schedule', options);
+            const response = await this.httpClient.post('/push/schedule', options);
             this.logger.info('Push notification scheduled', {
                 campaign_id: response.data.campaign_id,
                 scheduled_at: response.data.scheduled_at
@@ -84,7 +84,7 @@ class PushClient {
      */
     async createCampaign(campaign) {
         try {
-            const response = await this.httpClient.post('/api/v1/push/campaigns', campaign);
+            const response = await this.httpClient.post('/push/campaigns', campaign);
             this.logger.info('Push campaign created', { id: response.data.id, name: campaign.name });
             return response.data;
         }
@@ -98,7 +98,7 @@ class PushClient {
      */
     async getCampaigns(options) {
         try {
-            const response = await this.httpClient.get('/api/v1/push/campaigns', { params: options });
+            const response = await this.httpClient.get('/push/campaigns', { params: options });
             return response.data;
         }
         catch (error) {
@@ -111,7 +111,7 @@ class PushClient {
      */
     async getCampaign(campaignId) {
         try {
-            const response = await this.httpClient.get(`/api/v1/push/campaigns/${campaignId}`);
+            const response = await this.httpClient.get(`/push/campaigns/${campaignId}`);
             return response.data;
         }
         catch (error) {
@@ -124,7 +124,7 @@ class PushClient {
      */
     async cancelCampaign(campaignId) {
         try {
-            const response = await this.httpClient.post(`/api/v1/push/campaigns/${campaignId}/cancel`);
+            const response = await this.httpClient.post(`/push/campaigns/${campaignId}/cancel`);
             this.logger.info('Push campaign cancelled', { campaignId });
             return response.data;
         }
@@ -138,7 +138,7 @@ class PushClient {
      */
     async registerDevice(registration) {
         try {
-            const response = await this.httpClient.post('/api/v1/push/devices', registration);
+            const response = await this.httpClient.post('/push/devices', registration);
             this.logger.info('Device registered for push notifications', {
                 device_id: response.data.device_id,
                 user_id: registration.user_id
@@ -155,7 +155,7 @@ class PushClient {
      */
     async unregisterDevice(deviceToken) {
         try {
-            const response = await this.httpClient.delete(`/api/v1/push/devices/${deviceToken}`);
+            const response = await this.httpClient.delete(`/push/devices/${deviceToken}`);
             this.logger.info('Device unregistered', { deviceToken });
             return response.data;
         }
@@ -169,7 +169,7 @@ class PushClient {
      */
     async updateDeviceTags(deviceToken, tags) {
         try {
-            const response = await this.httpClient.put(`/api/v1/push/devices/${deviceToken}/tags`, { tags });
+            const response = await this.httpClient.put(`/push/devices/${deviceToken}/tags`, { tags });
             this.logger.info('Device tags updated', { deviceToken, tags });
             return response.data;
         }
@@ -183,7 +183,7 @@ class PushClient {
      */
     async createTemplate(template) {
         try {
-            const response = await this.httpClient.post('/api/v1/push/templates', template);
+            const response = await this.httpClient.post('/push/templates', template);
             this.logger.info('Push template created', { id: response.data.id, name: template.name });
             return response.data;
         }
@@ -197,7 +197,7 @@ class PushClient {
      */
     async getTemplates() {
         try {
-            const response = await this.httpClient.get('/api/v1/push/templates');
+            const response = await this.httpClient.get('/push/templates');
             return response.data || [];
         }
         catch (error) {
@@ -210,7 +210,7 @@ class PushClient {
      */
     async sendWithTemplate(templateId, options) {
         try {
-            const response = await this.httpClient.post(`/api/v1/push/templates/${templateId}/send`, options);
+            const response = await this.httpClient.post(`/push/templates/${templateId}/send`, options);
             this.logger.info('Template push notification sent', {
                 template_id: templateId,
                 message_id: response.data.message_id
@@ -227,7 +227,7 @@ class PushClient {
      */
     async getStats(options) {
         try {
-            const response = await this.httpClient.get('/api/v1/push/stats', { params: options });
+            const response = await this.httpClient.get('/push/stats', { params: options });
             return response.data;
         }
         catch (error) {
@@ -240,7 +240,7 @@ class PushClient {
      */
     async test(notification, testDevices) {
         try {
-            const response = await this.httpClient.post('/api/v1/push/test', {
+            const response = await this.httpClient.post('/push/test', {
                 notification,
                 test_devices: testDevices,
             });

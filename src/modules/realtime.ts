@@ -219,7 +219,7 @@ export class RealtimeClient {
    */
   async joinPresence(channel: string, presenceData: PresenceData): Promise<void> {
     try {
-      await this.httpClient.post('/api/v1/realtime/presence/join', {
+      await this.httpClient.post('/realtime/presence/join', {
         channel,
         presence_data: presenceData,
       });
@@ -240,7 +240,7 @@ export class RealtimeClient {
    */
   async leavePresence(channel: string): Promise<void> {
     try {
-      await this.httpClient.post('/api/v1/realtime/presence/leave', {
+      await this.httpClient.post('/realtime/presence/leave', {
         channel,
       });
 
@@ -257,7 +257,7 @@ export class RealtimeClient {
    */
   async getPresence(channel: string): Promise<PresenceData[]> {
     try {
-      const response = await this.httpClient.get(`/api/v1/realtime/presence/${channel}`);
+      const response = await this.httpClient.get(`/realtime/presence/${channel}`);
       return response.data || [];
     } catch (error) {
       this.logger.error('Failed to get presence data', error);

@@ -15,14 +15,22 @@ class AuthClient {
     async login(credentials) {
         this.logger.debug('Logging in', { email: credentials.email });
         const response = await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.LOGIN, credentials);
-        const token = response.data;
+        const data = response.data;
         // Store current user
-        this.currentUser = token.user;
-        // Update client authentication
-        if (token.token) {
-            this.httpClient.defaults.headers.common['Authorization'] = `Bearer ${token.token}`;
+        this.currentUser = data.user;
+        // Update client authentication - handle both token formats
+        const accessToken = data.accessToken || data.token;
+        if (accessToken) {
+            this.httpClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
         }
-        return token;
+        // Normalize response to match AuthToken interface
+        return {
+            token: accessToken,
+            refreshToken: data.refreshToken,
+            expiresIn: data.expiresIn || 3600,
+            tokenType: data.tokenType || 'Bearer',
+            user: data.user
+        };
     }
     /**
      * Register a new user
@@ -85,7 +93,7 @@ class AuthClient {
      * Update user (admin only)
      */
     async updateUser(userId, data) {
-        const response = await this.httpClient.patch(`/tenant-auth/users/${userId}`, data);
+        const response = await this.httpClient.put(`/tenant-auth/users/${userId}`, data);
         return response.data;
     }
     /**
