@@ -18,11 +18,10 @@ class AuthClient {
         const data = response.data;
         // Store current user
         this.currentUser = data.user;
-        // Update client authentication - handle both token formats
+        // DON'T update client authentication here - it breaks subsequent auth operations
+        // The API key needs to remain for tenant-auth endpoints
+        // Users should manually set the token if they want to use it
         const accessToken = data.accessToken || data.token;
-        if (accessToken) {
-            this.httpClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-        }
         // Normalize response to match AuthToken interface
         return {
             token: accessToken,
@@ -49,10 +48,8 @@ class AuthClient {
             refreshToken,
         });
         const token = response.data;
-        // Update client authentication
-        if (token.token) {
-            this.httpClient.defaults.headers.common['Authorization'] = `Bearer ${token.token}`;
-        }
+        // DON'T update client authentication here - it breaks subsequent auth operations
+        // The API key needs to remain for tenant-auth endpoints
         return token;
     }
     /**
