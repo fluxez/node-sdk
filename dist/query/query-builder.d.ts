@@ -198,7 +198,7 @@ export declare class QueryBuilder {
     /**
      * Aggregate functions
      */
-    count(column?: string): QueryBuilder;
+    count(column?: string): Promise<number>;
     sum(column: string): QueryBuilder;
     avg(column: string): QueryBuilder;
     min(column: string): QueryBuilder;
@@ -247,6 +247,14 @@ export declare class QueryBuilder {
      * Catch method for promise-like behavior
      */
     catch(onrejected?: ((reason: any) => any) | null): Promise<any>;
+    /**
+     * Transform WHERE conditions to backend format
+     */
+    private transformWhereConditions;
+    /**
+     * Transform JOIN clauses to backend format
+     */
+    private transformJoins;
     /**
      * Clone the builder for immutability
      */

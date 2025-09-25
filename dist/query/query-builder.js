@@ -456,9 +456,12 @@ class QueryBuilder {
     /**
      * Aggregate functions
      */
-    count(column = '*') {
-        this.selectColumns = [`COUNT(${column}) as count`];
-        return this;
+    async count(column = '*') {
+        const response = await this.httpClient.post('/query-builder/count', {
+            table: this.table,
+            where: this.transformWhereConditions(),
+        });
+        return response.data.count || 0;
     }
     sum(column) {
         this.selectColumns = [`SUM(${column}) as sum`];
@@ -482,10 +485,54 @@ class QueryBuilder {
     async execute() {
         const query = this.buildQuery();
         this.logger.debug('Executing query', query);
-        const response = await this.httpClient.post('/query/execute', query);
+        // Map to the appropriate endpoint based on query type
+        let endpoint = '';
+        let requestBody = {};
+        switch (query.type) {
+            case 'SELECT':
+                endpoint = '/query-builder/select';
+                requestBody = {
+                    table: query.table,
+                    columns: query.columns,
+                    where: this.transformWhereConditions(),
+                    orderBy: query.orderBy,
+                    limit: query.limit,
+                    offset: query.offset,
+                    joins: this.transformJoins(),
+                };
+                break;
+            case 'INSERT':
+                endpoint = '/query-builder/insert';
+                requestBody = {
+                    table: query.table,
+                    data: query.data.length === 1 ? query.data[0] : query.data,
+                    returning: query.returning,
+                };
+                break;
+            case 'UPDATE':
+                endpoint = '/query-builder/update';
+                requestBody = {
+                    table: query.table,
+                    data: query.data,
+                    where: this.transformWhereConditions(),
+                    returning: query.returning,
+                };
+                break;
+            case 'DELETE':
+                endpoint = '/query-builder/delete';
+                requestBody = {
+                    table: query.table,
+                    where: this.transformWhereConditions(),
+                    returning: query.returning,
+                };
+                break;
+            default:
+                throw new Error(`Unsupported query type: ${query.type}`);
+        }
+        const response = await this.httpClient.post(endpoint, requestBody);
         return {
             data: response.data.rows || response.data.data || response.data,
-            count: response.data.count,
+            count: response.data.count || response.data.rowCount,
             metadata: response.data.metadata,
         };
     }
@@ -516,10 +563,11 @@ class QueryBuilder {
      * Check if record exists
      */
     async exists() {
-        this.selectColumns = ['1'];
-        this.limitValue = 1;
-        const result = await this.execute();
-        return result.data.length > 0;
+        const response = await this.httpClient.post('/query-builder/exists', {
+            table: this.table,
+            where: this.transformWhereConditions(),
+        });
+        return response.data.exists || false;
     }
     /**
      * Get query object for manual execution
@@ -623,6 +671,38 @@ class QueryBuilder {
      */
     catch(onrejected) {
         return this.then(null, onrejected);
+    }
+    /**
+     * Transform WHERE conditions to backend format
+     */
+    transformWhereConditions() {
+        // For simple cases, convert to key-value pairs
+        // For complex cases (OR, IN, etc.), we'll need to handle differently
+        const whereObject = {};
+        for (const condition of this.whereConditions) {
+            // Only handle simple AND conditions with = operator for now
+            if (condition.type === 'AND' && condition.operator === '=') {
+                whereObject[condition.column] = condition.value;
+            }
+            else if (condition.operator === 'IN') {
+                whereObject[condition.column] = condition.value;
+            }
+            else if (condition.operator === 'IS NULL') {
+                whereObject[condition.column] = null;
+            }
+            // TODO: Handle other operators - may need backend enhancement
+        }
+        return whereObject;
+    }
+    /**
+     * Transform JOIN clauses to backend format
+     */
+    transformJoins() {
+        return this.joinClauses.map(join => ({
+            type: join.type,
+            table: join.table,
+            on: `${join.firstColumn} ${join.operator} ${join.secondColumn}`,
+        }));
     }
     /**
      * Clone the builder for immutability
