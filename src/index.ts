@@ -223,6 +223,50 @@ export type {
   PushStats
 } from './modules/push';
 
+// Video Conferencing
+export { VideoClient } from './modules/video';
+export type {
+  CreateRoomOptions,
+  VideoRoom,
+  RoomFilters,
+  TokenOptions,
+  RoomToken,
+  Participant,
+  ParticipantTrack,
+  RecordingConfig,
+  Recording,
+  SessionFilters,
+  VideoSession,
+  SessionStats,
+  UpdateRoomOptions,
+  EgressOptions,
+  Egress,
+  RoomWebhookEvent
+} from './modules/video';
+
+// Documents
+export { DocumentsClient } from './modules/documents';
+export type {
+  GeneratePDFOptions,
+  DocumentResult,
+  TextExtractionResult,
+  PageRange,
+  WatermarkOptions,
+  OCRProvider,
+  OCRResult,
+  OCRBlock,
+  OCRWord,
+  TemplateFilters,
+  DocumentTemplate,
+  TemplateVariable,
+  CreateTemplateOptions,
+  LogFilters,
+  ProcessingLog,
+  MergePDFOptions,
+  SplitPDFOptions,
+  ConvertDocumentOptions
+} from './modules/documents';
+
 // Edge Functions
 export { EdgeFunctionsClient } from './modules/edge-functions';
 export type {

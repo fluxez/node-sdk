@@ -13,6 +13,8 @@ import { WorkflowClient } from './modules/workflow';
 import { RealtimeClient } from './modules/realtime';
 import { PushClient } from './modules/push';
 import { EdgeFunctionsClient } from './modules/edge-functions';
+import { VideoClient } from './modules/video';
+import { DocumentsClient } from './modules/documents';
 import { SchemaClient } from './schema/schema-client';
 import { FLUXEZ_BASE_URL } from './constants';
 import { 
@@ -96,6 +98,8 @@ export class FluxezClient {
   public schema!: SchemaClient;
   public realtime!: RealtimeClient;
   public push!: PushClient;
+  public video!: VideoClient;
+  public documents!: DocumentsClient;
   public edgeFunctions!: EdgeFunctionsClient;
 
   constructor(apiKey: string, config?: FluxezClientConfig) {
@@ -161,6 +165,8 @@ export class FluxezClient {
     this.schema = new SchemaClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.realtime = new RealtimeClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.push = new PushClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+    this.video = new VideoClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+    this.documents = new DocumentsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.edgeFunctions = new EdgeFunctionsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
   }
 
@@ -331,12 +337,12 @@ export class FluxezClient {
 
   /**
    * Update SDK configuration
-   * 
+   *
    * @param config Configuration updates
    */
   updateConfig(config: Partial<FluxezClientConfig>): void {
     this.config = { ...this.config, ...config };
-    
+
     // Update HTTP client if timeout or retries changed
     if (config.timeout || config.retries) {
       this.httpClient = new HttpClient(this.apiKey, {
@@ -344,16 +350,150 @@ export class FluxezClient {
         timeout: this.config.timeout,
         retries: this.config.retries,
       });
-      
+
       // Re-initialize clients with new HTTP client
       this.initializeClients();
     }
-    
+
     // Update headers
     if (config.headers) {
       Object.entries(config.headers).forEach(([key, value]) => {
         this.httpClient.setHeader(key, value);
       });
     }
+  }
+
+  // ============================================
+  // CRUD Helper Methods (Supabase-style)
+  // ============================================
+
+  /**
+   * Insert data into a table
+   *
+   * @param tableName Name of the table
+   * @param data Data to insert (single object or array)
+   * @returns Inserted data
+   */
+  async insert(tableName: string, data: any | any[]) {
+    return this.query.from(tableName).insert(data).execute();
+  }
+
+  /**
+   * Select data from a table
+   *
+   * @param tableName Name of the table
+   * @param columns Columns to select (default: '*')
+   * @returns Query builder for chaining
+   */
+  select(tableName: string, columns: string = '*') {
+    return this.query.from(tableName).select(columns);
+  }
+
+  /**
+   * Update data in a table
+   *
+   * @param tableName Name of the table
+   * @param data Data to update
+   * @param where WHERE conditions (can be string ID or object with conditions)
+   * @returns Updated data
+   */
+  async update(tableName: string, data: any, where: string | Record<string, any>) {
+    const query = this.query.from(tableName).update(data);
+
+    if (typeof where === 'string') {
+      // If where is a string, assume it's an ID
+      query.where('id', '=', where);
+    } else {
+      // If where is an object, apply each condition
+      Object.entries(where).forEach(([key, value]) => {
+        query.where(key, '=', value);
+      });
+    }
+
+    return query.execute();
+  }
+
+  /**
+   * Delete data from a table
+   *
+   * @param tableName Name of the table
+   * @param where WHERE conditions (can be string ID or object with conditions)
+   * @returns Deletion result
+   */
+  async delete(tableName: string, where: string | Record<string, any>) {
+    const query = this.query.from(tableName).delete();
+
+    if (typeof where === 'string') {
+      // If where is a string, assume it's an ID
+      query.where('id', '=', where);
+    } else {
+      // If where is an object, apply each condition
+      Object.entries(where).forEach(([key, value]) => {
+        query.where(key, '=', value);
+      });
+    }
+
+    return query.execute();
+  }
+
+  /**
+   * Find one record from a table
+   *
+   * @param tableName Name of the table
+   * @param where WHERE conditions to find the record
+   * @returns Single record or null
+   */
+  async findOne(tableName: string, where: Record<string, any>) {
+    const query = this.query.from(tableName).select('*');
+
+    Object.entries(where).forEach(([key, value]) => {
+      query.where(key, '=', value);
+    });
+
+    query.limit(1);
+    const result = await query.execute();
+    return result.data?.[0] || null;
+  }
+
+  /**
+   * Find many records from a table
+   *
+   * @param tableName Name of the table
+   * @param where WHERE conditions to filter records
+   * @param options Query options (limit, offset, orderBy)
+   * @returns Array of records
+   */
+  async findMany(
+    tableName: string,
+    where?: Record<string, any>,
+    options?: {
+      limit?: number;
+      offset?: number;
+      orderBy?: string;
+      order?: 'asc' | 'desc';
+    }
+  ) {
+    const query = this.query.from(tableName).select('*');
+
+    if (where) {
+      Object.entries(where).forEach(([key, value]) => {
+        query.where(key, '=', value);
+      });
+    }
+
+    if (options?.limit) {
+      query.limit(options.limit);
+    }
+
+    if (options?.offset) {
+      query.offset(options.offset);
+    }
+
+    if (options?.orderBy) {
+      query.orderBy(options.orderBy, options.order || 'asc');
+    }
+
+    const result = await query.execute();
+    return result.data || [];
   }
 }

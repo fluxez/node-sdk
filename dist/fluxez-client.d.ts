@@ -12,6 +12,8 @@ import { WorkflowClient } from './modules/workflow';
 import { RealtimeClient } from './modules/realtime';
 import { PushClient } from './modules/push';
 import { EdgeFunctionsClient } from './modules/edge-functions';
+import { VideoClient } from './modules/video';
+import { DocumentsClient } from './modules/documents';
 import { SchemaClient } from './schema/schema-client';
 import { FluxezClientConfig, QueryResult } from './types';
 /**
@@ -85,6 +87,8 @@ export declare class FluxezClient {
     schema: SchemaClient;
     realtime: RealtimeClient;
     push: PushClient;
+    video: VideoClient;
+    documents: DocumentsClient;
     edgeFunctions: EdgeFunctionsClient;
     constructor(apiKey: string, config?: FluxezClientConfig);
     private initializeClients;
@@ -174,5 +178,60 @@ export declare class FluxezClient {
      * @param config Configuration updates
      */
     updateConfig(config: Partial<FluxezClientConfig>): void;
+    /**
+     * Insert data into a table
+     *
+     * @param tableName Name of the table
+     * @param data Data to insert (single object or array)
+     * @returns Inserted data
+     */
+    insert(tableName: string, data: any | any[]): Promise<import("./query/types").QueryResult<any>>;
+    /**
+     * Select data from a table
+     *
+     * @param tableName Name of the table
+     * @param columns Columns to select (default: '*')
+     * @returns Query builder for chaining
+     */
+    select(tableName: string, columns?: string): QueryBuilder;
+    /**
+     * Update data in a table
+     *
+     * @param tableName Name of the table
+     * @param data Data to update
+     * @param where WHERE conditions (can be string ID or object with conditions)
+     * @returns Updated data
+     */
+    update(tableName: string, data: any, where: string | Record<string, any>): Promise<import("./query/types").QueryResult<any>>;
+    /**
+     * Delete data from a table
+     *
+     * @param tableName Name of the table
+     * @param where WHERE conditions (can be string ID or object with conditions)
+     * @returns Deletion result
+     */
+    delete(tableName: string, where: string | Record<string, any>): Promise<import("./query/types").QueryResult<any>>;
+    /**
+     * Find one record from a table
+     *
+     * @param tableName Name of the table
+     * @param where WHERE conditions to find the record
+     * @returns Single record or null
+     */
+    findOne(tableName: string, where: Record<string, any>): Promise<any>;
+    /**
+     * Find many records from a table
+     *
+     * @param tableName Name of the table
+     * @param where WHERE conditions to filter records
+     * @param options Query options (limit, offset, orderBy)
+     * @returns Array of records
+     */
+    findMany(tableName: string, where?: Record<string, any>, options?: {
+        limit?: number;
+        offset?: number;
+        orderBy?: string;
+        order?: 'asc' | 'desc';
+    }): Promise<any[]>;
 }
 //# sourceMappingURL=fluxez-client.d.ts.map

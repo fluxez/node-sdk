@@ -17,6 +17,9 @@ A complete replacement for `@fluxez/node-sdk` with enhanced features, MongoDB-st
 - 🧠 **AI-Powered App Generation** - Generate complete applications from natural language
 - 🔄 **Workflow Automation** - Create and execute automated workflows with 54+ connectors
 - 📧 **Email & Queue Management** - Send emails, manage queues, and handle notifications
+- 🎥 **Video Conferencing** - WebRTC-based video rooms with recording and live streaming
+- 📄 **Document Processing** - PDF generation, OCR, watermarking, merging, and more
+- 📱 **Push Notifications** - Multi-platform push notifications with campaigns and analytics
 
 ## 🔄 Migration from @fluxez/node-sdk
 
@@ -739,6 +742,164 @@ console.log(`Success rate: ${workflowStats.successRate}%`);
 console.log(`Average execution time: ${workflowStats.averageExecutionTime}ms`);
 ```
 
+## Video Conferencing
+
+Create and manage video rooms for real-time communication:
+
+```javascript
+// Create video room
+const room = await client.video.createRoom({
+  name: 'Team Standup',
+  description: 'Daily standup meeting',
+  maxParticipants: 10,
+  recordingEnabled: true,
+  videoQuality: 'hd',
+  roomType: 'group'
+});
+
+// Generate participant token
+const token = await client.video.generateToken(
+  room.id,
+  'user_john_doe',
+  {
+    permissions: {
+      canPublish: true,
+      canSubscribe: true
+    },
+    expiresIn: 3600 // 1 hour
+  }
+);
+
+// List participants
+const participants = await client.video.listParticipants(room.id);
+
+// Start recording
+const recording = await client.video.startRecording(room.id, {
+  layout: 'speaker',
+  outputFormat: 'mp4',
+  width: 1920,
+  height: 1080
+});
+
+// Stop recording
+await client.video.stopRecording(recording.id);
+
+// Get session stats
+const stats = await client.video.getSessionStats(session.id);
+console.log(`Peak participants: ${stats.peakParticipants}`);
+console.log(`Average quality: ${stats.averageConnectionQuality}`);
+
+// Live streaming (egress)
+const egress = await client.video.startEgress({
+  roomId: room.id,
+  type: 'rtmp',
+  rtmpUrl: 'rtmp://a.rtmp.youtube.com/live2',
+  rtmpKey: 'your-stream-key'
+});
+
+// End room session
+await client.video.endRoom(room.id);
+```
+
+## Document Processing
+
+Generate PDFs, perform OCR, and process documents:
+
+```javascript
+// Generate PDF from HTML
+const pdf = await client.documents.generatePDF({
+  html: '<h1>Invoice</h1><p>Total: $100</p>',
+  options: {
+    format: 'A4',
+    orientation: 'portrait',
+    margin: { top: '20mm', bottom: '20mm' }
+  },
+  metadata: {
+    title: 'Invoice #1234',
+    author: 'Acme Corp'
+  }
+});
+
+// Generate from template
+const invoice = await client.documents.generatePDF({
+  template: 'invoice-template',
+  templateData: {
+    invoiceNumber: '1234',
+    customer: 'John Doe',
+    total: 100
+  }
+});
+
+// Extract text from PDF
+const text = await client.documents.extractText(pdfUrl);
+console.log(`Extracted ${text.wordCount} words from ${text.pageCount} pages`);
+
+// Merge PDFs
+const merged = await client.documents.mergePDFs([
+  'https://example.com/doc1.pdf',
+  'https://example.com/doc2.pdf'
+]);
+
+// Add watermark
+const watermarked = await client.documents.addWatermark(
+  pdfUrl,
+  'CONFIDENTIAL',
+  {
+    position: 'center',
+    opacity: 0.3,
+    rotation: 45
+  }
+);
+
+// Split PDF
+const split = await client.documents.splitPDF(pdfUrl, [
+  { start: 1, end: 5 },
+  { start: 6, end: 10 }
+]);
+
+// Compress PDF
+const compressed = await client.documents.compressPDF(pdfUrl, 70);
+
+// Protect with password
+const protected = await client.documents.protectPDF(
+  pdfUrl,
+  'password123',
+  { allowPrinting: false, allowCopying: false }
+);
+
+// OCR on image
+const ocrResult = await client.documents.performOCR(
+  'https://example.com/scan.jpg',
+  'google-vision'
+);
+console.log(`Extracted: ${ocrResult.text}`);
+console.log(`Confidence: ${ocrResult.confidence}%`);
+
+// OCR on PDF
+const pdfOcr = await client.documents.ocrPDF(
+  'https://example.com/scanned.pdf',
+  'aws-textract'
+);
+
+// Create template
+const template = await client.documents.createTemplate({
+  name: 'Invoice Template',
+  type: 'pdf',
+  content: '<html>...</html>',
+  variables: [
+    { name: 'invoiceNumber', type: 'string', required: true },
+    { name: 'total', type: 'number', required: true }
+  ]
+});
+
+// Convert document
+const converted = await client.documents.convertDocument({
+  sourceUrl: 'https://example.com/doc.docx',
+  sourceFormat: 'docx',
+  targetFormat: 'pdf'
+});
+```
+
 ## Email & Queue Management
 
 Send emails and manage message queues:
@@ -780,7 +941,7 @@ const messages = await client.queue.receive('my-queue-url', {
 for (const message of messages) {
   // Process message
   console.log('Processing:', message.body);
-  
+
   // Delete after processing
   await client.queue.delete(message.receiptHandle);
 }
@@ -791,8 +952,8 @@ for (const message of messages) {
 The SDK is written in TypeScript and provides full type definitions:
 
 ```typescript
-import { 
-  FluxezClient, 
+import {
+  FluxezClient,
   QueryBuilder,
   UploadResult,
   SearchResult,
@@ -806,7 +967,18 @@ import {
   WorkflowDefinition,
   WorkflowExecution,
   ConnectorMetadata,
-  WorkflowStats
+  WorkflowStats,
+  // Video Types
+  VideoRoom,
+  RoomToken,
+  Participant,
+  Recording,
+  SessionStats,
+  // Document Types
+  DocumentResult,
+  OCRResult,
+  DocumentTemplate,
+  TextExtractionResult
 } from '@fluxez/node-sdk';
 
 // Typed responses
@@ -839,6 +1011,38 @@ const execution: WorkflowExecution = await client.workflow.execute(
   'workflow-id',
   { input: { orderId: '123' }}
 );
+
+// Typed video operations
+const room: VideoRoom = await client.video.createRoom({
+  name: 'Team Meeting',
+  maxParticipants: 10
+});
+
+const token: RoomToken = await client.video.generateToken(
+  room.id,
+  'user_123'
+);
+
+const stats: SessionStats = await client.video.getSessionStats(
+  'session_id'
+);
+
+// Typed document operations
+const pdf: DocumentResult = await client.documents.generatePDF({
+  html: '<h1>Document</h1>',
+  options: { format: 'A4' }
+});
+
+const ocr: OCRResult = await client.documents.performOCR(
+  'https://example.com/image.jpg',
+  'google-vision'
+);
+
+const template: DocumentTemplate = await client.documents.createTemplate({
+  name: 'Invoice',
+  type: 'pdf',
+  content: '<html>...</html>'
+});
 
 const connectors: ConnectorMetadata[] = await client.workflow.listConnectors();
 ```

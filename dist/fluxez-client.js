@@ -16,6 +16,8 @@ const workflow_1 = require("./modules/workflow");
 const realtime_1 = require("./modules/realtime");
 const push_1 = require("./modules/push");
 const edge_functions_1 = require("./modules/edge-functions");
+const video_1 = require("./modules/video");
+const documents_1 = require("./modules/documents");
 const schema_client_1 = require("./schema/schema-client");
 const constants_1 = require("./constants");
 /**
@@ -127,6 +129,8 @@ class FluxezClient {
         this.schema = new schema_client_1.SchemaClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.realtime = new realtime_1.RealtimeClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.push = new push_1.PushClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+        this.video = new video_1.VideoClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+        this.documents = new documents_1.DocumentsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.edgeFunctions = new edge_functions_1.EdgeFunctionsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     }
     getClientConfig() {
@@ -303,6 +307,115 @@ class FluxezClient {
                 this.httpClient.setHeader(key, value);
             });
         }
+    }
+    // ============================================
+    // CRUD Helper Methods (Supabase-style)
+    // ============================================
+    /**
+     * Insert data into a table
+     *
+     * @param tableName Name of the table
+     * @param data Data to insert (single object or array)
+     * @returns Inserted data
+     */
+    async insert(tableName, data) {
+        return this.query.from(tableName).insert(data).execute();
+    }
+    /**
+     * Select data from a table
+     *
+     * @param tableName Name of the table
+     * @param columns Columns to select (default: '*')
+     * @returns Query builder for chaining
+     */
+    select(tableName, columns = '*') {
+        return this.query.from(tableName).select(columns);
+    }
+    /**
+     * Update data in a table
+     *
+     * @param tableName Name of the table
+     * @param data Data to update
+     * @param where WHERE conditions (can be string ID or object with conditions)
+     * @returns Updated data
+     */
+    async update(tableName, data, where) {
+        const query = this.query.from(tableName).update(data);
+        if (typeof where === 'string') {
+            // If where is a string, assume it's an ID
+            query.where('id', '=', where);
+        }
+        else {
+            // If where is an object, apply each condition
+            Object.entries(where).forEach(([key, value]) => {
+                query.where(key, '=', value);
+            });
+        }
+        return query.execute();
+    }
+    /**
+     * Delete data from a table
+     *
+     * @param tableName Name of the table
+     * @param where WHERE conditions (can be string ID or object with conditions)
+     * @returns Deletion result
+     */
+    async delete(tableName, where) {
+        const query = this.query.from(tableName).delete();
+        if (typeof where === 'string') {
+            // If where is a string, assume it's an ID
+            query.where('id', '=', where);
+        }
+        else {
+            // If where is an object, apply each condition
+            Object.entries(where).forEach(([key, value]) => {
+                query.where(key, '=', value);
+            });
+        }
+        return query.execute();
+    }
+    /**
+     * Find one record from a table
+     *
+     * @param tableName Name of the table
+     * @param where WHERE conditions to find the record
+     * @returns Single record or null
+     */
+    async findOne(tableName, where) {
+        const query = this.query.from(tableName).select('*');
+        Object.entries(where).forEach(([key, value]) => {
+            query.where(key, '=', value);
+        });
+        query.limit(1);
+        const result = await query.execute();
+        return result.data?.[0] || null;
+    }
+    /**
+     * Find many records from a table
+     *
+     * @param tableName Name of the table
+     * @param where WHERE conditions to filter records
+     * @param options Query options (limit, offset, orderBy)
+     * @returns Array of records
+     */
+    async findMany(tableName, where, options) {
+        const query = this.query.from(tableName).select('*');
+        if (where) {
+            Object.entries(where).forEach(([key, value]) => {
+                query.where(key, '=', value);
+            });
+        }
+        if (options?.limit) {
+            query.limit(options.limit);
+        }
+        if (options?.offset) {
+            query.offset(options.offset);
+        }
+        if (options?.orderBy) {
+            query.orderBy(options.orderBy, options.order || 'asc');
+        }
+        const result = await query.execute();
+        return result.data || [];
     }
 }
 exports.FluxezClient = FluxezClient;

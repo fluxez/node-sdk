@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.1.0] - 2025-10-01
+
+### 🎉 New Features
+
+#### Video Conferencing Module (`client.video`)
+Complete WebRTC-based video conferencing solution with enterprise features:
+
+- **Room Management**: Create group calls, P2P sessions, and webinars
+- **Participant Control**: Generate tokens, manage permissions, track participants
+- **Recording**: Record sessions with customizable layouts (grid, speaker, custom)
+- **Live Streaming**: RTMP and HLS egress for YouTube, Twitch, etc.
+- **Analytics**: Detailed session stats, quality metrics, and participant tracking
+- **Security**: E2E encryption support, permission-based access control
+
+#### Documents Module (`client.documents`)
+Comprehensive document processing and PDF manipulation:
+
+- **PDF Generation**: From HTML, URLs, Markdown, and templates
+- **PDF Operations**: Merge, split, compress, watermark, protect with passwords
+- **OCR**: Multi-provider support (Tesseract, Google Vision, AWS Textract, Azure)
+- **Text Extraction**: Extract text from PDFs with page-by-page breakdown
+- **Templates**: Create and manage reusable document templates
+- **Conversion**: Convert between document formats (HTML, DOCX, PDF)
+- **Processing Logs**: Track all operations with detailed metrics
+
+### 📝 Examples
+
+Added comprehensive example files:
+- `examples/13-video-conferencing.js` - Video rooms, recordings, analytics
+- `examples/14-pdf-generation.js` - PDF creation, manipulation, templates
+- `examples/15-ocr-processing.js` - OCR workflows and data extraction
+
+### 📚 Documentation
+
+- Updated README with video conferencing examples
+- Added document processing documentation
+- Enhanced TypeScript type definitions
+- Updated feature list and keywords
+
+### 🔧 Technical
+
+**New Type Exports:**
+- Video: `CreateRoomOptions`, `VideoRoom`, `RoomToken`, `Participant`, `Recording`, `SessionStats`, `Egress`
+- Documents: `GeneratePDFOptions`, `DocumentResult`, `OCRResult`, `DocumentTemplate`, `TextExtractionResult`
+
+**Package Updates:**
+- Version bumped to 1.1.0
+- Keywords: added video-conferencing, webrtc, pdf-generation, ocr, document-processing
+
 ## [2.0.0] - 2024-09-09
 
 ### 🚀 Major Changes - New SDK Architecture
