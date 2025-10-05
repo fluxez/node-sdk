@@ -1,1 +1,1 @@
-{"version":3,"file":"migrate.d.ts","sourceRoot":"","sources":["../../../src/cli/commands/migrate.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,WAAW,CAAC;AAmQpC,eAAO,MAAM,cAAc,SASJ,CAAC"}
+{"version":3,"file":"migrate.d.ts","sourceRoot":"","sources":["../../../src/cli/commands/migrate.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,WAAW,CAAC;AAuQpC,eAAO,MAAM,cAAc,SASJ,CAAC"}

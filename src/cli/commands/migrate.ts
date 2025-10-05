@@ -141,19 +141,23 @@ async function runMigration(schemaPath: string, options: any) {
     // Just assume we're connected if the client was created successfully
     console.log(chalk.green(`✅ Ready to migrate\\n`));
 
+    // NOTE: Realtime WebSocket connection disabled for migrations
+    // Migrations use SSE (Server-Sent Events) for progress updates via /schema/migration-progress
+    // The realtime WebSocket is only needed for live data subscriptions, not migrations
+
     // Try to connect to realtime for progress updates
-    if (!options.dryRun) {
-      try {
-        if (client.realtime && !client.realtime.isConnectedToRealtime()) {
-          console.log(chalk.gray('📡 Connecting to realtime server for progress updates...'));
-          await client.realtime.connect();
-          console.log(chalk.green('✅ Connected to realtime server'));
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      } catch (err) {
-        console.log(chalk.yellow('⚠️  Could not connect to realtime server, progress updates disabled'));
-      }
-    }
+    // if (!options.dryRun) {
+    //   try {
+    //     if (client.realtime && !client.realtime.isConnectedToRealtime()) {
+    //       console.log(chalk.gray('📡 Connecting to realtime server for progress updates...'));
+    //       await client.realtime.connect();
+    //       console.log(chalk.green('✅ Connected to realtime server'));
+    //       await new Promise(resolve => setTimeout(resolve, 1000));
+    //     }
+    //   } catch (err) {
+    //     console.log(chalk.yellow('⚠️  Could not connect to realtime server, progress updates disabled'));
+    //   }
+    // }
 
     let result;
     const progressHandler = createProgressHandler();
