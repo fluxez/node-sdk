@@ -43,6 +43,8 @@ export { DocumentsClient } from './modules/documents';
 export type { GeneratePDFOptions, DocumentResult, TextExtractionResult, PageRange, WatermarkOptions, OCRProvider, OCRResult, OCRBlock, OCRWord, TemplateFilters, DocumentTemplate, TemplateVariable, CreateTemplateOptions, LogFilters, ProcessingLog, MergePDFOptions, SplitPDFOptions, ConvertDocumentOptions } from './modules/documents';
 export { EdgeFunctionsClient } from './modules/edge-functions';
 export type { EdgeFunction, EdgeTrigger, EdgeExecution, EdgeLog, EdgeDeployment, CreateFunctionOptions, UpdateFunctionOptions, ExecuteOptions, EdgeStats } from './modules/edge-functions';
+export { ChatbotClient } from './modules/chatbot';
+export type { ChatbotConfig, ChatbotConversation, ChatbotMessage, ChatbotSendMessageOptions, ChatbotSendMessageResponse, ChatbotDocument, UploadDocumentOptions, ChatbotStats, MessageFeedback, ListOptions as ChatbotListOptions } from './modules/chatbot';
 export { Migrator } from './migration/migrator';
 export { MigrationCLI } from './migration/cli';
 export type { MigrationConfig, Migration, MigrationResult } from './migration/migrator';

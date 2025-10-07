@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluxez Chatbot Widget Example</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+    }
+
+    h1 {
+      color: #1a202c;
+      margin-bottom: 16px;
+      font-size: 32px;
+    }
+
+    p {
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .code-block {
+      background: #1a202c;
+      color: #68d391;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+      font-size: 14px;
+      overflow-x: auto;
+      margin-bottom: 32px;
+    }
+
+    .code-block .comment {
+      color: #718096;
+    }
+
+    .code-block .string {
+      color: #fbd38d;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .feature-list li {
+      padding: 12px 0;
+      border-bottom: 1px solid #e2e8f0;
+      color: #2d3748;
+    }
+
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+
+    .feature-list li::before {
+      content: '✓';
+      color: #48bb78;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #4299e1;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #3182ce;
+    }
+
+    .btn-secondary {
+      background: #edf2f7;
+      color: #2d3748;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-danger {
+      background: #fc8181;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #f56565;
+    }
+
+    .note {
+      background: #fef5e7;
+      border-left: 4px solid #f39c12;
+      padding: 16px;
+      border-radius: 4px;
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fluxez Chatbot Widget</h1>
+    <p>
+      This page demonstrates the Fluxez chatbot widget. The widget is fully customizable
+      and can be integrated into any website with just a few lines of code.
+    </p>
+
+    <h3 style="margin-bottom: 16px; color: #2d3748;">Features:</h3>
+    <ul class="feature-list">
+      <li>Beautiful, responsive chat interface</li>
+      <li>Customizable colors and positioning</li>
+      <li>Real-time message streaming</li>
+      <li>Mobile-friendly design</li>
+      <li>Easy integration with service_ or anon_ API keys</li>
+      <li>Context-aware (supports organizationId, projectId, appId)</li>
+    </ul>
+
+    <h3 style="margin-bottom: 16px; color: #2d3748;">Usage:</h3>
+    <div class="code-block">
+<span class="comment">// Import the browser module</span>
+import { loadChatbot } from <span class="string">'@fluxez/node-sdk/browser'</span>;
+
+<span class="comment">// Load the chatbot with your API key</span>
+const widget = loadChatbot(<span class="string">'service_your_api_key'</span>, {
+  position: <span class="string">'bottom-right'</span>,
+  theme: {
+    primaryColor: <span class="string">'#0891b2'</span>,
+    secondaryColor: <span class="string">'#06b6d4'</span>
+  },
+  startOpen: false,
+  organizationId: <span class="string">'your-org-id'</span>,
+  projectId: <span class="string">'your-project-id'</span>,
+  appId: <span class="string">'your-app-id'</span>
+});
+    </div>
+
+    <h3 style="margin-bottom: 16px; color: #2d3748;">Control the widget:</h3>
+    <div class="button-group">
+      <button class="btn-primary" onclick="showWidget()">Show Widget</button>
+      <button class="btn-secondary" onclick="hideWidget()">Hide Widget</button>
+      <button class="btn-primary" onclick="toggleWidget()">Toggle Widget</button>
+      <button class="btn-danger" onclick="destroyWidget()">Destroy Widget</button>
+    </div>
+
+    <div class="note">
+      <strong>Note:</strong> Replace <code>'service_your_api_key'</code> with your actual Fluxez API key.
+      The key should start with <code>service_</code> or <code>anon_</code>.
+    </div>
+  </div>
+
+  <!-- Load the Fluxez SDK browser module -->
+  <script type="module">
+    import { loadChatbot } from '../dist/browser/index.js';
+
+    // Initialize the chatbot widget
+    let widget;
+
+    try {
+      widget = loadChatbot('service_demo_key_12345', {
+        position: 'bottom-right',
+        theme: {
+          primaryColor: '#667eea',
+          secondaryColor: '#764ba2'
+        },
+        startOpen: false,
+        // Optional: Add context
+        // organizationId: 'your-org-id',
+        // projectId: 'your-project-id',
+        // appId: 'your-app-id'
+      });
+
+      console.log('Chatbot widget loaded successfully!');
+    } catch (error) {
+      console.error('Error loading chatbot:', error);
+    }
+
+    // Make widget control functions available globally
+    window.showWidget = () => {
+      if (widget) widget.show();
+    };
+
+    window.hideWidget = () => {
+      if (widget) widget.hide();
+    };
+
+    window.toggleWidget = () => {
+      if (widget) widget.toggle();
+    };
+
+    window.destroyWidget = () => {
+      if (widget) {
+        widget.destroy();
+        widget = null;
+        console.log('Widget destroyed');
+      }
+    };
+
+    // Check widget status
+    setInterval(() => {
+      if (widget) {
+        console.log('Widget is open:', widget.isOpen());
+      }
+    }, 5000);
+  </script>
+</body>
+</html>

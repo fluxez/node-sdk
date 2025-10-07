@@ -281,6 +281,21 @@ export type {
   EdgeStats
 } from './modules/edge-functions';
 
+// Chatbot
+export { ChatbotClient } from './modules/chatbot';
+export type {
+  ChatbotConfig,
+  ChatbotConversation,
+  ChatbotMessage,
+  ChatbotSendMessageOptions,
+  ChatbotSendMessageResponse,
+  ChatbotDocument,
+  UploadDocumentOptions,
+  ChatbotStats,
+  MessageFeedback,
+  ListOptions as ChatbotListOptions
+} from './modules/chatbot';
+
 // Migration
 export { Migrator } from './migration/migrator';
 export { MigrationCLI } from './migration/cli';

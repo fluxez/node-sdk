@@ -18,6 +18,7 @@ const push_1 = require("./modules/push");
 const edge_functions_1 = require("./modules/edge-functions");
 const video_1 = require("./modules/video");
 const documents_1 = require("./modules/documents");
+const chatbot_1 = require("./modules/chatbot");
 const schema_client_1 = require("./schema/schema-client");
 const constants_1 = require("./constants");
 /**
@@ -131,6 +132,7 @@ class FluxezClient {
         this.push = new push_1.PushClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.video = new video_1.VideoClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.documents = new documents_1.DocumentsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+        this.chatbot = new chatbot_1.ChatbotClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.edgeFunctions = new edge_functions_1.EdgeFunctionsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     }
     getClientConfig() {

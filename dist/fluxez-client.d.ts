@@ -14,6 +14,7 @@ import { PushClient } from './modules/push';
 import { EdgeFunctionsClient } from './modules/edge-functions';
 import { VideoClient } from './modules/video';
 import { DocumentsClient } from './modules/documents';
+import { ChatbotClient } from './modules/chatbot';
 import { SchemaClient } from './schema/schema-client';
 import { FluxezClientConfig, QueryResult } from './types';
 /**
@@ -89,6 +90,7 @@ export declare class FluxezClient {
     push: PushClient;
     video: VideoClient;
     documents: DocumentsClient;
+    chatbot: ChatbotClient;
     edgeFunctions: EdgeFunctionsClient;
     constructor(apiKey: string, config?: FluxezClientConfig);
     private initializeClients;

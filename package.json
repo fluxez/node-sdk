@@ -1,11 +1,25 @@
 {
   "name": "@fluxez/node-sdk",
-  "version": "1.1.0",
-  "description": "Official Node.js SDK for Fluxez - Complete platform SDK with AI, workflows, video conferencing, document processing, email, storage, and multi-database support",
+  "version": "1.2.0",
+  "description": "Official Node.js SDK for Fluxez - Complete platform SDK with AI, workflows, chatbot, video conferencing, document processing, email, storage, and multi-database support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./browser": {
+      "import": "./dist/browser/index.js",
+      "require": "./dist/browser/index.js",
+      "types": "./dist/browser/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:node && npm run build:browser",
+    "build:node": "tsc",
+    "build:browser": "tsc --project tsconfig.browser.json",
     "dev": "tsc --watch",
     "test": "jest",
     "playground": "cd playground && npm run dev",
@@ -29,6 +43,8 @@
     "queue",
     "ai",
     "brain",
+    "chatbot",
+    "chat-widget",
     "workflow",
     "automation",
     "video-conferencing",

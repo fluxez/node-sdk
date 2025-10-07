@@ -15,6 +15,7 @@ import { PushClient } from './modules/push';
 import { EdgeFunctionsClient } from './modules/edge-functions';
 import { VideoClient } from './modules/video';
 import { DocumentsClient } from './modules/documents';
+import { ChatbotClient } from './modules/chatbot';
 import { SchemaClient } from './schema/schema-client';
 import { FLUXEZ_BASE_URL } from './constants';
 import { 
@@ -100,6 +101,7 @@ export class FluxezClient {
   public push!: PushClient;
   public video!: VideoClient;
   public documents!: DocumentsClient;
+  public chatbot!: ChatbotClient;
   public edgeFunctions!: EdgeFunctionsClient;
 
   constructor(apiKey: string, config?: FluxezClientConfig) {
@@ -167,6 +169,7 @@ export class FluxezClient {
     this.push = new PushClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.video = new VideoClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.documents = new DocumentsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+    this.chatbot = new ChatbotClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.edgeFunctions = new EdgeFunctionsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
   }
 
