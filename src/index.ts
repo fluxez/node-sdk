@@ -224,7 +224,7 @@ export type {
 } from './modules/push';
 
 // Video Conferencing
-export { VideoClient } from './modules/video';
+export { VideoConferencingClient } from './modules/video-conferencing';
 export type {
   CreateRoomOptions,
   VideoRoom,
@@ -242,7 +242,7 @@ export type {
   EgressOptions,
   Egress,
   RoomWebhookEvent
-} from './modules/video';
+} from './modules/video-conferencing';
 
 // Documents
 export { DocumentsClient } from './modules/documents';

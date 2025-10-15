@@ -748,7 +748,7 @@ Create and manage video rooms for real-time communication:
 
 ```javascript
 // Create video room
-const room = await client.video.createRoom({
+const room = await client.videoConferencing.createRoom({
   name: 'Team Standup',
   description: 'Daily standup meeting',
   maxParticipants: 10,
@@ -758,7 +758,7 @@ const room = await client.video.createRoom({
 });
 
 // Generate participant token
-const token = await client.video.generateToken(
+const token = await client.videoConferencing.generateToken(
   room.id,
   'user_john_doe',
   {
@@ -771,10 +771,10 @@ const token = await client.video.generateToken(
 );
 
 // List participants
-const participants = await client.video.listParticipants(room.id);
+const participants = await client.videoConferencing.listParticipants(room.id);
 
 // Start recording
-const recording = await client.video.startRecording(room.id, {
+const recording = await client.videoConferencing.startRecording(room.id, {
   layout: 'speaker',
   outputFormat: 'mp4',
   width: 1920,
@@ -782,15 +782,15 @@ const recording = await client.video.startRecording(room.id, {
 });
 
 // Stop recording
-await client.video.stopRecording(recording.id);
+await client.videoConferencing.stopRecording(recording.id);
 
 // Get session stats
-const stats = await client.video.getSessionStats(session.id);
+const stats = await client.videoConferencing.getSessionStats(session.id);
 console.log(`Peak participants: ${stats.peakParticipants}`);
 console.log(`Average quality: ${stats.averageConnectionQuality}`);
 
 // Live streaming (egress)
-const egress = await client.video.startEgress({
+const egress = await client.videoConferencing.startEgress({
   roomId: room.id,
   type: 'rtmp',
   rtmpUrl: 'rtmp://a.rtmp.youtube.com/live2',
@@ -798,7 +798,7 @@ const egress = await client.video.startEgress({
 });
 
 // End room session
-await client.video.endRoom(room.id);
+await client.videoConferencing.endRoom(room.id);
 ```
 
 ## Document Processing
@@ -1012,18 +1012,18 @@ const execution: WorkflowExecution = await client.workflow.execute(
   { input: { orderId: '123' }}
 );
 
-// Typed video operations
-const room: VideoRoom = await client.video.createRoom({
+// Typed video conferencing operations
+const room: VideoRoom = await client.videoConferencing.createRoom({
   name: 'Team Meeting',
   maxParticipants: 10
 });
 
-const token: RoomToken = await client.video.generateToken(
+const token: RoomToken = await client.videoConferencing.generateToken(
   room.id,
   'user_123'
 );
 
-const stats: SessionStats = await client.video.getSessionStats(
+const stats: SessionStats = await client.videoConferencing.getSessionStats(
   'session_id'
 );
 

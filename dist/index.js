@@ -18,7 +18,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Logger = exports.ErrorCode = exports.ApiError = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoClient = exports.PushClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.WorkflowClient = exports.BrainClient = exports.QueueClient = exports.EmailClient = exports.TenantAuthValidationError = exports.TenantAuthNetworkError = exports.TenantAuthApiError = exports.TeamRole = exports.SocialProvider = exports.TenantAuthClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
+exports.Logger = exports.ErrorCode = exports.ApiError = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoConferencingClient = exports.PushClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.WorkflowClient = exports.BrainClient = exports.QueueClient = exports.EmailClient = exports.TenantAuthValidationError = exports.TenantAuthNetworkError = exports.TenantAuthApiError = exports.TeamRole = exports.SocialProvider = exports.TenantAuthClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
 // Core Client
 var fluxez_client_1 = require("./fluxez-client");
 Object.defineProperty(exports, "FluxezClient", { enumerable: true, get: function () { return fluxez_client_1.FluxezClient; } });
@@ -80,8 +80,8 @@ Object.defineProperty(exports, "RealtimeClient", { enumerable: true, get: functi
 var push_1 = require("./modules/push");
 Object.defineProperty(exports, "PushClient", { enumerable: true, get: function () { return push_1.PushClient; } });
 // Video Conferencing
-var video_1 = require("./modules/video");
-Object.defineProperty(exports, "VideoClient", { enumerable: true, get: function () { return video_1.VideoClient; } });
+var video_conferencing_1 = require("./modules/video-conferencing");
+Object.defineProperty(exports, "VideoConferencingClient", { enumerable: true, get: function () { return video_conferencing_1.VideoConferencingClient; } });
 // Documents
 var documents_1 = require("./modules/documents");
 Object.defineProperty(exports, "DocumentsClient", { enumerable: true, get: function () { return documents_1.DocumentsClient; } });

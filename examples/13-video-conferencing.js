@@ -23,7 +23,7 @@ async function videoConferencingExamples() {
     // 1. Create Video Room
     // ============================================
     console.log('1. Creating a video room...');
-    const room = await client.video.createRoom({
+    const room = await client.videoConferencing.createRoom({
       name: 'Team Standup Meeting',
       description: 'Daily team standup',
       maxParticipants: 10,
@@ -47,7 +47,7 @@ async function videoConferencingExamples() {
     console.log('2. Generating participant tokens...');
 
     // Token for regular participant
-    const userToken = await client.video.generateToken(
+    const userToken = await client.videoConferencing.generateToken(
       room.id,
       'user_john_doe',
       {
@@ -70,7 +70,7 @@ async function videoConferencingExamples() {
     console.log(`  Expires at: ${userToken.expiresAt}`);
 
     // Token for moderator
-    const modToken = await client.video.generateToken(
+    const modToken = await client.videoConferencing.generateToken(
       room.id,
       'user_jane_moderator',
       {
@@ -97,7 +97,7 @@ async function videoConferencingExamples() {
     console.log('3. Managing participants...');
 
     // List all participants
-    const participants = await client.video.listParticipants(room.id);
+    const participants = await client.videoConferencing.listParticipants(room.id);
     console.log(`✓ Current participants: ${participants.length}`);
     participants.forEach(p => {
       console.log(`  - ${p.identity}: ${p.status} (publishing: ${p.isPublishing})`);
@@ -105,7 +105,7 @@ async function videoConferencingExamples() {
 
     // Update participant metadata
     if (participants.length > 0) {
-      const updated = await client.video.updateParticipantMetadata(
+      const updated = await client.videoConferencing.updateParticipantMetadata(
         room.id,
         participants[0].id,
         {
@@ -122,7 +122,7 @@ async function videoConferencingExamples() {
     // ============================================
     console.log('4. Managing room recordings...');
 
-    const recording = await client.video.startRecording(room.id, {
+    const recording = await client.videoConferencing.startRecording(room.id, {
       layout: 'speaker',
       width: 1920,
       height: 1080,
@@ -141,11 +141,11 @@ async function videoConferencingExamples() {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Stop recording
-    await client.video.stopRecording(recording.id);
+    await client.videoConferencing.stopRecording(recording.id);
     console.log(`✓ Recording stopped`);
 
     // Get recording details
-    const recordingDetails = await client.video.getRecording(recording.id);
+    const recordingDetails = await client.videoConferencing.getRecording(recording.id);
     console.log(`  Status: ${recordingDetails.status}`);
     if (recordingDetails.downloadUrl) {
       console.log(`  Download URL: ${recordingDetails.downloadUrl}`);
@@ -156,7 +156,7 @@ async function videoConferencingExamples() {
     // 5. List All Recordings
     // ============================================
     console.log('5. Listing room recordings...');
-    const recordings = await client.video.listRecordings(room.id);
+    const recordings = await client.videoConferencing.listRecordings(room.id);
     console.log(`✓ Found ${recordings.length} recordings`);
     recordings.forEach(rec => {
       console.log(`  - ${rec.id}: ${rec.status} (${rec.duration || 0}s)`);
@@ -169,7 +169,7 @@ async function videoConferencingExamples() {
     console.log('6. Setting up live streaming...');
 
     // Stream to RTMP (e.g., YouTube, Twitch)
-    const egress = await client.video.startEgress({
+    const egress = await client.videoConferencing.startEgress({
       roomId: room.id,
       type: 'rtmp',
       rtmpUrl: 'rtmp://a.rtmp.youtube.com/live2',
@@ -183,7 +183,7 @@ async function videoConferencingExamples() {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Stop egress
-    await client.video.stopEgress(egress.id);
+    await client.videoConferencing.stopEgress(egress.id);
     console.log(`✓ Live stream stopped`);
     console.log();
 
@@ -192,7 +192,7 @@ async function videoConferencingExamples() {
     // ============================================
     console.log('7. Listing video rooms...');
 
-    const activeRooms = await client.video.listRooms({
+    const activeRooms = await client.videoConferencing.listRooms({
       status: 'active',
       limit: 10
     });
@@ -201,7 +201,7 @@ async function videoConferencingExamples() {
       console.log(`  - ${r.name}: ${r.currentParticipants}/${r.maxParticipants} participants`);
     });
 
-    const allRooms = await client.video.listRooms({
+    const allRooms = await client.videoConferencing.listRooms({
       createdAfter: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       limit: 20
     });
@@ -213,7 +213,7 @@ async function videoConferencingExamples() {
     // ============================================
     console.log('8. Updating room configuration...');
 
-    const updatedRoom = await client.video.updateRoom(room.id, {
+    const updatedRoom = await client.videoConferencing.updateRoom(room.id, {
       maxParticipants: 20,
       lockOnJoin: true,
       metadata: {
@@ -232,7 +232,7 @@ async function videoConferencingExamples() {
     console.log('9. Getting session analytics...');
 
     // Get session history
-    const sessions = await client.video.getSessions({
+    const sessions = await client.videoConferencing.getSessions({
       roomId: room.id,
       limit: 5
     });
@@ -245,7 +245,7 @@ async function videoConferencingExamples() {
       console.log(`  Participants: ${session.participantCount}`);
 
       // Get detailed session stats
-      const stats = await client.video.getSessionStats(session.id);
+      const stats = await client.videoConferencing.getSessionStats(session.id);
       console.log(`  Peak participants: ${stats.peakParticipants}`);
       console.log(`  Average quality: ${stats.averageConnectionQuality}`);
       console.log(`  Total bytes sent: ${(stats.totalBytesSent / 1024 / 1024).toFixed(2)} MB`);
@@ -262,7 +262,7 @@ async function videoConferencingExamples() {
     console.log('10. Advanced room features...');
 
     // Create a webinar room
-    const webinarRoom = await client.video.createRoom({
+    const webinarRoom = await client.videoConferencing.createRoom({
       name: 'Product Launch Webinar',
       description: 'Live product demonstration',
       maxParticipants: 1000,
@@ -279,7 +279,7 @@ async function videoConferencingExamples() {
     console.log(`  Max participants: ${webinarRoom.maxParticipants}`);
 
     // Create a 1-on-1 room
-    const p2pRoom = await client.video.createRoom({
+    const p2pRoom = await client.videoConferencing.createRoom({
       name: 'Sales Call with Customer',
       maxParticipants: 2,
       roomType: 'p2p',
@@ -297,7 +297,7 @@ async function videoConferencingExamples() {
     console.log('11. Removing participant...');
 
     if (participants.length > 0) {
-      await client.video.removeParticipant(room.id, participants[0].id);
+      await client.videoConferencing.removeParticipant(room.id, participants[0].id);
       console.log(`✓ Removed participant: ${participants[0].identity}`);
     }
     console.log();
@@ -307,13 +307,13 @@ async function videoConferencingExamples() {
     // ============================================
     console.log('12. Ending room sessions...');
 
-    await client.video.endRoom(room.id);
+    await client.videoConferencing.endRoom(room.id);
     console.log(`✓ Room session ended: ${room.id}`);
 
-    await client.video.endRoom(webinarRoom.id);
+    await client.videoConferencing.endRoom(webinarRoom.id);
     console.log(`✓ Webinar session ended: ${webinarRoom.id}`);
 
-    await client.video.endRoom(p2pRoom.id);
+    await client.videoConferencing.endRoom(p2pRoom.id);
     console.log(`✓ P2P session ended: ${p2pRoom.id}`);
     console.log();
 
@@ -322,13 +322,13 @@ async function videoConferencingExamples() {
     // ============================================
     console.log('13. Cleaning up...');
 
-    await client.video.deleteRoom(room.id);
+    await client.videoConferencing.deleteRoom(room.id);
     console.log(`✓ Deleted room: ${room.id}`);
 
-    await client.video.deleteRoom(webinarRoom.id);
+    await client.videoConferencing.deleteRoom(webinarRoom.id);
     console.log(`✓ Deleted webinar room: ${webinarRoom.id}`);
 
-    await client.video.deleteRoom(p2pRoom.id);
+    await client.videoConferencing.deleteRoom(p2pRoom.id);
     console.log(`✓ Deleted p2p room: ${p2pRoom.id}`);
     console.log();
 
@@ -348,7 +348,7 @@ async function videoCallWorkflow() {
 
   try {
     // Step 1: Create room for team meeting
-    const meeting = await client.video.createRoom({
+    const meeting = await client.videoConferencing.createRoom({
       name: 'Sprint Planning Meeting',
       description: 'Q1 2024 Sprint Planning',
       maxParticipants: 15,
@@ -371,7 +371,7 @@ async function videoCallWorkflow() {
 
     console.log('\nGenerating access tokens:');
     for (const member of teamMembers) {
-      const token = await client.video.generateToken(
+      const token = await client.videoConferencing.generateToken(
         meeting.id,
         member.id,
         {
@@ -393,7 +393,7 @@ async function videoCallWorkflow() {
 
     // Step 3: Start recording
     console.log('\nStarting meeting recording...');
-    const recording = await client.video.startRecording(meeting.id, {
+    const recording = await client.videoConferencing.startRecording(meeting.id, {
       layout: 'grid',
       width: 1920,
       height: 1080,
@@ -407,14 +407,14 @@ async function videoCallWorkflow() {
 
     // Step 5: End meeting and stop recording
     console.log('\nEnding meeting...');
-    await client.video.stopRecording(recording.id);
-    await client.video.endRoom(meeting.id);
+    await client.videoConferencing.stopRecording(recording.id);
+    await client.videoConferencing.endRoom(meeting.id);
     console.log('  ✓ Meeting ended');
 
     // Step 6: Get meeting analytics
-    const sessions = await client.video.getSessions({ roomId: meeting.id });
+    const sessions = await client.videoConferencing.getSessions({ roomId: meeting.id });
     if (sessions.length > 0) {
-      const stats = await client.video.getSessionStats(sessions[0].id);
+      const stats = await client.videoConferencing.getSessionStats(sessions[0].id);
       console.log('\nMeeting Summary:');
       console.log(`  Duration: ${stats.duration}s`);
       console.log(`  Participants: ${stats.participantCount}`);
@@ -423,7 +423,7 @@ async function videoCallWorkflow() {
     }
 
     // Cleanup
-    await client.video.deleteRoom(meeting.id);
+    await client.videoConferencing.deleteRoom(meeting.id);
     console.log('\n✓ Workflow completed successfully!');
 
   } catch (error) {

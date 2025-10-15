@@ -274,9 +274,9 @@ export interface RoomWebhookEvent {
 }
 
 /**
- * Video Client for managing video conferencing
+ * Video Conferencing Client for managing video conferencing
  */
-export class VideoClient {
+export class VideoConferencingClient {
   private httpClient: AxiosInstance;
   private config: FluxezConfig;
   private logger: Logger;
@@ -299,7 +299,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const room = await client.video.createRoom({
+   * const room = await client.videoConferencing.createRoom({
    *   name: 'Team Standup',
    *   description: 'Daily team standup meeting',
    *   maxParticipants: 10,
@@ -314,7 +314,7 @@ export class VideoClient {
       this.logger.debug('Creating video room', options);
 
       const response = await this.httpClient.post<ApiResponse<VideoRoom>>(
-        '/video/rooms',
+        '/video-conferencing/rooms',
         options
       );
 
@@ -334,7 +334,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const room = await client.video.getRoom('room_abc123');
+   * const room = await client.videoConferencing.getRoom('room_abc123');
    * console.log(`Participants: ${room.currentParticipants}/${room.maxParticipants}`);
    * ```
    */
@@ -343,7 +343,7 @@ export class VideoClient {
       this.logger.debug('Getting video room', { roomId });
 
       const response = await this.httpClient.get<ApiResponse<VideoRoom>>(
-        `/video/rooms/${roomId}`
+        `/video-conferencing/rooms/${roomId}`
       );
 
       return response.data.data;
@@ -361,7 +361,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const activeRooms = await client.video.listRooms({
+   * const activeRooms = await client.videoConferencing.listRooms({
    *   status: 'active',
    *   limit: 20
    * });
@@ -372,7 +372,7 @@ export class VideoClient {
       this.logger.debug('Listing video rooms', filters);
 
       const response = await this.httpClient.get<ApiResponse<{ rooms: VideoRoom[]; total: number }>>(
-        '/video/rooms',
+        '/video-conferencing/rooms',
         { params: filters }
       );
 
@@ -392,7 +392,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const room = await client.video.updateRoom('room_abc123', {
+   * const room = await client.videoConferencing.updateRoom('room_abc123', {
    *   maxParticipants: 20,
    *   lockOnJoin: true
    * });
@@ -403,7 +403,7 @@ export class VideoClient {
       this.logger.debug('Updating video room', { roomId, updates });
 
       const response = await this.httpClient.put<ApiResponse<VideoRoom>>(
-        `/video/rooms/${roomId}`,
+        `/video-conferencing/rooms/${roomId}`,
         updates
       );
 
@@ -422,14 +422,14 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * await client.video.deleteRoom('room_abc123');
+   * await client.videoConferencing.deleteRoom('room_abc123');
    * ```
    */
   async deleteRoom(roomId: string): Promise<void> {
     try {
       this.logger.debug('Deleting video room', { roomId });
 
-      await this.httpClient.delete(`/video/rooms/${roomId}`);
+      await this.httpClient.delete(`/video-conferencing/rooms/${roomId}`);
 
       this.logger.info('Video room deleted', { roomId });
     } catch (error) {
@@ -445,14 +445,14 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * await client.video.endRoom('room_abc123');
+   * await client.videoConferencing.endRoom('room_abc123');
    * ```
    */
   async endRoom(roomId: string): Promise<void> {
     try {
       this.logger.debug('Ending video room', { roomId });
 
-      await this.httpClient.post(`/video/rooms/${roomId}/end`);
+      await this.httpClient.post(`/video-conferencing/rooms/${roomId}/end`);
 
       this.logger.info('Video room ended', { roomId });
     } catch (error) {
@@ -475,7 +475,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const token = await client.video.generateToken(
+   * const token = await client.videoConferencing.generateToken(
    *   'room_abc123',
    *   'user_123',
    *   {
@@ -494,7 +494,7 @@ export class VideoClient {
       this.logger.debug('Generating room token', { roomId, identity });
 
       const response = await this.httpClient.post<ApiResponse<RoomToken>>(
-        `/video/rooms/${roomId}/tokens`,
+        `/video-conferencing/rooms/${roomId}/tokens`,
         {
           identity,
           ...options,
@@ -517,7 +517,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const participants = await client.video.listParticipants('room_abc123');
+   * const participants = await client.videoConferencing.listParticipants('room_abc123');
    * console.log(`Active participants: ${participants.length}`);
    * ```
    */
@@ -526,7 +526,7 @@ export class VideoClient {
       this.logger.debug('Listing room participants', { roomId });
 
       const response = await this.httpClient.get<ApiResponse<{ participants: Participant[] }>>(
-        `/video/rooms/${roomId}/participants`
+        `/video-conferencing/rooms/${roomId}/participants`
       );
 
       return response.data.data.participants;
@@ -545,7 +545,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const participant = await client.video.getParticipant('room_abc123', 'user_123');
+   * const participant = await client.videoConferencing.getParticipant('room_abc123', 'user_123');
    * ```
    */
   async getParticipant(roomId: string, participantId: string): Promise<Participant> {
@@ -553,7 +553,7 @@ export class VideoClient {
       this.logger.debug('Getting participant details', { roomId, participantId });
 
       const response = await this.httpClient.get<ApiResponse<Participant>>(
-        `/video/rooms/${roomId}/participants/${participantId}`
+        `/video-conferencing/rooms/${roomId}/participants/${participantId}`
       );
 
       return response.data.data;
@@ -571,14 +571,14 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * await client.video.removeParticipant('room_abc123', 'user_123');
+   * await client.videoConferencing.removeParticipant('room_abc123', 'user_123');
    * ```
    */
   async removeParticipant(roomId: string, participantId: string): Promise<void> {
     try {
       this.logger.debug('Removing participant', { roomId, participantId });
 
-      await this.httpClient.delete(`/video/rooms/${roomId}/participants/${participantId}`);
+      await this.httpClient.delete(`/video-conferencing/rooms/${roomId}/participants/${participantId}`);
 
       this.logger.info('Participant removed', { roomId, participantId });
     } catch (error) {
@@ -596,7 +596,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * await client.video.updateParticipantMetadata('room_abc123', 'user_123', {
+   * await client.videoConferencing.updateParticipantMetadata('room_abc123', 'user_123', {
    *   role: 'moderator',
    *   handRaised: true
    * });
@@ -611,7 +611,7 @@ export class VideoClient {
       this.logger.debug('Updating participant metadata', { roomId, participantId });
 
       const response = await this.httpClient.patch<ApiResponse<Participant>>(
-        `/video/rooms/${roomId}/participants/${participantId}`,
+        `/video-conferencing/rooms/${roomId}/participants/${participantId}`,
         { metadata }
       );
 
@@ -635,7 +635,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const recording = await client.video.startRecording('room_abc123', {
+   * const recording = await client.videoConferencing.startRecording('room_abc123', {
    *   layout: 'speaker',
    *   outputFormat: 'mp4',
    *   width: 1920,
@@ -648,7 +648,7 @@ export class VideoClient {
       this.logger.debug('Starting room recording', { roomId, config });
 
       const response = await this.httpClient.post<ApiResponse<Recording>>(
-        `/video/rooms/${roomId}/recording`,
+        `/video-conferencing/rooms/${roomId}/recording`,
         config
       );
 
@@ -667,14 +667,14 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * await client.video.stopRecording('rec_abc123');
+   * await client.videoConferencing.stopRecording('rec_abc123');
    * ```
    */
   async stopRecording(recordingId: string): Promise<void> {
     try {
       this.logger.debug('Stopping recording', { recordingId });
 
-      await this.httpClient.post(`/video/recordings/${recordingId}/stop`);
+      await this.httpClient.post(`/video-conferencing/recordings/${recordingId}/stop`);
 
       this.logger.info('Recording stopped', { recordingId });
     } catch (error) {
@@ -691,7 +691,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const recording = await client.video.getRecording('rec_abc123');
+   * const recording = await client.videoConferencing.getRecording('rec_abc123');
    * if (recording.status === 'completed') {
    *   console.log(`Download: ${recording.downloadUrl}`);
    * }
@@ -702,7 +702,7 @@ export class VideoClient {
       this.logger.debug('Getting recording details', { recordingId });
 
       const response = await this.httpClient.get<ApiResponse<Recording>>(
-        `/video/recordings/${recordingId}`
+        `/video-conferencing/recordings/${recordingId}`
       );
 
       return response.data.data;
@@ -720,7 +720,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const recordings = await client.video.listRecordings('room_abc123');
+   * const recordings = await client.videoConferencing.listRecordings('room_abc123');
    * ```
    */
   async listRecordings(roomId: string): Promise<Recording[]> {
@@ -728,7 +728,7 @@ export class VideoClient {
       this.logger.debug('Listing recordings', { roomId });
 
       const response = await this.httpClient.get<ApiResponse<{ recordings: Recording[] }>>(
-        `/video/rooms/${roomId}/recordings`
+        `/video-conferencing/rooms/${roomId}/recordings`
       );
 
       return response.data.data.recordings;
@@ -745,14 +745,14 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * await client.video.deleteRecording('rec_abc123');
+   * await client.videoConferencing.deleteRecording('rec_abc123');
    * ```
    */
   async deleteRecording(recordingId: string): Promise<void> {
     try {
       this.logger.debug('Deleting recording', { recordingId });
 
-      await this.httpClient.delete(`/video/recordings/${recordingId}`);
+      await this.httpClient.delete(`/video-conferencing/recordings/${recordingId}`);
 
       this.logger.info('Recording deleted', { recordingId });
     } catch (error) {
@@ -773,7 +773,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const sessions = await client.video.getSessions({
+   * const sessions = await client.videoConferencing.getSessions({
    *   startedAfter: '2024-01-01',
    *   minDuration: 300 // 5 minutes
    * });
@@ -784,7 +784,7 @@ export class VideoClient {
       this.logger.debug('Getting video sessions', filters);
 
       const response = await this.httpClient.get<ApiResponse<{ sessions: VideoSession[] }>>(
-        '/video/sessions',
+        '/video-conferencing/sessions',
         { params: filters }
       );
 
@@ -803,7 +803,7 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * const stats = await client.video.getSessionStats('session_abc123');
+   * const stats = await client.videoConferencing.getSessionStats('session_abc123');
    * console.log(`Peak participants: ${stats.peakParticipants}`);
    * console.log(`Average quality: ${stats.averageConnectionQuality}`);
    * ```
@@ -813,7 +813,7 @@ export class VideoClient {
       this.logger.debug('Getting session stats', { sessionId });
 
       const response = await this.httpClient.get<ApiResponse<SessionStats>>(
-        `/video/sessions/${sessionId}/stats`
+        `/video-conferencing/sessions/${sessionId}/stats`
       );
 
       return response.data.data;
@@ -836,7 +836,7 @@ export class VideoClient {
    * @example
    * ```typescript
    * // Stream to YouTube
-   * const egress = await client.video.startEgress({
+   * const egress = await client.videoConferencing.startEgress({
    *   roomId: 'room_abc123',
    *   type: 'rtmp',
    *   rtmpUrl: 'rtmp://a.rtmp.youtube.com/live2',
@@ -849,7 +849,7 @@ export class VideoClient {
       this.logger.debug('Starting egress', options);
 
       const response = await this.httpClient.post<ApiResponse<Egress>>(
-        '/video/egress',
+        '/video-conferencing/egress',
         options
       );
 
@@ -868,14 +868,14 @@ export class VideoClient {
    *
    * @example
    * ```typescript
-   * await client.video.stopEgress('egress_abc123');
+   * await client.videoConferencing.stopEgress('egress_abc123');
    * ```
    */
   async stopEgress(egressId: string): Promise<void> {
     try {
       this.logger.debug('Stopping egress', { egressId });
 
-      await this.httpClient.post(`/video/egress/${egressId}/stop`);
+      await this.httpClient.post(`/video-conferencing/egress/${egressId}/stop`);
 
       this.logger.info('Egress stopped', { egressId });
     } catch (error) {
@@ -893,7 +893,7 @@ export class VideoClient {
   async getEgress(egressId: string): Promise<Egress> {
     try {
       const response = await this.httpClient.get<ApiResponse<Egress>>(
-        `/video/egress/${egressId}`
+        `/video-conferencing/egress/${egressId}`
       );
 
       return response.data.data;

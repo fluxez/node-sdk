@@ -12,7 +12,7 @@ import { WorkflowClient } from './modules/workflow';
 import { RealtimeClient } from './modules/realtime';
 import { PushClient } from './modules/push';
 import { EdgeFunctionsClient } from './modules/edge-functions';
-import { VideoClient } from './modules/video';
+import { VideoConferencingClient } from './modules/video-conferencing';
 import { DocumentsClient } from './modules/documents';
 import { ChatbotClient } from './modules/chatbot';
 import { SchemaClient } from './schema/schema-client';
@@ -88,7 +88,7 @@ export declare class FluxezClient {
     schema: SchemaClient;
     realtime: RealtimeClient;
     push: PushClient;
-    video: VideoClient;
+    videoConferencing: VideoConferencingClient;
     documents: DocumentsClient;
     chatbot: ChatbotClient;
     edgeFunctions: EdgeFunctionsClient;

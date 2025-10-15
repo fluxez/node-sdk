@@ -16,7 +16,7 @@ const workflow_1 = require("./modules/workflow");
 const realtime_1 = require("./modules/realtime");
 const push_1 = require("./modules/push");
 const edge_functions_1 = require("./modules/edge-functions");
-const video_1 = require("./modules/video");
+const video_conferencing_1 = require("./modules/video-conferencing");
 const documents_1 = require("./modules/documents");
 const chatbot_1 = require("./modules/chatbot");
 const schema_client_1 = require("./schema/schema-client");
@@ -130,7 +130,7 @@ class FluxezClient {
         this.schema = new schema_client_1.SchemaClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.realtime = new realtime_1.RealtimeClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.push = new push_1.PushClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
-        this.video = new video_1.VideoClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+        this.videoConferencing = new video_conferencing_1.VideoConferencingClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.documents = new documents_1.DocumentsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.chatbot = new chatbot_1.ChatbotClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.edgeFunctions = new edge_functions_1.EdgeFunctionsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
