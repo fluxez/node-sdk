@@ -26,6 +26,7 @@
     "playground:build": "cd playground && npm run build",
     "example": "node examples/01-quick-start.js",
     "examples": "for file in examples/*.js; do echo \"Running $file...\"; node \"$file\" || true; done",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
