@@ -14,7 +14,7 @@ A complete replacement for `@fluxez/node-sdk` with enhanced features, MongoDB-st
 - 📊 **Real-Time Analytics** - ClickHouse-powered analytics
 - ⚡ **Intelligent Caching** - Redis-based caching with multiple strategies
 - 🔐 **Unified Authentication** - Support for API keys and JWT tokens
-- 🧠 **AI-Powered App Generation** - Generate complete applications from natural language
+- 🤖 **Comprehensive AI Capabilities** - Text, image, audio, and video generation with AI
 - 🔄 **Workflow Automation** - Create and execute automated workflows with 54+ connectors
 - 📧 **Email & Queue Management** - Send emails, manage queues, and handle notifications
 - 🎥 **Video Conferencing** - WebRTC-based video rooms with recording and live streaming
@@ -537,74 +537,132 @@ try {
 }
 ```
 
-## Brain/AI - App Generation
+## AI - Text, Image, Audio & Video Generation
 
-Generate complete applications from natural language using our AI-powered brain system:
+Comprehensive AI capabilities for text, image, audio, and video generation:
 
 ```javascript
-// Generate a complete e-commerce app
-const app = await client.brain.generate(
-  'Create an e-commerce app with Stripe payments and user authentication',
-  {
-    includeWorkflows: true,
-    includeAuth: true,
-    includePayments: true,
-    framework: 'react',
-    styling: 'tailwind',
-    complexity: 'standard'
-  }
+// ========== TEXT AI ==========
+
+// Generate text content
+const textResult = await client.ai.generateText(
+  'Write a blog post about the future of AI',
+  { saveToDatabase: true }
 );
+console.log(textResult.text);
 
-console.log(`Generated: ${app.name}`);
-console.log(`Components: ${app.components.length}`);
-console.log(`Features: ${app.features.join(', ')}`);
-
-// Understand app requirements from natural language
-const understanding = await client.ai.understand(
-  'Build a social media platform like Instagram with photo sharing'
-);
-
-console.log(`App Type: ${understanding.appType}`);
-console.log(`Confidence: ${understanding.confidence}%`);
-console.log(`Required features: ${understanding.features.join(', ')}`);
-
-// Find similar app patterns using vector search
-const patterns = await client.brain.findPatterns('social media app', {
-  limit: 5,
-  threshold: 0.8
-});
-
-// Get architecture recommendations
-const architecture = await client.ai.suggestArchitecture({
-  appType: 'ecommerce',
-  features: ['authentication', 'payments', 'inventory'],
-  scale: 'medium',
-  complexity: 'standard'
-});
-
-// Select recommended UI components
-const components = await client.brain.selectComponents('blog', {
-  framework: 'react',
-  complexity: 'simple'
-});
-
-// Train the brain with successful generations
-await client.brain.train([
-  {
-    prompt: 'Create a task management app',
-    appType: 'productivity',
-    features: ['tasks', 'projects', 'teams'],
-    components: ['TaskList', 'ProjectView', 'TeamDashboard'],
-    architecture: 'mvc',
-    outcome: 'success',
-    feedback: 'User loved the generated app'
-  }
+// Chat with AI
+const chatResult = await client.ai.chat([
+  { role: 'system', content: 'You are a helpful assistant' },
+  { role: 'user', content: 'Explain quantum computing in simple terms' }
 ]);
+console.log(chatResult.message);
 
-// Get brain performance statistics
-const stats = await client.ai.getStats();
-console.log(`Success rate: ${stats.successRate}%`);
-console.log(`Total generations: ${stats.totalGenerations}`);
+// Generate code
+const codeResult = await client.ai.generateCode(
+  'Create a React component for a login form',
+  { language: 'typescript', framework: 'react' }
+);
+console.log(codeResult.code);
+
+// Summarize text
+const summary = await client.ai.summarizeText(
+  longArticleText,
+  { length: 'short' }
+);
+console.log(`Summary: ${summary.summary}`);
+console.log(`Compression ratio: ${summary.compressionRatio}x`);
+
+// Translate text
+const translation = await client.ai.translateText(
+  'Hello, how are you?',
+  'es', // Spanish
+  { sourceLanguage: 'en' }
+);
+console.log(translation.translatedText);
+
+// ========== IMAGE AI ==========
+
+// Generate images
+const imageResult = await client.ai.generateImage(
+  'A sunset over mountains with dramatic clouds',
+  {
+    size: '1024x1024',
+    quality: 'hd',
+    style: 'vivid',
+    n: 1
+  }
+);
+console.log(`Generated image: ${imageResult.images[0].url}`);
+console.log(`Cost: $${imageResult.cost}`);
+
+// Analyze image
+const analysis = await client.ai.analyzeImage(
+  'https://example.com/photo.jpg',
+  { question: 'What objects are in this image?' }
+);
+console.log(analysis.description);
+
+// Edit image
+const editedImage = await client.ai.editImage(
+  imageDataBase64,
+  'Add a rainbow in the sky',
+  { mask: maskDataBase64 }
+);
+
+// Create image variations
+const variations = await client.ai.createImageVariation(
+  imageDataBase64,
+  { n: 3 }
+);
+
+// ========== AUDIO AI ==========
+
+// Transcribe audio
+const audioFile = fs.createReadStream('./audio.mp3');
+const transcription = await client.ai.transcribeAudio(
+  audioFile,
+  { language: 'en', responseFormat: 'json' }
+);
+console.log(`Transcribed: ${transcription.text}`);
+
+// Text to speech
+const audioBuffer = await client.ai.textToSpeech(
+  'Hello, this is a test of text to speech',
+  { voice: 'alloy', speed: 1.0 }
+);
+fs.writeFileSync('./output.mp3', Buffer.from(audioBuffer));
+
+// Translate audio
+const audioTranslation = await client.ai.translateAudio(
+  audioFile,
+  'es' // Spanish
+);
+console.log(`Translated: ${audioTranslation.translatedText}`);
+
+// Get available voices
+const voices = await client.ai.getAvailableVoices();
+console.log(`Available voices: ${voices.map(v => v.name).join(', ')}`);
+
+// ========== VIDEO AI ==========
+
+// Generate video
+const videoResult = await client.ai.generateVideo(
+  'A timelapse of a city at sunset',
+  {
+    duration: 4,
+    aspectRatio: '16:9',
+    frameRate: 24
+  }
+);
+console.log(`Video generation task: ${videoResult.taskId}`);
+console.log(`Status: ${videoResult.status}`);
+
+// Check video generation status
+const videoStatus = await client.ai.getVideoJobStatus(videoResult.taskId);
+if (videoStatus.status === 'completed') {
+  console.log(`Video ready: ${videoStatus.videoUrl}`);
+}
 ```
 
 ## Workflow Automation
@@ -958,11 +1016,6 @@ import {
   UploadResult,
   SearchResult,
   User,
-  // Brain/AI Types
-  GeneratedApp,
-  AppComponent,
-  PromptUnderstanding,
-  BrainStats,
   // Workflow Types
   WorkflowDefinition,
   WorkflowExecution,
@@ -993,13 +1046,13 @@ const results: SearchResult<Product> = await client.search
     fields: ['name', 'description']
   });
 
-// Typed Brain/AI responses
-const app: GeneratedApp = await client.brain.generate(
-  'Create a blog app with authentication'
+// Typed AI responses
+const textResult = await client.ai.generateText(
+  'Write a product description'
 );
 
-const understanding: PromptUnderstanding = await client.ai.understand(
-  'Build a social media platform'
+const imageResult = await client.ai.generateImage(
+  'A modern office workspace'
 );
 
 // Typed workflow operations

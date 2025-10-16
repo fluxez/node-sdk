@@ -125,25 +125,8 @@ export type {
   QueueInfo
 } from './modules/queue';
 
-// Brain/AI
-export { BrainClient } from './modules/brain';
-export type {
-  GenerateAppOptions,
-  GeneratedApp,
-  AppComponent,
-  AppArchitecture,
-  ArchitectureLayer,
-  DatabaseLayer,
-  ApiLayer,
-  ServiceLayer,
-  GeneratedFile,
-  DeploymentConfig,
-  WorkflowSuggestion,
-  PromptUnderstanding,
-  AppPattern,
-  BrainTrainingData,
-  BrainStats
-} from './modules/brain';
+// AI Module
+export { AIModule } from './modules/ai';
 
 // Workflow
 export { WorkflowClient } from './modules/workflow';

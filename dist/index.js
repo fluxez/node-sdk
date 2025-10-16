@@ -18,7 +18,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Logger = exports.ErrorCode = exports.ApiError = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoConferencingClient = exports.PushClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.WorkflowClient = exports.BrainClient = exports.QueueClient = exports.EmailClient = exports.TenantAuthValidationError = exports.TenantAuthNetworkError = exports.TenantAuthApiError = exports.TeamRole = exports.SocialProvider = exports.TenantAuthClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
+exports.Logger = exports.ErrorCode = exports.ApiError = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoConferencingClient = exports.PushClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.WorkflowClient = exports.AIModule = exports.QueueClient = exports.EmailClient = exports.TenantAuthValidationError = exports.TenantAuthNetworkError = exports.TenantAuthApiError = exports.TeamRole = exports.SocialProvider = exports.TenantAuthClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
 // Core Client
 var fluxez_client_1 = require("./fluxez-client");
 Object.defineProperty(exports, "FluxezClient", { enumerable: true, get: function () { return fluxez_client_1.FluxezClient; } });
@@ -62,9 +62,9 @@ Object.defineProperty(exports, "EmailClient", { enumerable: true, get: function 
 // Queue
 var queue_1 = require("./modules/queue");
 Object.defineProperty(exports, "QueueClient", { enumerable: true, get: function () { return queue_1.QueueClient; } });
-// Brain/AI
-var brain_1 = require("./modules/brain");
-Object.defineProperty(exports, "BrainClient", { enumerable: true, get: function () { return brain_1.BrainClient; } });
+// AI Module
+var ai_1 = require("./modules/ai");
+Object.defineProperty(exports, "AIModule", { enumerable: true, get: function () { return ai_1.AIModule; } });
 // Workflow
 var workflow_1 = require("./modules/workflow");
 Object.defineProperty(exports, "WorkflowClient", { enumerable: true, get: function () { return workflow_1.WorkflowClient; } });

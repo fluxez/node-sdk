@@ -11,7 +11,7 @@ const auth_client_1 = require("./auth/auth-client");
 const tenant_auth_client_1 = require("./tenant-auth/tenant-auth-client");
 const email_1 = require("./modules/email");
 const queue_1 = require("./modules/queue");
-const brain_1 = require("./modules/brain");
+const ai_1 = require("./modules/ai");
 const workflow_1 = require("./modules/workflow");
 const realtime_1 = require("./modules/realtime");
 const push_1 = require("./modules/push");
@@ -50,8 +50,9 @@ const constants_1 = require("./constants");
  * const authResult = await client.tenantAuth.login({ email: 'user@example.com', password: 'password' });
  * const teams = await client.tenantAuth.getTeams();
  *
- * // Brain/AI
- * const app = await client.brain.generate('Create an e-commerce app with Stripe');
+ * // AI
+ * const result = await client.ai.generateText('Write a blog post about AI');
+ * const image = await client.ai.generateImage('A sunset over mountains');
  *
  * // Workflow
  * const workflow = await client.workflow.create({
@@ -124,8 +125,7 @@ class FluxezClient {
         this.tenantAuth = new tenant_auth_client_1.TenantAuthClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.email = new email_1.EmailClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.queue = new queue_1.QueueClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
-        this.brain = new brain_1.BrainClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
-        this.ai = this.brain; // Alias for brain
+        this.ai = new ai_1.AIModule(this.httpClient);
         this.workflow = new workflow_1.WorkflowClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.schema = new schema_client_1.SchemaClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.realtime = new realtime_1.RealtimeClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());

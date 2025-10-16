@@ -8,7 +8,7 @@ import { AuthClient } from './auth/auth-client';
 import { TenantAuthClient } from './tenant-auth/tenant-auth-client';
 import { EmailClient } from './modules/email';
 import { QueueClient } from './modules/queue';
-import { BrainClient } from './modules/brain';
+import { AIModule } from './modules/ai';
 import { WorkflowClient } from './modules/workflow';
 import { RealtimeClient } from './modules/realtime';
 import { PushClient } from './modules/push';
@@ -54,10 +54,11 @@ import {
  * // Tenant Auth
  * const authResult = await client.tenantAuth.login({ email: 'user@example.com', password: 'password' });
  * const teams = await client.tenantAuth.getTeams();
- * 
- * // Brain/AI
- * const app = await client.brain.generate('Create an e-commerce app with Stripe');
- * 
+ *
+ * // AI
+ * const result = await client.ai.generateText('Write a blog post about AI');
+ * const image = await client.ai.generateImage('A sunset over mountains');
+ *
  * // Workflow
  * const workflow = await client.workflow.create({
  *   name: 'Send Welcome Email',
@@ -93,8 +94,7 @@ export class FluxezClient {
   public tenantAuth!: TenantAuthClient;
   public email!: EmailClient;
   public queue!: QueueClient;
-  public brain!: BrainClient;
-  public ai!: BrainClient; // Alias for brain
+  public ai!: AIModule;
   public workflow!: WorkflowClient;
   public schema!: SchemaClient;
   public realtime!: RealtimeClient;
@@ -161,8 +161,7 @@ export class FluxezClient {
     this.tenantAuth = new TenantAuthClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.email = new EmailClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.queue = new QueueClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
-    this.brain = new BrainClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
-    this.ai = this.brain; // Alias for brain
+    this.ai = new AIModule(this.httpClient);
     this.workflow = new WorkflowClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.schema = new SchemaClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.realtime = new RealtimeClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
