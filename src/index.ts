@@ -288,6 +288,32 @@ export type {
   MigrationResult
 } from './migration/migrator';
 
+// Payment
+export { PaymentClient } from './modules/payment';
+export type {
+  PaymentConfig,
+  CreatePaymentConfigRequest,
+  UpdatePaymentConfigRequest,
+  PriceIdConfig,
+  AddPriceIdRequest,
+  Subscription,
+  CreateSubscriptionRequest,
+  UpdateSubscriptionRequest,
+  SubscriptionStatus,
+  Invoice,
+  CheckoutSession,
+  CreateCheckoutSessionRequest,
+  Customer,
+  CreateCustomerRequest,
+  PaymentMethod,
+  PaymentIntent,
+  CreatePaymentIntentRequest,
+  ListOptions,
+  ListResponse,
+  WebhookEvent,
+  WebhookVerificationResult
+} from './types/payment.types';
+
 // Utils
 export { ApiError, ErrorCode } from './utils/errors';
 export { Logger } from './utils/logger';

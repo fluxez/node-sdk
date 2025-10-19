@@ -18,7 +18,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Logger = exports.ErrorCode = exports.ApiError = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoConferencingClient = exports.PushClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.WorkflowClient = exports.AIModule = exports.QueueClient = exports.EmailClient = exports.TenantAuthValidationError = exports.TenantAuthNetworkError = exports.TenantAuthApiError = exports.TeamRole = exports.SocialProvider = exports.TenantAuthClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
+exports.Logger = exports.ErrorCode = exports.ApiError = exports.PaymentClient = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoConferencingClient = exports.PushClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.WorkflowClient = exports.AIModule = exports.QueueClient = exports.EmailClient = exports.TenantAuthValidationError = exports.TenantAuthNetworkError = exports.TenantAuthApiError = exports.TeamRole = exports.SocialProvider = exports.TenantAuthClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
 // Core Client
 var fluxez_client_1 = require("./fluxez-client");
 Object.defineProperty(exports, "FluxezClient", { enumerable: true, get: function () { return fluxez_client_1.FluxezClient; } });
@@ -96,6 +96,9 @@ var migrator_1 = require("./migration/migrator");
 Object.defineProperty(exports, "Migrator", { enumerable: true, get: function () { return migrator_1.Migrator; } });
 var cli_1 = require("./migration/cli");
 Object.defineProperty(exports, "MigrationCLI", { enumerable: true, get: function () { return cli_1.MigrationCLI; } });
+// Payment
+var payment_1 = require("./modules/payment");
+Object.defineProperty(exports, "PaymentClient", { enumerable: true, get: function () { return payment_1.PaymentClient; } });
 // Utils
 var errors_1 = require("./utils/errors");
 Object.defineProperty(exports, "ApiError", { enumerable: true, get: function () { return errors_1.ApiError; } });

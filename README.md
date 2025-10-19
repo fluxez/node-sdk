@@ -958,6 +958,300 @@ const converted = await client.documents.convertDocument({
 });
 ```
 
+## Payment Management
+
+Manage Stripe payments and subscriptions with multi-tenant support:
+
+```javascript
+// ========== PAYMENT CONFIGURATION ==========
+
+// Create payment configuration for organization/project
+const paymentConfig = await client.payment.createConfig('org_123', 'proj_456', {
+  stripePublishableKey: 'pk_test_...',
+  stripeSecretKey: 'sk_test_...',
+  stripeWebhookSecret: 'whsec_...',
+  currency: 'usd'
+});
+
+// Get payment configuration
+const config = await client.payment.getConfig('org_123', 'proj_456');
+console.log('Stripe publishable key:', config.stripePublishableKey);
+
+// Update payment configuration
+await client.payment.updateConfig('org_123', 'proj_456', {
+  currency: 'eur',
+  isActive: true
+});
+
+// ========== PRICE MANAGEMENT ==========
+
+// Add price ID for subscription plans
+const priceConfig = await client.payment.addPriceId('org_123', 'proj_456', 'price_xxx', {
+  name: 'Pro Monthly Plan',
+  description: 'Monthly subscription to Pro features',
+  interval: 'month',
+  amount: 2999, // $29.99
+  currency: 'usd',
+  metadata: { tier: 'pro', features: 'all' }
+});
+
+// Get all price IDs
+const prices = await client.payment.getPriceIds('org_123', 'proj_456');
+prices.forEach(price => {
+  console.log(`${price.name}: ${price.amount} ${price.currency} per ${price.interval}`);
+});
+
+// Remove price ID
+await client.payment.removePriceId('org_123', 'proj_456', 'price_config_789');
+
+// ========== SUBSCRIPTION MANAGEMENT ==========
+
+// Create subscription
+const subscription = await client.payment.createSubscription('org_123', 'proj_456', {
+  customerId: 'cus_xxx',
+  priceId: 'price_xxx',
+  trialPeriodDays: 14,
+  metadata: { userId: 'user_123' }
+});
+console.log('Subscription status:', subscription.status);
+
+// Get subscription details
+const sub = await client.payment.getSubscription('org_123', 'proj_456', 'sub_xxx');
+console.log('Current period:', sub.currentPeriodStart, 'to', sub.currentPeriodEnd);
+
+// Update subscription (upgrade/downgrade)
+const updated = await client.payment.updateSubscription('org_123', 'proj_456', 'sub_xxx', {
+  priceId: 'price_yyy', // New plan
+  prorationBehavior: 'create_prorations'
+});
+
+// Cancel subscription (at period end - recommended)
+await client.payment.cancelSubscription('org_123', 'proj_456', 'sub_xxx', true);
+
+// Cancel immediately
+await client.payment.cancelSubscription('org_123', 'proj_456', 'sub_xxx', false);
+
+// Resume canceled subscription
+await client.payment.resumeSubscription('org_123', 'proj_456', 'sub_xxx');
+
+// List all subscriptions
+const subscriptions = await client.payment.listSubscriptions('org_123', 'proj_456', {
+  limit: 10
+});
+
+// ========== CHECKOUT SESSIONS ==========
+
+// Create checkout session for new subscription
+const session = await client.payment.createCheckoutSession('org_123', 'proj_456', {
+  priceId: 'price_xxx',
+  successUrl: 'https://yourapp.com/success',
+  cancelUrl: 'https://yourapp.com/cancel',
+  mode: 'subscription',
+  customerEmail: 'user@example.com',
+  allowPromotionCodes: true,
+  trialPeriodDays: 14,
+  metadata: { userId: 'user_123' }
+});
+
+// Redirect user to Stripe Checkout
+console.log('Checkout URL:', session.url);
+window.location.href = session.url; // In browser
+
+// Get checkout session details
+const sessionDetails = await client.payment.getCheckoutSession('org_123', 'proj_456', 'cs_xxx');
+console.log('Payment status:', sessionDetails.paymentStatus);
+
+// ========== CUSTOMER MANAGEMENT ==========
+
+// Create customer
+const customer = await client.payment.createCustomer('org_123', 'proj_456', {
+  email: 'user@example.com',
+  name: 'John Doe',
+  phone: '+1234567890',
+  metadata: { userId: 'user_123', plan: 'pro' }
+});
+console.log('Customer ID:', customer.customerId);
+
+// Get customer details
+const customerInfo = await client.payment.getCustomer('org_123', 'proj_456', 'cus_xxx');
+console.log('Customer:', customerInfo.name, customerInfo.email);
+
+// List customer payment methods
+const paymentMethods = await client.payment.listPaymentMethods('org_123', 'proj_456', 'cus_xxx');
+paymentMethods.forEach(pm => {
+  if (pm.card) {
+    console.log(`${pm.card.brand} ending in ${pm.card.last4}`);
+  }
+});
+
+// ========== PAYMENT INTENTS ==========
+
+// Create payment intent for one-time payment
+const intent = await client.payment.createPaymentIntent('org_123', 'proj_456', {
+  amount: 2999, // $29.99
+  currency: 'usd',
+  customerId: 'cus_xxx',
+  description: 'One-time purchase',
+  metadata: { orderId: 'order_123' }
+});
+
+// Use client secret on frontend
+console.log('Client secret:', intent.clientSecret);
+// Pass to Stripe.js: stripe.confirmCardPayment(intent.clientSecret)
+
+// Get payment intent status
+const intentStatus = await client.payment.getPaymentIntent('org_123', 'proj_456', 'pi_xxx');
+console.log('Payment status:', intentStatus.status);
+
+// ========== INVOICES ==========
+
+// Get invoices for a customer
+const invoices = await client.payment.getInvoices('org_123', 'proj_456', {
+  customerId: 'cus_xxx',
+  limit: 10
+});
+
+invoices.data.forEach(invoice => {
+  console.log(`Invoice ${invoice.invoiceId}: ${invoice.amount} ${invoice.currency} - ${invoice.status}`);
+  console.log(`PDF: ${invoice.invoicePdf}`);
+});
+
+// Get specific invoice
+const invoice = await client.payment.getInvoice('org_123', 'proj_456', 'in_xxx');
+console.log('Invoice PDF:', invoice.invoicePdf);
+console.log('Hosted URL:', invoice.hostedInvoiceUrl);
+
+// ========== WEBHOOK HANDLING ==========
+
+// Verify webhook signature (in your webhook endpoint)
+const result = await client.payment.verifyWebhook(
+  'org_123',
+  'proj_456',
+  req.body, // Raw request body
+  req.headers['stripe-signature'] // Stripe signature header
+);
+
+if (result.verified) {
+  console.log('Verified event:', result.event.type);
+
+  // Handle different event types
+  switch (result.event.type) {
+    case 'customer.subscription.created':
+      console.log('New subscription created');
+      break;
+    case 'customer.subscription.updated':
+      console.log('Subscription updated');
+      break;
+    case 'customer.subscription.deleted':
+      console.log('Subscription canceled');
+      break;
+    case 'invoice.payment_succeeded':
+      console.log('Payment succeeded');
+      break;
+    case 'invoice.payment_failed':
+      console.log('Payment failed');
+      break;
+  }
+
+  // Process the event
+  await client.payment.handleWebhook('org_123', 'proj_456', result.event);
+} else {
+  console.error('Webhook verification failed:', result.error);
+}
+
+// ========== COMPLETE PAYMENT FLOW EXAMPLE ==========
+
+async function completePaymentFlow() {
+  const orgId = 'org_123';
+  const projectId = 'proj_456';
+
+  // 1. Configure payment for your project
+  await client.payment.createConfig(orgId, projectId, {
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+    currency: 'usd'
+  });
+
+  // 2. Add subscription plans
+  const proPlan = await client.payment.addPriceId(orgId, projectId, 'price_pro_monthly', {
+    name: 'Pro Monthly',
+    interval: 'month',
+    amount: 2999
+  });
+
+  const enterprisePlan = await client.payment.addPriceId(orgId, projectId, 'price_enterprise_monthly', {
+    name: 'Enterprise Monthly',
+    interval: 'month',
+    amount: 9999
+  });
+
+  // 3. Create customer when user signs up
+  const customer = await client.payment.createCustomer(orgId, projectId, {
+    email: 'newuser@example.com',
+    name: 'New User',
+    metadata: { userId: 'user_new_123' }
+  });
+
+  // 4. Create checkout session for subscription
+  const checkoutSession = await client.payment.createCheckoutSession(orgId, projectId, {
+    priceId: proPlan.priceId,
+    customerId: customer.customerId,
+    successUrl: 'https://yourapp.com/success?session_id={CHECKOUT_SESSION_ID}',
+    cancelUrl: 'https://yourapp.com/pricing',
+    mode: 'subscription',
+    allowPromotionCodes: true,
+    trialPeriodDays: 14
+  });
+
+  // 5. Redirect user to checkout
+  return checkoutSession.url;
+}
+
+// ========== WEBHOOK ENDPOINT EXAMPLE ==========
+
+// Express.js webhook endpoint
+app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+
+  try {
+    // Verify and handle webhook
+    const verification = await client.payment.verifyWebhook(
+      'org_123',
+      'proj_456',
+      req.body,
+      sig
+    );
+
+    if (verification.verified) {
+      const event = verification.event;
+
+      // Process webhook event
+      await client.payment.handleWebhook('org_123', 'proj_456', event);
+
+      // Custom handling based on event type
+      switch (event.type) {
+        case 'customer.subscription.created':
+          await updateUserSubscription(event.data.object);
+          break;
+        case 'invoice.payment_succeeded':
+          await sendPaymentReceipt(event.data.object);
+          break;
+        case 'invoice.payment_failed':
+          await notifyPaymentFailure(event.data.object);
+          break;
+      }
+
+      res.json({ received: true });
+    } else {
+      res.status(400).send(`Webhook Error: ${verification.error}`);
+    }
+  } catch (err) {
+    res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+});
+```
+
 ## Email & Queue Management
 
 Send emails and manage message queues:

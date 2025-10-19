@@ -16,6 +16,7 @@ import { EdgeFunctionsClient } from './modules/edge-functions';
 import { VideoConferencingClient } from './modules/video-conferencing';
 import { DocumentsClient } from './modules/documents';
 import { ChatbotClient } from './modules/chatbot';
+import { PaymentClient } from './modules/payment';
 import { SchemaClient } from './schema/schema-client';
 import { FLUXEZ_BASE_URL } from './constants';
 import { 
@@ -58,6 +59,17 @@ import {
  * // AI
  * const result = await client.ai.generateText('Write a blog post about AI');
  * const image = await client.ai.generateImage('A sunset over mountains');
+ *
+ * // Payment
+ * await client.payment.createConfig('org_123', 'proj_456', {
+ *   stripePublishableKey: 'pk_...',
+ *   stripeSecretKey: 'sk_...',
+ *   stripeWebhookSecret: 'whsec_...'
+ * });
+ * const subscription = await client.payment.createSubscription('org_123', 'proj_456', {
+ *   customerId: 'cus_xxx',
+ *   priceId: 'price_xxx'
+ * });
  *
  * // Workflow
  * const workflow = await client.workflow.create({
@@ -103,6 +115,7 @@ export class FluxezClient {
   public documents!: DocumentsClient;
   public chatbot!: ChatbotClient;
   public edgeFunctions!: EdgeFunctionsClient;
+  public payment!: PaymentClient;
 
   constructor(apiKey: string, config?: FluxezClientConfig) {
     if (!apiKey) {
@@ -170,6 +183,7 @@ export class FluxezClient {
     this.documents = new DocumentsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.chatbot = new ChatbotClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.edgeFunctions = new EdgeFunctionsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+    this.payment = new PaymentClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
   }
 
   private getClientConfig(): any {

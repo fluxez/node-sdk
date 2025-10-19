@@ -19,6 +19,7 @@ const edge_functions_1 = require("./modules/edge-functions");
 const video_conferencing_1 = require("./modules/video-conferencing");
 const documents_1 = require("./modules/documents");
 const chatbot_1 = require("./modules/chatbot");
+const payment_1 = require("./modules/payment");
 const schema_client_1 = require("./schema/schema-client");
 const constants_1 = require("./constants");
 /**
@@ -53,6 +54,17 @@ const constants_1 = require("./constants");
  * // AI
  * const result = await client.ai.generateText('Write a blog post about AI');
  * const image = await client.ai.generateImage('A sunset over mountains');
+ *
+ * // Payment
+ * await client.payment.createConfig('org_123', 'proj_456', {
+ *   stripePublishableKey: 'pk_...',
+ *   stripeSecretKey: 'sk_...',
+ *   stripeWebhookSecret: 'whsec_...'
+ * });
+ * const subscription = await client.payment.createSubscription('org_123', 'proj_456', {
+ *   customerId: 'cus_xxx',
+ *   priceId: 'price_xxx'
+ * });
  *
  * // Workflow
  * const workflow = await client.workflow.create({
@@ -134,6 +146,7 @@ class FluxezClient {
         this.documents = new documents_1.DocumentsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.chatbot = new chatbot_1.ChatbotClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.edgeFunctions = new edge_functions_1.EdgeFunctionsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+        this.payment = new payment_1.PaymentClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     }
     getClientConfig() {
         // Convert our config to the format expected by existing clients

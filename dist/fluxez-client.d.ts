@@ -15,6 +15,7 @@ import { EdgeFunctionsClient } from './modules/edge-functions';
 import { VideoConferencingClient } from './modules/video-conferencing';
 import { DocumentsClient } from './modules/documents';
 import { ChatbotClient } from './modules/chatbot';
+import { PaymentClient } from './modules/payment';
 import { SchemaClient } from './schema/schema-client';
 import { FluxezClientConfig, QueryResult } from './types';
 /**
@@ -49,6 +50,17 @@ import { FluxezClientConfig, QueryResult } from './types';
  * // AI
  * const result = await client.ai.generateText('Write a blog post about AI');
  * const image = await client.ai.generateImage('A sunset over mountains');
+ *
+ * // Payment
+ * await client.payment.createConfig('org_123', 'proj_456', {
+ *   stripePublishableKey: 'pk_...',
+ *   stripeSecretKey: 'sk_...',
+ *   stripeWebhookSecret: 'whsec_...'
+ * });
+ * const subscription = await client.payment.createSubscription('org_123', 'proj_456', {
+ *   customerId: 'cus_xxx',
+ *   priceId: 'price_xxx'
+ * });
  *
  * // Workflow
  * const workflow = await client.workflow.create({
@@ -92,6 +104,7 @@ export declare class FluxezClient {
     documents: DocumentsClient;
     chatbot: ChatbotClient;
     edgeFunctions: EdgeFunctionsClient;
+    payment: PaymentClient;
     constructor(apiKey: string, config?: FluxezClientConfig);
     private initializeClients;
     private getClientConfig;
