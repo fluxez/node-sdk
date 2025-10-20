@@ -69,34 +69,63 @@ export class PaymentClient {
   // ============================================
 
   /**
-   * Create payment configuration for an organization/project
+   * Create payment configuration for an organization/project/app
    *
    * @param organizationId Organization ID
-   * @param projectId Project ID
+   * @param projectId Project ID (optional)
+   * @param appId App ID (optional)
    * @param config Payment configuration details
    * @returns Created payment configuration
    *
    * @example
    * ```typescript
-   * const config = await client.payment.createConfig('org_123', 'proj_456', {
+   * const config = await client.payment.createConfig('org_123', 'proj_456', null, {
    *   stripePublishableKey: 'pk_test_...',
    *   stripeSecretKey: 'sk_test_...',
    *   stripeWebhookSecret: 'whsec_...',
-   *   currency: 'usd'
+   *   priceIds: ['price_123', 'price_456'],
+   *   isActive: true
    * });
    * ```
    */
   async createConfig(
     organizationId: string,
-    projectId: string,
-    config: CreatePaymentConfigRequest
+    projectId?: string,
+    appId?: string,
+    config?: CreatePaymentConfigRequest
   ): Promise<PaymentConfig> {
     try {
-      this.logger.debug('Creating payment configuration', { organizationId, projectId });
+      // Handle both old and new signatures
+      let actualConfig: CreatePaymentConfigRequest;
+      let actualOrgId: string;
+      let actualProjectId: string | undefined;
+      let actualAppId: string | undefined;
+
+      // Check if called with old signature (orgId, projectId, config)
+      if (typeof appId === 'object' && !config) {
+        actualOrgId = organizationId;
+        actualProjectId = projectId;
+        actualAppId = undefined;
+        actualConfig = appId as CreatePaymentConfigRequest;
+      } else {
+        actualOrgId = organizationId;
+        actualProjectId = projectId;
+        actualAppId = appId;
+        actualConfig = config!;
+      }
+
+      this.logger.debug('Creating payment configuration', { organizationId: actualOrgId, projectId: actualProjectId, appId: actualAppId });
+
+      const headers: Record<string, string> = {
+        'x-organization-id': actualOrgId
+      };
+      if (actualProjectId) headers['x-project-id'] = actualProjectId;
+      if (actualAppId) headers['x-app-id'] = actualAppId;
 
       const response = await this.httpClient.post<ApiResponse<PaymentConfig>>(
-        `/payment/${organizationId}/${projectId}/config`,
-        config
+        `/tenant-payment/config`,
+        actualConfig,
+        { headers }
       );
 
       this.logger.debug('Payment configuration created successfully', response.data);
@@ -108,10 +137,11 @@ export class PaymentClient {
   }
 
   /**
-   * Get payment configuration for an organization/project
+   * Get payment configuration for an organization/project/app
    *
    * @param organizationId Organization ID
-   * @param projectId Project ID
+   * @param projectId Project ID (optional)
+   * @param appId App ID (optional)
    * @returns Payment configuration
    *
    * @example
@@ -120,12 +150,19 @@ export class PaymentClient {
    * console.log('Stripe publishable key:', config.stripePublishableKey);
    * ```
    */
-  async getConfig(organizationId: string, projectId: string): Promise<PaymentConfig> {
+  async getConfig(organizationId: string, projectId?: string, appId?: string): Promise<PaymentConfig> {
     try {
-      this.logger.debug('Getting payment configuration', { organizationId, projectId });
+      this.logger.debug('Getting payment configuration', { organizationId, projectId, appId });
+
+      const headers: Record<string, string> = {
+        'x-organization-id': organizationId
+      };
+      if (projectId) headers['x-project-id'] = projectId;
+      if (appId) headers['x-app-id'] = appId;
 
       const response = await this.httpClient.get<ApiResponse<PaymentConfig>>(
-        `/payment/${organizationId}/${projectId}/config`
+        `/tenant-payment/config`,
+        { headers }
       );
 
       return response.data.data;
@@ -136,32 +173,60 @@ export class PaymentClient {
   }
 
   /**
-   * Update payment configuration for an organization/project
+   * Update payment configuration for an organization/project/app
    *
    * @param organizationId Organization ID
-   * @param projectId Project ID
+   * @param projectId Project ID (optional)
+   * @param appId App ID (optional)
    * @param updates Configuration updates
    * @returns Updated payment configuration
    *
    * @example
    * ```typescript
-   * const config = await client.payment.updateConfig('org_123', 'proj_456', {
-   *   currency: 'eur',
+   * const config = await client.payment.updateConfig('org_123', 'proj_456', null, {
+   *   priceIds: ['price_123', 'price_456'],
    *   isActive: true
    * });
    * ```
    */
   async updateConfig(
     organizationId: string,
-    projectId: string,
-    updates: UpdatePaymentConfigRequest
+    projectId?: string,
+    appId?: string,
+    updates?: UpdatePaymentConfigRequest
   ): Promise<PaymentConfig> {
     try {
-      this.logger.debug('Updating payment configuration', { organizationId, projectId, updates });
+      // Handle both old and new signatures
+      let actualUpdates: UpdatePaymentConfigRequest;
+      let actualOrgId: string;
+      let actualProjectId: string | undefined;
+      let actualAppId: string | undefined;
+
+      // Check if called with old signature (orgId, projectId, updates)
+      if (typeof appId === 'object' && !updates) {
+        actualOrgId = organizationId;
+        actualProjectId = projectId;
+        actualAppId = undefined;
+        actualUpdates = appId as UpdatePaymentConfigRequest;
+      } else {
+        actualOrgId = organizationId;
+        actualProjectId = projectId;
+        actualAppId = appId;
+        actualUpdates = updates!;
+      }
+
+      this.logger.debug('Updating payment configuration', { organizationId: actualOrgId, projectId: actualProjectId, appId: actualAppId, updates: actualUpdates });
+
+      const headers: Record<string, string> = {
+        'x-organization-id': actualOrgId
+      };
+      if (actualProjectId) headers['x-project-id'] = actualProjectId;
+      if (actualAppId) headers['x-app-id'] = actualAppId;
 
       const response = await this.httpClient.put<ApiResponse<PaymentConfig>>(
-        `/payment/${organizationId}/${projectId}/config`,
-        updates
+        `/tenant-payment/config`,
+        actualUpdates,
+        { headers }
       );
 
       this.logger.debug('Payment configuration updated successfully', response.data);
@@ -173,21 +238,28 @@ export class PaymentClient {
   }
 
   /**
-   * Delete payment configuration for an organization/project
+   * Delete payment configuration for an organization/project/app
    *
    * @param organizationId Organization ID
-   * @param projectId Project ID
+   * @param projectId Project ID (optional)
+   * @param appId App ID (optional)
    *
    * @example
    * ```typescript
    * await client.payment.deleteConfig('org_123', 'proj_456');
    * ```
    */
-  async deleteConfig(organizationId: string, projectId: string): Promise<void> {
+  async deleteConfig(organizationId: string, projectId?: string, appId?: string): Promise<void> {
     try {
-      this.logger.debug('Deleting payment configuration', { organizationId, projectId });
+      this.logger.debug('Deleting payment configuration', { organizationId, projectId, appId });
 
-      await this.httpClient.delete(`/payment/${organizationId}/${projectId}/config`);
+      const headers: Record<string, string> = {
+        'x-organization-id': organizationId
+      };
+      if (projectId) headers['x-project-id'] = projectId;
+      if (appId) headers['x-app-id'] = appId;
+
+      await this.httpClient.delete(`/tenant-payment/config`, { headers });
 
       this.logger.debug('Payment configuration deleted successfully');
     } catch (error) {

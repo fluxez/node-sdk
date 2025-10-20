@@ -36,29 +36,32 @@ export declare class PaymentClient {
     private logger;
     constructor(httpClient: AxiosInstance, config: FluxezConfig, logger: Logger);
     /**
-     * Create payment configuration for an organization/project
+     * Create payment configuration for an organization/project/app
      *
      * @param organizationId Organization ID
-     * @param projectId Project ID
+     * @param projectId Project ID (optional)
+     * @param appId App ID (optional)
      * @param config Payment configuration details
      * @returns Created payment configuration
      *
      * @example
      * ```typescript
-     * const config = await client.payment.createConfig('org_123', 'proj_456', {
+     * const config = await client.payment.createConfig('org_123', 'proj_456', null, {
      *   stripePublishableKey: 'pk_test_...',
      *   stripeSecretKey: 'sk_test_...',
      *   stripeWebhookSecret: 'whsec_...',
-     *   currency: 'usd'
+     *   priceIds: ['price_123', 'price_456'],
+     *   isActive: true
      * });
      * ```
      */
-    createConfig(organizationId: string, projectId: string, config: CreatePaymentConfigRequest): Promise<PaymentConfig>;
+    createConfig(organizationId: string, projectId?: string, appId?: string, config?: CreatePaymentConfigRequest): Promise<PaymentConfig>;
     /**
-     * Get payment configuration for an organization/project
+     * Get payment configuration for an organization/project/app
      *
      * @param organizationId Organization ID
-     * @param projectId Project ID
+     * @param projectId Project ID (optional)
+     * @param appId App ID (optional)
      * @returns Payment configuration
      *
      * @example
@@ -67,36 +70,38 @@ export declare class PaymentClient {
      * console.log('Stripe publishable key:', config.stripePublishableKey);
      * ```
      */
-    getConfig(organizationId: string, projectId: string): Promise<PaymentConfig>;
+    getConfig(organizationId: string, projectId?: string, appId?: string): Promise<PaymentConfig>;
     /**
-     * Update payment configuration for an organization/project
+     * Update payment configuration for an organization/project/app
      *
      * @param organizationId Organization ID
-     * @param projectId Project ID
+     * @param projectId Project ID (optional)
+     * @param appId App ID (optional)
      * @param updates Configuration updates
      * @returns Updated payment configuration
      *
      * @example
      * ```typescript
-     * const config = await client.payment.updateConfig('org_123', 'proj_456', {
-     *   currency: 'eur',
+     * const config = await client.payment.updateConfig('org_123', 'proj_456', null, {
+     *   priceIds: ['price_123', 'price_456'],
      *   isActive: true
      * });
      * ```
      */
-    updateConfig(organizationId: string, projectId: string, updates: UpdatePaymentConfigRequest): Promise<PaymentConfig>;
+    updateConfig(organizationId: string, projectId?: string, appId?: string, updates?: UpdatePaymentConfigRequest): Promise<PaymentConfig>;
     /**
-     * Delete payment configuration for an organization/project
+     * Delete payment configuration for an organization/project/app
      *
      * @param organizationId Organization ID
-     * @param projectId Project ID
+     * @param projectId Project ID (optional)
+     * @param appId App ID (optional)
      *
      * @example
      * ```typescript
      * await client.payment.deleteConfig('org_123', 'proj_456');
      * ```
      */
-    deleteConfig(organizationId: string, projectId: string): Promise<void>;
+    deleteConfig(organizationId: string, projectId?: string, appId?: string): Promise<void>;
     /**
      * Add a price ID to the organization/project
      *
