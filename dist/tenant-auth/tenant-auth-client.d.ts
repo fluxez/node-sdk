@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { FluxezConfig } from '../types/config';
 import { Logger } from '../utils/logger';
-import { TenantRegisterRequest, TenantLoginRequest, TenantVerifyEmailRequest, TenantForgotPasswordRequest, TenantResetPasswordRequest, TenantSocialAuthRequest, TenantLinkSocialRequest, TenantRefreshTokenRequest, TenantLogoutRequest, CreateTeamRequest, InviteMemberRequest, AcceptInvitationRequest, RemoveMemberRequest, UpdateMemberRoleRequest, ConfigureSocialProviderRequest, TenantAuthResponse, TenantUser, TenantTeam, TenantTeamMember, TenantSocialProvider } from '../types/tenant-auth.types';
+import { TenantRegisterRequest, TenantLoginRequest, TenantVerifyEmailRequest, TenantForgotPasswordRequest, TenantResetPasswordRequest, TenantSocialAuthRequest, TenantLinkSocialRequest, TenantRefreshTokenRequest, TenantLogoutRequest, CreateTeamRequest, InviteMemberRequest, AcceptInvitationRequest, RemoveMemberRequest, UpdateMemberRoleRequest, ConfigureSocialProviderRequest, TenantAuthResponse, TenantUser, TenantTeam, TenantTeamMember, TenantSocialProvider, SocialProvider } from '../types/tenant-auth.types';
 export declare class TenantAuthClient {
     private httpClient;
     private config;
@@ -52,6 +52,20 @@ export declare class TenantAuthClient {
      * Configure social provider (admin only)
      */
     configureSocialProvider(data: ConfigureSocialProviderRequest): Promise<void>;
+    /**
+     * Get OAuth authorization URL for a provider
+     */
+    getOAuthUrl(provider: SocialProvider): Promise<string>;
+    /**
+     * Handle OAuth callback and authenticate user
+     */
+    handleOAuthCallback(provider: SocialProvider, code: string, state: string): Promise<TenantAuthResponse>;
+    /**
+     * Initiate OAuth flow - redirects user to provider authorization page
+     * This is a convenience method that gets the OAuth URL and returns it
+     * The client application should redirect the user to this URL
+     */
+    initiateOAuthFlow(provider: SocialProvider): Promise<string>;
     /**
      * Create a new team
      */

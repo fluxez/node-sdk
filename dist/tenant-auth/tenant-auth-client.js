@@ -124,6 +124,40 @@ class TenantAuthClient {
         const response = await this.httpClient.post('/tenant-auth/social/configure', data);
         return response.data;
     }
+    /**
+     * Get OAuth authorization URL for a provider
+     */
+    async getOAuthUrl(provider) {
+        this.logger.debug('Getting OAuth URL', { provider });
+        const response = await this.httpClient.get(`/tenant-auth/social/${provider}/url`);
+        return response.data.url;
+    }
+    /**
+     * Handle OAuth callback and authenticate user
+     */
+    async handleOAuthCallback(provider, code, state) {
+        this.logger.debug('Handling OAuth callback', { provider });
+        const response = await this.httpClient.get(`/tenant-auth/social/${provider}/callback`, {
+            params: { code, state }
+        });
+        const authResponse = response.data;
+        // Store current user
+        this.currentUser = authResponse.user;
+        // Update client authentication
+        if (authResponse.accessToken) {
+            this.httpClient.defaults.headers.common['Authorization'] = `Bearer ${authResponse.accessToken}`;
+        }
+        return authResponse;
+    }
+    /**
+     * Initiate OAuth flow - redirects user to provider authorization page
+     * This is a convenience method that gets the OAuth URL and returns it
+     * The client application should redirect the user to this URL
+     */
+    async initiateOAuthFlow(provider) {
+        this.logger.debug('Initiating OAuth flow', { provider });
+        return this.getOAuthUrl(provider);
+    }
     // Team management operations
     /**
      * Create a new team
