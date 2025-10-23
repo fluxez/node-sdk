@@ -127,9 +127,10 @@ class TenantAuthClient {
     /**
      * Get OAuth authorization URL for a provider
      */
-    async getOAuthUrl(provider) {
-        this.logger.debug('Getting OAuth URL', { provider });
-        const response = await this.httpClient.get(`/tenant-auth/social/${provider}/url`);
+    async getOAuthUrl(provider, redirectUrl) {
+        this.logger.debug('Getting OAuth URL', { provider, redirectUrl });
+        const params = redirectUrl ? { redirect_url: redirectUrl } : {};
+        const response = await this.httpClient.get(`/tenant-auth/social/${provider}/url`, { params });
         return response.data.url;
     }
     /**

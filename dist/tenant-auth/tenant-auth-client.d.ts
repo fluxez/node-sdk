@@ -55,7 +55,7 @@ export declare class TenantAuthClient {
     /**
      * Get OAuth authorization URL for a provider
      */
-    getOAuthUrl(provider: SocialProvider): Promise<string>;
+    getOAuthUrl(provider: SocialProvider, redirectUrl?: string): Promise<string>;
     /**
      * Handle OAuth callback and authenticate user
      */
