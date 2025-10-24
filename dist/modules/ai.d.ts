@@ -64,25 +64,31 @@ export declare class AIModule {
     }>;
     /**
      * Generate images from text prompts
+     * Now supports queue system with webhook notifications
      */
     generateImage(prompt: string, options?: {
+        model?: string;
         size?: '256x256' | '512x512' | '1024x1024' | '1792x1024' | '1024x1792';
         quality?: 'standard' | 'hd';
         n?: number;
         style?: 'vivid' | 'natural';
+        negativePrompt?: string;
+        steps?: number;
+        webhookUrl?: string;
     }): Promise<{
-        images: Array<{
-            url: string;
+        success: boolean;
+        data?: {
+            images?: Array<{
+                url: string;
+                cost?: number;
+                taskUUID?: string;
+            }>;
+            jobId?: string;
+            status?: string;
+            prompt: string;
             cost?: number;
-            taskUUID?: string;
-            stored?: boolean;
-            contentId?: string;
-        }>;
-        prompt: string;
-        cost?: number;
-        taskUUID?: string;
-        size?: string;
-        quality?: string;
+        };
+        error?: string;
     }>;
     /**
      * Analyze image content
@@ -119,26 +125,71 @@ export declare class AIModule {
         }>;
     }>;
     /**
-     * Transcribe audio to text
+     * Transcribe audio to text (Speech-to-Text)
+     * Now supports async processing with webhook notifications
      */
-    transcribeAudio(audioFile: File | Buffer, options?: {
+    transcribeAudio(audioFile: File | Buffer | string, options?: {
         language?: string;
+        prompt?: string;
         responseFormat?: 'json' | 'text' | 'srt' | 'verbose_json' | 'vtt';
+        webhookUrl?: string;
     }): Promise<{
-        text: string;
-        language?: string;
-        duration?: number;
-        segments?: Array<any>;
-        confidence?: number;
+        success: boolean;
+        data?: {
+            text: string;
+            language?: string;
+            duration?: number;
+            fileName: string;
+            fileSize: number;
+            mimeType: string;
+        };
+        jobId?: string;
+        status?: string;
+        stored?: boolean;
+        contentId?: string;
     }>;
     /**
-     * Convert text to speech
+     * Check STT (Speech-to-Text) job status
+     */
+    getSTTJobStatus(jobId: string): Promise<{
+        success: boolean;
+        status: string;
+        text?: string;
+        language?: string;
+        duration?: number;
+        error?: string;
+    }>;
+    /**
+     * Convert text to speech (TTS)
+     * Now supports async processing with webhook notifications
      */
     textToSpeech(text: string, options?: {
-        voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
-        speed?: number;
+        voice?: string;
+        model?: string;
+        instructions?: string;
         responseFormat?: 'mp3' | 'opus' | 'aac' | 'flac';
-    }): Promise<ArrayBuffer>;
+        speed?: number;
+        webhookUrl?: string;
+    }): Promise<Buffer | {
+        success: boolean;
+        jobId?: string;
+        status?: string;
+        stored?: boolean;
+        contentId?: string;
+    }>;
+    /**
+     * Check TTS (Text-to-Speech) job status
+     */
+    getTTSJobStatus(jobId: string): Promise<{
+        success: boolean;
+        status: string;
+        audioUrl?: string;
+        error?: string;
+    }>;
+    /**
+     * Download TTS generated audio file
+     */
+    downloadTTSAudio(jobId: string): Promise<Buffer>;
     /**
      * Translate audio from one language to another
      */
@@ -158,32 +209,129 @@ export declare class AIModule {
     }>>;
     /**
      * Generate video from text prompt
+     * Now supports async processing with webhook notifications
      */
     generateVideo(prompt: string, options?: {
         duration?: number;
         aspectRatio?: '16:9' | '9:16' | '1:1';
         frameRate?: number;
+        webhookUrl?: string;
     }): Promise<{
-        taskId: string;
-        status: string;
-        videoUrl?: string;
-        cost?: number;
-        duration?: number;
-        dimensions?: {
-            width: number;
-            height: number;
+        success: boolean;
+        data?: {
+            taskId: string;
+            jobId?: string;
+            status: string;
+            videoUrl?: string;
+            prompt: string;
+            duration: number;
+            dimensions: {
+                width: number;
+                height: number;
+            };
+            fps: number;
+            cost?: number;
         };
-        fps?: number;
+        error?: string;
     }>;
     /**
      * Check video generation job status
      */
     getVideoJobStatus(jobId: string): Promise<{
-        jobId: string;
-        status: string;
-        videoUrl?: string;
+        success: boolean;
+        data?: {
+            jobId: string;
+            status: string;
+            videoUrl?: string;
+            error?: string;
+            cost?: number;
+        };
         error?: string;
-        cost?: number;
+    }>;
+    /**
+     * Enqueue a new AI job to the processing queue
+     */
+    enqueueJob(jobType: 'video' | 'image' | 'audio' | 'tts' | 'stt', jobData: any, options?: {
+        priority?: 'low' | 'normal' | 'high' | 'urgent';
+        webhookUrl?: string;
+        autoRetry?: boolean;
+        maxRetries?: number;
+    }): Promise<{
+        success: boolean;
+        data?: {
+            jobId: string;
+            jobType: string;
+            status: string;
+            priority: string;
+            createdAt: string;
+            message: string;
+        };
+        error?: string;
+    }>;
+    /**
+     * Get overall queue status and statistics
+     */
+    getQueueStatus(): Promise<{
+        success: boolean;
+        data?: {
+            totalJobs: number;
+            jobsByType: Record<string, number>;
+            jobsByStatus: Record<string, number>;
+            capacity?: any;
+            processingStatus?: any;
+        };
+        error?: string;
+    }>;
+    /**
+     * Get detailed information about a specific job
+     */
+    getJobDetails(jobId: string): Promise<{
+        success: boolean;
+        data?: {
+            jobId: string;
+            jobType: string;
+            status: string;
+            priority: string;
+            jobData: any;
+            createdAt: string;
+            dispatchedAt?: string;
+            completedAt?: string;
+            result?: any;
+            error?: string;
+            retryCount: number;
+            maxRetries: number;
+            externalJobId?: string;
+            webhookUrl?: string;
+            progress?: number;
+        };
+        error?: string;
+    }>;
+    /**
+     * Cancel a pending or processing job
+     */
+    cancelJob(jobId: string): Promise<{
+        success: boolean;
+        data?: {
+            jobId: string;
+            status: 'cancelled';
+            message: string;
+        };
+        error?: string;
+    }>;
+    /**
+     * List jobs with optional filters
+     */
+    listJobs(filters?: {
+        type?: string;
+        status?: string;
+        limit?: number;
+    }): Promise<{
+        success: boolean;
+        data?: {
+            jobs: any[];
+            total: number;
+        };
+        error?: string;
     }>;
 }
 //# sourceMappingURL=ai.d.ts.map

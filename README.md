@@ -14,7 +14,7 @@ A complete replacement for `@fluxez/node-sdk` with enhanced features, MongoDB-st
 - 📊 **Real-Time Analytics** - ClickHouse-powered analytics
 - ⚡ **Intelligent Caching** - Redis-based caching with multiple strategies
 - 🔐 **Unified Authentication** - Support for API keys and JWT tokens
-- 🤖 **Comprehensive AI Capabilities** - Text, image, audio, and video generation with AI
+- 🤖 **Comprehensive AI Capabilities** - Text, image, audio, and video generation with job queue, webhooks, and real-time updates
 - 🔄 **Workflow Automation** - Create and execute automated workflows with 54+ connectors
 - 📧 **Email & Queue Management** - Send emails, manage queues, and handle notifications
 - 🎥 **Video Conferencing** - WebRTC-based video rooms with recording and live streaming
@@ -541,6 +541,131 @@ try {
 
 Comprehensive AI capabilities for text, image, audio, and video generation:
 
+### Job Queue System & Webhooks
+
+All AI operations (image, video, TTS, STT) support queue-based processing with webhook callbacks for long-running tasks:
+
+#### Enqueue Jobs Directly
+
+```javascript
+// Enqueue any AI job type with custom options
+const job = await client.ai.enqueueJob('image', {
+  prompt: 'A beautiful sunset over the ocean',
+  size: '1024x1024',
+  quality: 'hd'
+}, {
+  priority: 'high',
+  webhookUrl: 'https://your-server.com/webhook/ai',
+  autoRetry: true,
+  maxRetries: 3
+});
+
+console.log('Job ID:', job.data.jobId);
+console.log('Initial status:', job.data.status);
+```
+
+#### Track Job Status
+
+```javascript
+// Get specific job details with progress tracking
+const jobDetails = await client.ai.getJobDetails(jobId);
+console.log('Status:', jobDetails.data.status);
+console.log('Progress:', jobDetails.data.progress);
+console.log('Created:', jobDetails.data.createdAt);
+
+if (jobDetails.data.status === 'completed') {
+  console.log('Result:', jobDetails.data.result);
+}
+
+// Get queue statistics and health metrics
+const queueStatus = await client.ai.getQueueStatus();
+console.log('Total jobs:', queueStatus.data.totalJobs);
+console.log('Processing:', queueStatus.data.jobsByStatus.processing);
+console.log('Queued:', queueStatus.data.jobsByStatus.queued);
+console.log('Completed:', queueStatus.data.jobsByStatus.completed);
+console.log('Failed:', queueStatus.data.jobsByStatus.failed);
+```
+
+#### List and Cancel Jobs
+
+```javascript
+// List jobs with flexible filters
+const jobs = await client.ai.listJobs({
+  type: 'image',           // Filter by job type
+  status: 'queued',        // Filter by status
+  limit: 20,               // Results per page
+  offset: 0                // Pagination offset
+});
+
+console.log(`Found ${jobs.data.length} jobs`);
+
+// Cancel a queued or processing job
+await client.ai.cancelJob(jobId);
+console.log('Job cancelled successfully');
+```
+
+#### Webhook Callbacks
+
+Set up a webhook endpoint to receive job completion notifications automatically:
+
+```javascript
+// Express.js webhook endpoint example
+app.post('/webhook/ai', (req, res) => {
+  const { jobId, jobType, status, result, error, metadata } = req.body;
+
+  if (status === 'completed') {
+    console.log(`${jobType} job ${jobId} completed successfully`);
+    console.log('Storage URL:', result.storageUrl);
+    console.log('Cost:', result.cost);
+
+    // Process the result (e.g., update database, notify user)
+    updateJobInDatabase(jobId, result);
+  } else if (status === 'failed') {
+    console.error(`${jobType} job ${jobId} failed:`, error);
+
+    // Handle failure (e.g., log error, retry, notify admin)
+    logJobFailure(jobId, error);
+  } else if (status === 'processing') {
+    console.log(`${jobType} job ${jobId} is ${result.progress}% complete`);
+  }
+
+  // Acknowledge receipt
+  res.json({ received: true });
+});
+```
+
+#### Real-time Job Updates
+
+Use the Realtime module to receive WebSocket updates for job progress:
+
+```javascript
+const realtime = client.realtime.connect();
+
+// Subscribe to job progress events
+realtime.subscribe('job:progress', (data) => {
+  console.log(`Job ${data.jobId}: ${data.progress}%`);
+  console.log('Current step:', data.currentStep);
+});
+
+// Subscribe to job completion events
+realtime.subscribe('job:completed', (data) => {
+  console.log('Job completed:', data.jobId);
+  console.log('Result:', data.result);
+  console.log('Processing time:', data.processingTime);
+});
+
+// Subscribe to job failure events
+realtime.subscribe('job:failed', (data) => {
+  console.error('Job failed:', data.jobId);
+  console.error('Error:', data.error);
+});
+
+// Subscribe to specific job updates
+realtime.subscribe(`job:${jobId}`, (data) => {
+  console.log('Job update:', data);
+});
+```
+
 ```javascript
 // ========== TEXT AI ==========
 
@@ -583,7 +708,7 @@ console.log(translation.translatedText);
 
 // ========== IMAGE AI ==========
 
-// Generate images
+// Generate images (synchronous)
 const imageResult = await client.ai.generateImage(
   'A sunset over mountains with dramatic clouds',
   {
@@ -595,6 +720,28 @@ const imageResult = await client.ai.generateImage(
 );
 console.log(`Generated image: ${imageResult.images[0].url}`);
 console.log(`Cost: $${imageResult.cost}`);
+
+// Generate images (async mode with webhook and queue support)
+const imageJob = await client.ai.generateImage(
+  'A futuristic city with flying cars',
+  {
+    size: '1024x1024',
+    quality: 'hd',
+    style: 'vivid',
+    n: 3,
+    webhookUrl: 'https://your-server.com/webhook/image',  // Webhook callback
+    async: true  // Enable async mode
+  }
+);
+
+console.log('Image Job ID:', imageJob.jobId);
+console.log('Queue position:', imageJob.queuePosition);
+
+// Track job progress
+const imageStatus = await client.ai.getJobDetails(imageJob.jobId);
+if (imageStatus.data.status === 'completed') {
+  console.log('Generated images:', imageStatus.data.result.images);
+}
 
 // Analyze image
 const analysis = await client.ai.analyzeImage(
@@ -618,7 +765,7 @@ const variations = await client.ai.createImageVariation(
 
 // ========== AUDIO AI ==========
 
-// Transcribe audio
+// Transcribe audio (synchronous - for small files)
 const audioFile = fs.createReadStream('./audio.mp3');
 const transcription = await client.ai.transcribeAudio(
   audioFile,
@@ -626,12 +773,55 @@ const transcription = await client.ai.transcribeAudio(
 );
 console.log(`Transcribed: ${transcription.text}`);
 
-// Text to speech
+// Transcribe audio (async mode - for large files or background processing)
+const audioBuffer = fs.readFileSync('./large-audio.mp3');
+const sttJob = await client.ai.transcribeAudio(audioBuffer, {
+  language: 'en',
+  responseFormat: 'json',
+  webhookUrl: 'https://your-server.com/webhook/stt',
+  async: true  // Enable async mode
+});
+
+console.log('STT Job ID:', sttJob.jobId);
+
+// Check transcription status
+const sttStatus = await client.ai.getSTTJobStatus(sttJob.jobId);
+console.log('Status:', sttStatus.status);
+console.log('Progress:', sttStatus.progress);
+
+if (sttStatus.status === 'completed') {
+  console.log('Transcription:', sttStatus.text);
+  console.log('Language detected:', sttStatus.language);
+  console.log('Duration:', sttStatus.duration);
+}
+
+// Text to speech (synchronous - for short text)
 const audioBuffer = await client.ai.textToSpeech(
   'Hello, this is a test of text to speech',
   { voice: 'alloy', speed: 1.0 }
 );
 fs.writeFileSync('./output.mp3', Buffer.from(audioBuffer));
+
+// Text to speech (async mode - for long text or background processing)
+const ttsJob = await client.ai.textToSpeech('Very long text to convert to speech...', {
+  voice: 'alloy',
+  speed: 1.0,
+  webhookUrl: 'https://your-server.com/webhook/tts',
+  async: true  // Enable async mode
+});
+
+console.log('TTS Job ID:', ttsJob.jobId);
+
+// Poll for job status
+const ttsStatus = await client.ai.getTTSJobStatus(ttsJob.jobId);
+console.log('Status:', ttsStatus.status);
+console.log('Progress:', ttsStatus.progress);
+
+// Download audio when ready
+if (ttsStatus.status === 'completed') {
+  const audio = await client.ai.downloadTTSAudio(ttsJob.jobId);
+  fs.writeFileSync('./output.mp3', Buffer.from(audio));
+}
 
 // Translate audio
 const audioTranslation = await client.ai.translateAudio(
@@ -646,22 +836,36 @@ console.log(`Available voices: ${voices.map(v => v.name).join(', ')}`);
 
 // ========== VIDEO AI ==========
 
-// Generate video
+// Generate video (async by default - video generation takes time)
 const videoResult = await client.ai.generateVideo(
   'A timelapse of a city at sunset',
   {
     duration: 4,
     aspectRatio: '16:9',
-    frameRate: 24
+    frameRate: 24,
+    webhookUrl: 'https://your-server.com/webhook/video'  // Get notified when complete
   }
 );
 console.log(`Video generation task: ${videoResult.taskId}`);
 console.log(`Status: ${videoResult.status}`);
+console.log(`Estimated time: ${videoResult.estimatedTime} seconds`);
 
 // Check video generation status
 const videoStatus = await client.ai.getVideoJobStatus(videoResult.taskId);
+console.log('Current status:', videoStatus.status);
+console.log('Progress:', videoStatus.progress);
+
 if (videoStatus.status === 'completed') {
   console.log(`Video ready: ${videoStatus.videoUrl}`);
+  console.log(`Duration: ${videoStatus.duration} seconds`);
+  console.log(`Size: ${videoStatus.fileSize} bytes`);
+}
+
+// Or use the generic job tracking methods
+const videoJobDetails = await client.ai.getJobDetails(videoResult.taskId);
+if (videoJobDetails.data.status === 'completed') {
+  console.log('Video URL:', videoJobDetails.data.result.videoUrl);
+  console.log('Thumbnail:', videoJobDetails.data.result.thumbnailUrl);
 }
 ```
 
@@ -1310,6 +1514,12 @@ import {
   UploadResult,
   SearchResult,
   User,
+  // AI Job Queue Types
+  AIJob,
+  AIJobDetails,
+  AIJobStatus,
+  QueueStatus,
+  JobEnqueueOptions,
   // Workflow Types
   WorkflowDefinition,
   WorkflowExecution,
@@ -1348,6 +1558,29 @@ const textResult = await client.ai.generateText(
 const imageResult = await client.ai.generateImage(
   'A modern office workspace'
 );
+
+// Typed AI job queue operations
+const job: AIJob = await client.ai.enqueueJob('image', {
+  prompt: 'A sunset over the ocean',
+  size: '1024x1024'
+}, {
+  priority: 'high',
+  webhookUrl: 'https://example.com/webhook',
+  autoRetry: true
+});
+
+const jobDetails: AIJobDetails = await client.ai.getJobDetails(job.data.jobId);
+console.log('Job status:', jobDetails.data.status);
+console.log('Progress:', jobDetails.data.progress);
+
+const queueStatus: QueueStatus = await client.ai.getQueueStatus();
+console.log('Total jobs:', queueStatus.data.totalJobs);
+
+const jobs: AIJob[] = await client.ai.listJobs({
+  type: 'image',
+  status: 'queued',
+  limit: 20
+});
 
 // Typed workflow operations
 const workflow: WorkflowDefinition = await client.workflow.generateFromPrompt(
