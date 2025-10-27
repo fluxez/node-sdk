@@ -503,7 +503,7 @@ const client = new FluxezClient('cgx_your_api_key');
 
 // With custom configuration
 const client = new FluxezClient('cgx_your_api_key', {
-  apiUrl: 'https://api.fluxez.com/v1',  // Custom API URL
+  
   timeout: 30000,                       // Request timeout
   retries: 3,                          // Retry attempts
   debug: true,                         // Enable logging

@@ -18,7 +18,6 @@ const { FluxezClient } = require('@fluxez/node-sdk');
 
 // Configuration - Use environment variables or replace with your actual values
 const API_KEY = process.env.FLUXEZ_API_KEY || 'cgx_your_api_key_here';
-const API_URL = process.env.FLUXEZ_API_URL || 'https://api.fluxez.com/api/v1';
 
 async function quickStartExample() {
   console.log('🚀 Fluxez SDK Quick Start Example\n');
@@ -26,7 +25,7 @@ async function quickStartExample() {
   // Step 1: Initialize the client
   console.log('📡 Initializing Fluxez client...');
   const client = new FluxezClient(API_KEY, {
-    apiUrl: API_URL,
+    
     debug: true, // Enable debug logging to see what's happening
     timeout: 30000, // 30 second timeout
   });
@@ -204,7 +203,7 @@ function quickStartPromiseExample() {
   console.log('\n🔄 Quick Start using Promises (alternative pattern)...\n');
 
   const client = new FluxezClient(API_KEY, {
-    apiUrl: API_URL,
+    
     debug: false, // Less verbose for promise example
   });
 
@@ -241,7 +240,7 @@ function configurationExample() {
 
   // 2. Full configuration
   const client2 = new FluxezClient('cgx_your_api_key', {
-    apiUrl: 'https://api.fluxez.com/v1',
+    
     timeout: 60000,
     retries: 5,
     debug: true,

@@ -23,13 +23,12 @@ const path = require('path');
 
 // Configuration
 const API_KEY = process.env.FLUXEZ_API_KEY || 'cgx_your_api_key_here';
-const API_URL = process.env.FLUXEZ_API_URL || 'https://api.fluxez.com/api/v1';
 
 async function storageExamplesMain() {
   console.log('📁 Fluxez SDK Storage Examples\n');
 
   const client = new FluxezClient(API_KEY, {
-    apiUrl: API_URL,
+    
     debug: true,
     timeout: 120000, // Longer timeout for file operations
   });
@@ -1174,7 +1173,7 @@ function promiseBasedStorageExample() {
   console.log('\n🔄 Promise-based Storage Operations\n');
 
   const client = new FluxezClient(API_KEY, {
-    apiUrl: API_URL,
+    
     debug: false
   });
 

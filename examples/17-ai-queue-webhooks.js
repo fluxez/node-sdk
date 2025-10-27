@@ -24,14 +24,12 @@ const path = require('path');
 
 // Configuration
 const API_KEY = process.env.FLUXEZ_API_KEY || 'cgx_your_api_key_here';
-const API_URL = process.env.FLUXEZ_API_URL || 'https://api.fluxez.com/api/v1';
-const MEDIA_SERVER_URL = process.env.MEDIA_SERVER_URL || 'http://localhost:8000/api/v1';
 
 async function queueWebhooksExamplesMain() {
   console.log('Queue & Webhooks Examples\n');
 
   const client = new FluxezClient(API_KEY, {
-    apiUrl: API_URL,
+    
     debug: true,
     timeout: 120000, // Longer timeout for AI operations
   });
@@ -62,7 +60,7 @@ async function queueWebhooksExamplesMain() {
     console.error('Queue & Webhooks examples failed:', error);
     console.log('\nTroubleshooting:');
     console.log('- Ensure your backend has AI services configured');
-    console.log('- Check that the media server is running on', MEDIA_SERVER_URL);
+    console.log('- Check that the media server is running on');
     console.log('- Verify your API key has AI/Queue permissions');
     console.log('- For webhooks, ensure the webhook URL is publicly accessible');
   }

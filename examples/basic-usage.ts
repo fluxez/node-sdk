@@ -82,7 +82,7 @@ async function basicUsageExample() {
  */
 async function advancedUsageExample() {
   const client = new FluxezClient('cgx_your_api_key_here', {
-    apiUrl: 'https://api.fluxez.com/v1',
+    
     timeout: 30000,
     retries: 5,
     debug: false,

@@ -10,7 +10,7 @@ const { FluxezClient, SocialProvider, TeamRole } = require('../dist');
 async function main() {
   // Initialize client with API key
   const client = new FluxezClient('cgx_your_api_key_here', {
-    apiUrl: 'https://api.fluxez.com/api/v1',
+    
     debug: true
   });
 

@@ -21,13 +21,12 @@ const { FluxezClient } = require('@fluxez/node-sdk');
 
 // Configuration
 const API_KEY = process.env.FLUXEZ_API_KEY || 'cgx_your_api_key_here';
-const API_URL = process.env.FLUXEZ_API_URL || 'https://api.fluxez.com/api/v1';
 
 async function aiBrainExamplesMain() {
   console.log('🧠 Fluxez SDK AI/Brain Examples\n');
 
   const client = new FluxezClient(API_KEY, {
-    apiUrl: API_URL,
+    
     debug: true,
     timeout: 120000, // Longer timeout for AI operations
   });
@@ -1027,7 +1026,7 @@ function promiseBasedAIExample() {
   console.log('\n🔄 Promise-based AI Operations\n');
 
   const client = new FluxezClient(API_KEY, {
-    apiUrl: API_URL,
+    
     debug: false
   });
 
