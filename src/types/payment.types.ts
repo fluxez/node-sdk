@@ -266,6 +266,151 @@ export interface CreatePaymentIntentRequest {
   paymentMethodId?: string;
   metadata?: Record<string, any>;
   description?: string;
+  statementDescriptor?: string;
+  captureMethod?: 'automatic' | 'manual';
+  confirmationMethod?: 'automatic' | 'manual';
+  returnUrl?: string;
+  setupFutureUsage?: 'on_session' | 'off_session';
+}
+
+/**
+ * Update payment intent request
+ */
+export interface UpdatePaymentIntentRequest {
+  amount?: number;
+  currency?: string;
+  customerId?: string;
+  paymentMethodId?: string;
+  metadata?: Record<string, any>;
+  description?: string;
+  statementDescriptor?: string;
+}
+
+/**
+ * Confirm payment intent request
+ */
+export interface ConfirmPaymentIntentRequest {
+  paymentMethodId?: string;
+  returnUrl?: string;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Cancel payment intent request
+ */
+export interface CancelPaymentIntentRequest {
+  cancellationReason?: 'duplicate' | 'fraudulent' | 'requested_by_customer' | 'abandoned';
+}
+
+/**
+ * Capture payment intent request
+ */
+export interface CapturePaymentIntentRequest {
+  amountToCapture?: number;
+  statementDescriptor?: string;
+}
+
+/**
+ * Charge details (for direct one-time payments)
+ */
+export interface Charge {
+  id: string;
+  chargeId: string;
+  amount: number;
+  amountCaptured: number;
+  amountRefunded: number;
+  currency: string;
+  status: 'succeeded' | 'pending' | 'failed';
+  paymentMethodId?: string;
+  customerId?: string;
+  description?: string;
+  receiptUrl?: string;
+  metadata?: Record<string, any>;
+  created: string;
+  paid: boolean;
+  refunded: boolean;
+  captured: boolean;
+}
+
+/**
+ * Create direct charge request
+ */
+export interface CreateChargeRequest {
+  amount: number;
+  currency: string;
+  source?: string;
+  customerId?: string;
+  description?: string;
+  metadata?: Record<string, any>;
+  statementDescriptor?: string;
+  capture?: boolean;
+}
+
+/**
+ * Refund details
+ */
+export interface Refund {
+  id: string;
+  refundId: string;
+  chargeId?: string;
+  paymentIntentId?: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'succeeded' | 'failed' | 'canceled';
+  reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer';
+  receiptNumber?: string;
+  metadata?: Record<string, any>;
+  created: string;
+}
+
+/**
+ * Create refund request
+ */
+export interface CreateRefundRequest {
+  chargeId?: string;
+  paymentIntentId?: string;
+  amount?: number;
+  reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer';
+  refundApplicationFee?: boolean;
+  reverseTransfer?: boolean;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Payment source (card, bank account, etc.)
+ */
+export interface PaymentSource {
+  id: string;
+  object: 'card' | 'bank_account' | 'source';
+  card?: {
+    brand: string;
+    last4: string;
+    expMonth: number;
+    expYear: number;
+    funding: 'credit' | 'debit' | 'prepaid' | 'unknown';
+    country?: string;
+  };
+  bankAccount?: {
+    last4: string;
+    bankName?: string;
+    accountHolderType?: 'individual' | 'company';
+    routingNumber?: string;
+  };
+  created: string;
+}
+
+/**
+ * Direct payment result
+ */
+export interface DirectPaymentResult {
+  success: boolean;
+  paymentIntent?: PaymentIntent;
+  charge?: Charge;
+  error?: {
+    code: string;
+    message: string;
+    declineCode?: string;
+  };
 }
 
 /**

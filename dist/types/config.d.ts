@@ -7,6 +7,7 @@ export interface FluxezConfig {
     timeout?: number;
     maxRetries?: number;
     headers?: Record<string, string>;
+    frontendUrl?: string;
     debug?: boolean;
     logger?: (level: string, message: string, data?: any) => void;
 }

@@ -1,17 +1,20 @@
 export interface FluxezConfig {
   apiKey: string; // Required - API key is mandatory
-  
+
   // Optional service-specific configurations
   storage?: StorageConfig;
   search?: SearchConfig;
   analytics?: AnalyticsConfig;
   cache?: CacheConfig;
-  
+
   // Request configuration
   timeout?: number;
   maxRetries?: number;
   headers?: Record<string, string>;
-  
+
+  // Frontend URL for email links (password reset, email verification, etc.)
+  frontendUrl?: string;
+
   // Debugging
   debug?: boolean;
   logger?: (level: string, message: string, data?: any) => void;

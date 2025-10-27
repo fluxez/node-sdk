@@ -64,7 +64,7 @@ export declare class AuthClient {
     /**
      * Request password reset
      */
-    requestPasswordReset(email: string): Promise<void>;
+    requestPasswordReset(email: string, frontendUrl?: string): Promise<void>;
     /**
      * Reset password with token
      */

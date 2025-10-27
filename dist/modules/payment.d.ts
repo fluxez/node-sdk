@@ -1,12 +1,12 @@
 import { AxiosInstance } from 'axios';
 import { FluxezConfig } from '../types/config';
 import { Logger } from '../utils/logger';
-import { PaymentConfig, CreatePaymentConfigRequest, UpdatePaymentConfigRequest, PriceIdConfig, AddPriceIdRequest, Subscription, CreateSubscriptionRequest, UpdateSubscriptionRequest, Invoice, CheckoutSession, CreateCheckoutSessionRequest, Customer, CreateCustomerRequest, PaymentMethod, PaymentIntent, CreatePaymentIntentRequest, ListOptions, ListResponse, WebhookEvent, WebhookVerificationResult } from '../types/payment.types';
+import { PaymentConfig, CreatePaymentConfigRequest, UpdatePaymentConfigRequest, PriceIdConfig, AddPriceIdRequest, Subscription, CreateSubscriptionRequest, UpdateSubscriptionRequest, Invoice, CheckoutSession, CreateCheckoutSessionRequest, Customer, CreateCustomerRequest, PaymentMethod, PaymentIntent, CreatePaymentIntentRequest, UpdatePaymentIntentRequest, ConfirmPaymentIntentRequest, CancelPaymentIntentRequest, CapturePaymentIntentRequest, Charge, CreateChargeRequest, Refund, CreateRefundRequest, DirectPaymentResult, ListOptions, ListResponse, WebhookEvent, WebhookVerificationResult } from '../types/payment.types';
 /**
  * Payment Client
  *
- * Multi-tenant Stripe integration for subscription and payment management.
- * Supports payment configuration, subscription management, and webhook handling.
+ * Multi-tenant Stripe integration for subscription and direct payment management.
+ * Supports payment configuration, subscription management, direct payments, refunds, and webhook handling.
  *
  * @example
  * ```typescript
@@ -17,16 +17,18 @@ import { PaymentConfig, CreatePaymentConfigRequest, UpdatePaymentConfigRequest, 
  *   stripeWebhookSecret: 'whsec_...'
  * });
  *
- * // Add price IDs
- * await client.payment.addPriceId(orgId, projectId, 'price_xxx', {
- *   name: 'Pro Monthly',
- *   interval: 'month'
- * });
- *
- * // Create subscription
+ * // Subscription payment
  * await client.payment.createSubscription(orgId, projectId, {
  *   customerId: 'cus_xxx',
  *   priceId: 'price_xxx'
+ * });
+ *
+ * // Direct one-time payment
+ * await client.payment.createDirectPayment(orgId, projectId, {
+ *   amount: 2999,
+ *   currency: 'usd',
+ *   customerId: 'cus_xxx',
+ *   description: 'Product purchase'
  * });
  * ```
  */
@@ -452,5 +454,251 @@ export declare class PaymentClient {
         processed: boolean;
         message?: string;
     }>;
+    /**
+     * Update an existing payment intent
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param paymentIntentId Payment intent ID
+     * @param updates Payment intent updates
+     * @returns Updated payment intent
+     *
+     * @example
+     * ```typescript
+     * const intent = await client.payment.updatePaymentIntent('org_123', 'proj_456', 'pi_xxx', {
+     *   amount: 3499,
+     *   description: 'Updated order amount'
+     * });
+     * ```
+     */
+    updatePaymentIntent(organizationId: string, projectId: string, paymentIntentId: string, updates: UpdatePaymentIntentRequest): Promise<PaymentIntent>;
+    /**
+     * Confirm a payment intent
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param paymentIntentId Payment intent ID
+     * @param data Confirmation data
+     * @returns Confirmed payment intent
+     *
+     * @example
+     * ```typescript
+     * const intent = await client.payment.confirmPaymentIntent('org_123', 'proj_456', 'pi_xxx', {
+     *   paymentMethodId: 'pm_xxx',
+     *   returnUrl: 'https://yourapp.com/payment/complete'
+     * });
+     *
+     * if (intent.status === 'succeeded') {
+     *   console.log('Payment successful!');
+     * }
+     * ```
+     */
+    confirmPaymentIntent(organizationId: string, projectId: string, paymentIntentId: string, data: ConfirmPaymentIntentRequest): Promise<PaymentIntent>;
+    /**
+     * Cancel a payment intent
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param paymentIntentId Payment intent ID
+     * @param data Cancellation data
+     * @returns Canceled payment intent
+     *
+     * @example
+     * ```typescript
+     * const intent = await client.payment.cancelPaymentIntent('org_123', 'proj_456', 'pi_xxx', {
+     *   cancellationReason: 'requested_by_customer'
+     * });
+     * ```
+     */
+    cancelPaymentIntent(organizationId: string, projectId: string, paymentIntentId: string, data?: CancelPaymentIntentRequest): Promise<PaymentIntent>;
+    /**
+     * Capture a payment intent (for manual capture)
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param paymentIntentId Payment intent ID
+     * @param data Capture data
+     * @returns Captured payment intent
+     *
+     * @example
+     * ```typescript
+     * // Capture the full authorized amount
+     * const intent = await client.payment.capturePaymentIntent('org_123', 'proj_456', 'pi_xxx');
+     *
+     * // Capture a partial amount
+     * const intent = await client.payment.capturePaymentIntent('org_123', 'proj_456', 'pi_xxx', {
+     *   amountToCapture: 1999
+     * });
+     * ```
+     */
+    capturePaymentIntent(organizationId: string, projectId: string, paymentIntentId: string, data?: CapturePaymentIntentRequest): Promise<PaymentIntent>;
+    /**
+     * List all payment intents
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param options List options
+     * @returns List of payment intents
+     *
+     * @example
+     * ```typescript
+     * const intents = await client.payment.listPaymentIntents('org_123', 'proj_456', {
+     *   limit: 10
+     * });
+     *
+     * intents.data.forEach(intent => {
+     *   console.log(`Payment ${intent.id}: ${intent.status}`);
+     * });
+     * ```
+     */
+    listPaymentIntents(organizationId: string, projectId: string, options?: ListOptions & {
+        customerId?: string;
+    }): Promise<ListResponse<PaymentIntent>>;
+    /**
+     * Create a direct payment (combines payment intent creation and confirmation)
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param data Payment data
+     * @returns Direct payment result
+     *
+     * @example
+     * ```typescript
+     * // Create and confirm payment in one step
+     * const result = await client.payment.createDirectPayment('org_123', 'proj_456', {
+     *   amount: 2999,
+     *   currency: 'usd',
+     *   customerId: 'cus_xxx',
+     *   paymentMethodId: 'pm_xxx',
+     *   description: 'Product purchase',
+     *   metadata: { orderId: 'order_123' }
+     * });
+     *
+     * if (result.success) {
+     *   console.log('Payment successful!', result.paymentIntent);
+     * } else {
+     *   console.error('Payment failed:', result.error?.message);
+     * }
+     * ```
+     */
+    createDirectPayment(organizationId: string, projectId: string, data: CreatePaymentIntentRequest & {
+        confirmationMethod?: 'automatic';
+    }): Promise<DirectPaymentResult>;
+    /**
+     * Create a direct charge (legacy method, use createDirectPayment for new implementations)
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param data Charge data
+     * @returns Created charge
+     *
+     * @example
+     * ```typescript
+     * const charge = await client.payment.createCharge('org_123', 'proj_456', {
+     *   amount: 2999,
+     *   currency: 'usd',
+     *   source: 'tok_visa', // or payment method
+     *   description: 'Product purchase'
+     * });
+     * ```
+     */
+    createCharge(organizationId: string, projectId: string, data: CreateChargeRequest): Promise<Charge>;
+    /**
+     * Get charge details
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param chargeId Charge ID
+     * @returns Charge details
+     *
+     * @example
+     * ```typescript
+     * const charge = await client.payment.getCharge('org_123', 'proj_456', 'ch_xxx');
+     * console.log('Receipt URL:', charge.receiptUrl);
+     * ```
+     */
+    getCharge(organizationId: string, projectId: string, chargeId: string): Promise<Charge>;
+    /**
+     * List all charges
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param options List options
+     * @returns List of charges
+     *
+     * @example
+     * ```typescript
+     * const charges = await client.payment.listCharges('org_123', 'proj_456', {
+     *   limit: 10
+     * });
+     * ```
+     */
+    listCharges(organizationId: string, projectId: string, options?: ListOptions & {
+        customerId?: string;
+    }): Promise<ListResponse<Charge>>;
+    /**
+     * Create a refund for a charge or payment intent
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param data Refund data
+     * @returns Created refund
+     *
+     * @example
+     * ```typescript
+     * // Full refund
+     * const refund = await client.payment.createRefund('org_123', 'proj_456', {
+     *   chargeId: 'ch_xxx',
+     *   reason: 'requested_by_customer'
+     * });
+     *
+     * // Partial refund
+     * const refund = await client.payment.createRefund('org_123', 'proj_456', {
+     *   paymentIntentId: 'pi_xxx',
+     *   amount: 1000,
+     *   reason: 'requested_by_customer',
+     *   metadata: { reason: 'Partial order cancellation' }
+     * });
+     * ```
+     */
+    createRefund(organizationId: string, projectId: string, data: CreateRefundRequest): Promise<Refund>;
+    /**
+     * Get refund details
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param refundId Refund ID
+     * @returns Refund details
+     *
+     * @example
+     * ```typescript
+     * const refund = await client.payment.getRefund('org_123', 'proj_456', 're_xxx');
+     * console.log('Refund status:', refund.status);
+     * ```
+     */
+    getRefund(organizationId: string, projectId: string, refundId: string): Promise<Refund>;
+    /**
+     * List all refunds
+     *
+     * @param organizationId Organization ID
+     * @param projectId Project ID
+     * @param options List options
+     * @returns List of refunds
+     *
+     * @example
+     * ```typescript
+     * const refunds = await client.payment.listRefunds('org_123', 'proj_456', {
+     *   limit: 10
+     * });
+     *
+     * refunds.data.forEach(refund => {
+     *   console.log(`Refund ${refund.id}: ${refund.amount} ${refund.currency} - ${refund.status}`);
+     * });
+     * ```
+     */
+    listRefunds(organizationId: string, projectId: string, options?: ListOptions & {
+        chargeId?: string;
+        paymentIntentId?: string;
+    }): Promise<ListResponse<Refund>>;
 }
 //# sourceMappingURL=payment.d.ts.map

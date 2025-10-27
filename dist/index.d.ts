@@ -48,7 +48,7 @@ export { Migrator } from './migration/migrator';
 export { MigrationCLI } from './migration/cli';
 export type { MigrationConfig, Migration, MigrationResult } from './migration/migrator';
 export { PaymentClient } from './modules/payment';
-export type { PaymentConfig, CreatePaymentConfigRequest, UpdatePaymentConfigRequest, PriceIdConfig, AddPriceIdRequest, Subscription, CreateSubscriptionRequest, UpdateSubscriptionRequest, SubscriptionStatus, Invoice, CheckoutSession, CreateCheckoutSessionRequest, Customer, CreateCustomerRequest, PaymentMethod, PaymentIntent, CreatePaymentIntentRequest, ListOptions, ListResponse, WebhookEvent, WebhookVerificationResult } from './types/payment.types';
+export type { PaymentConfig, CreatePaymentConfigRequest, UpdatePaymentConfigRequest, PriceIdConfig, AddPriceIdRequest, Subscription, CreateSubscriptionRequest, UpdateSubscriptionRequest, SubscriptionStatus, Invoice, CheckoutSession, CreateCheckoutSessionRequest, Customer, CreateCustomerRequest, PaymentMethod, PaymentIntent, CreatePaymentIntentRequest, UpdatePaymentIntentRequest, ConfirmPaymentIntentRequest, CancelPaymentIntentRequest, CapturePaymentIntentRequest, Charge, CreateChargeRequest, Refund, CreateRefundRequest, PaymentSource, DirectPaymentResult, ListOptions, ListResponse, WebhookEvent, WebhookVerificationResult } from './types/payment.types';
 export { ApiError, ErrorCode } from './utils/errors';
 export { Logger } from './utils/logger';
 //# sourceMappingURL=index.d.ts.map

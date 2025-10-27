@@ -19,6 +19,16 @@ import {
   PaymentMethod,
   PaymentIntent,
   CreatePaymentIntentRequest,
+  UpdatePaymentIntentRequest,
+  ConfirmPaymentIntentRequest,
+  CancelPaymentIntentRequest,
+  CapturePaymentIntentRequest,
+  Charge,
+  CreateChargeRequest,
+  Refund,
+  CreateRefundRequest,
+  PaymentSource,
+  DirectPaymentResult,
   ListOptions,
   ListResponse,
   WebhookEvent,
@@ -28,8 +38,8 @@ import {
 /**
  * Payment Client
  *
- * Multi-tenant Stripe integration for subscription and payment management.
- * Supports payment configuration, subscription management, and webhook handling.
+ * Multi-tenant Stripe integration for subscription and direct payment management.
+ * Supports payment configuration, subscription management, direct payments, refunds, and webhook handling.
  *
  * @example
  * ```typescript
@@ -40,16 +50,18 @@ import {
  *   stripeWebhookSecret: 'whsec_...'
  * });
  *
- * // Add price IDs
- * await client.payment.addPriceId(orgId, projectId, 'price_xxx', {
- *   name: 'Pro Monthly',
- *   interval: 'month'
- * });
- *
- * // Create subscription
+ * // Subscription payment
  * await client.payment.createSubscription(orgId, projectId, {
  *   customerId: 'cus_xxx',
  *   priceId: 'price_xxx'
+ * });
+ *
+ * // Direct one-time payment
+ * await client.payment.createDirectPayment(orgId, projectId, {
+ *   amount: 2999,
+ *   currency: 'usd',
+ *   customerId: 'cus_xxx',
+ *   description: 'Product purchase'
  * });
  * ```
  */
@@ -946,6 +958,492 @@ export class PaymentClient {
       return response.data.data;
     } catch (error) {
       this.logger.error('Failed to handle webhook event', error);
+      throw error;
+    }
+  }
+
+  // ============================================
+  // Direct Payment Methods
+  // ============================================
+
+  /**
+   * Update an existing payment intent
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param paymentIntentId Payment intent ID
+   * @param updates Payment intent updates
+   * @returns Updated payment intent
+   *
+   * @example
+   * ```typescript
+   * const intent = await client.payment.updatePaymentIntent('org_123', 'proj_456', 'pi_xxx', {
+   *   amount: 3499,
+   *   description: 'Updated order amount'
+   * });
+   * ```
+   */
+  async updatePaymentIntent(
+    organizationId: string,
+    projectId: string,
+    paymentIntentId: string,
+    updates: UpdatePaymentIntentRequest
+  ): Promise<PaymentIntent> {
+    try {
+      this.logger.debug('Updating payment intent', { organizationId, projectId, paymentIntentId, updates });
+
+      const response = await this.httpClient.put<ApiResponse<PaymentIntent>>(
+        `/payment/${organizationId}/${projectId}/payment-intents/${paymentIntentId}`,
+        updates
+      );
+
+      this.logger.debug('Payment intent updated successfully', response.data);
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to update payment intent', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Confirm a payment intent
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param paymentIntentId Payment intent ID
+   * @param data Confirmation data
+   * @returns Confirmed payment intent
+   *
+   * @example
+   * ```typescript
+   * const intent = await client.payment.confirmPaymentIntent('org_123', 'proj_456', 'pi_xxx', {
+   *   paymentMethodId: 'pm_xxx',
+   *   returnUrl: 'https://yourapp.com/payment/complete'
+   * });
+   *
+   * if (intent.status === 'succeeded') {
+   *   console.log('Payment successful!');
+   * }
+   * ```
+   */
+  async confirmPaymentIntent(
+    organizationId: string,
+    projectId: string,
+    paymentIntentId: string,
+    data: ConfirmPaymentIntentRequest
+  ): Promise<PaymentIntent> {
+    try {
+      this.logger.debug('Confirming payment intent', { organizationId, projectId, paymentIntentId });
+
+      const response = await this.httpClient.post<ApiResponse<PaymentIntent>>(
+        `/payment/${organizationId}/${projectId}/payment-intents/${paymentIntentId}/confirm`,
+        data
+      );
+
+      this.logger.debug('Payment intent confirmed successfully', response.data);
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to confirm payment intent', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cancel a payment intent
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param paymentIntentId Payment intent ID
+   * @param data Cancellation data
+   * @returns Canceled payment intent
+   *
+   * @example
+   * ```typescript
+   * const intent = await client.payment.cancelPaymentIntent('org_123', 'proj_456', 'pi_xxx', {
+   *   cancellationReason: 'requested_by_customer'
+   * });
+   * ```
+   */
+  async cancelPaymentIntent(
+    organizationId: string,
+    projectId: string,
+    paymentIntentId: string,
+    data?: CancelPaymentIntentRequest
+  ): Promise<PaymentIntent> {
+    try {
+      this.logger.debug('Canceling payment intent', { organizationId, projectId, paymentIntentId });
+
+      const response = await this.httpClient.post<ApiResponse<PaymentIntent>>(
+        `/payment/${organizationId}/${projectId}/payment-intents/${paymentIntentId}/cancel`,
+        data || {}
+      );
+
+      this.logger.debug('Payment intent canceled successfully', response.data);
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to cancel payment intent', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Capture a payment intent (for manual capture)
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param paymentIntentId Payment intent ID
+   * @param data Capture data
+   * @returns Captured payment intent
+   *
+   * @example
+   * ```typescript
+   * // Capture the full authorized amount
+   * const intent = await client.payment.capturePaymentIntent('org_123', 'proj_456', 'pi_xxx');
+   *
+   * // Capture a partial amount
+   * const intent = await client.payment.capturePaymentIntent('org_123', 'proj_456', 'pi_xxx', {
+   *   amountToCapture: 1999
+   * });
+   * ```
+   */
+  async capturePaymentIntent(
+    organizationId: string,
+    projectId: string,
+    paymentIntentId: string,
+    data?: CapturePaymentIntentRequest
+  ): Promise<PaymentIntent> {
+    try {
+      this.logger.debug('Capturing payment intent', { organizationId, projectId, paymentIntentId });
+
+      const response = await this.httpClient.post<ApiResponse<PaymentIntent>>(
+        `/payment/${organizationId}/${projectId}/payment-intents/${paymentIntentId}/capture`,
+        data || {}
+      );
+
+      this.logger.debug('Payment intent captured successfully', response.data);
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to capture payment intent', error);
+      throw error;
+    }
+  }
+
+  /**
+   * List all payment intents
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param options List options
+   * @returns List of payment intents
+   *
+   * @example
+   * ```typescript
+   * const intents = await client.payment.listPaymentIntents('org_123', 'proj_456', {
+   *   limit: 10
+   * });
+   *
+   * intents.data.forEach(intent => {
+   *   console.log(`Payment ${intent.id}: ${intent.status}`);
+   * });
+   * ```
+   */
+  async listPaymentIntents(
+    organizationId: string,
+    projectId: string,
+    options?: ListOptions & { customerId?: string }
+  ): Promise<ListResponse<PaymentIntent>> {
+    try {
+      this.logger.debug('Listing payment intents', { organizationId, projectId, options });
+
+      const response = await this.httpClient.get<ApiResponse<ListResponse<PaymentIntent>>>(
+        `/payment/${organizationId}/${projectId}/payment-intents`,
+        { params: options }
+      );
+
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to list payment intents', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a direct payment (combines payment intent creation and confirmation)
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param data Payment data
+   * @returns Direct payment result
+   *
+   * @example
+   * ```typescript
+   * // Create and confirm payment in one step
+   * const result = await client.payment.createDirectPayment('org_123', 'proj_456', {
+   *   amount: 2999,
+   *   currency: 'usd',
+   *   customerId: 'cus_xxx',
+   *   paymentMethodId: 'pm_xxx',
+   *   description: 'Product purchase',
+   *   metadata: { orderId: 'order_123' }
+   * });
+   *
+   * if (result.success) {
+   *   console.log('Payment successful!', result.paymentIntent);
+   * } else {
+   *   console.error('Payment failed:', result.error?.message);
+   * }
+   * ```
+   */
+  async createDirectPayment(
+    organizationId: string,
+    projectId: string,
+    data: CreatePaymentIntentRequest & { confirmationMethod?: 'automatic' }
+  ): Promise<DirectPaymentResult> {
+    try {
+      this.logger.debug('Creating direct payment', { organizationId, projectId, data });
+
+      const response = await this.httpClient.post<ApiResponse<DirectPaymentResult>>(
+        `/payment/${organizationId}/${projectId}/direct-payment`,
+        { ...data, confirmationMethod: 'automatic' }
+      );
+
+      this.logger.debug('Direct payment processed', response.data);
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to create direct payment', error);
+      throw error;
+    }
+  }
+
+  // ============================================
+  // Charge Management (Legacy/Direct Charges)
+  // ============================================
+
+  /**
+   * Create a direct charge (legacy method, use createDirectPayment for new implementations)
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param data Charge data
+   * @returns Created charge
+   *
+   * @example
+   * ```typescript
+   * const charge = await client.payment.createCharge('org_123', 'proj_456', {
+   *   amount: 2999,
+   *   currency: 'usd',
+   *   source: 'tok_visa', // or payment method
+   *   description: 'Product purchase'
+   * });
+   * ```
+   */
+  async createCharge(
+    organizationId: string,
+    projectId: string,
+    data: CreateChargeRequest
+  ): Promise<Charge> {
+    try {
+      this.logger.debug('Creating charge', { organizationId, projectId, data });
+
+      const response = await this.httpClient.post<ApiResponse<Charge>>(
+        `/payment/${organizationId}/${projectId}/charges`,
+        data
+      );
+
+      this.logger.debug('Charge created successfully', response.data);
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to create charge', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get charge details
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param chargeId Charge ID
+   * @returns Charge details
+   *
+   * @example
+   * ```typescript
+   * const charge = await client.payment.getCharge('org_123', 'proj_456', 'ch_xxx');
+   * console.log('Receipt URL:', charge.receiptUrl);
+   * ```
+   */
+  async getCharge(
+    organizationId: string,
+    projectId: string,
+    chargeId: string
+  ): Promise<Charge> {
+    try {
+      this.logger.debug('Getting charge', { organizationId, projectId, chargeId });
+
+      const response = await this.httpClient.get<ApiResponse<Charge>>(
+        `/payment/${organizationId}/${projectId}/charges/${chargeId}`
+      );
+
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to get charge', error);
+      throw error;
+    }
+  }
+
+  /**
+   * List all charges
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param options List options
+   * @returns List of charges
+   *
+   * @example
+   * ```typescript
+   * const charges = await client.payment.listCharges('org_123', 'proj_456', {
+   *   limit: 10
+   * });
+   * ```
+   */
+  async listCharges(
+    organizationId: string,
+    projectId: string,
+    options?: ListOptions & { customerId?: string }
+  ): Promise<ListResponse<Charge>> {
+    try {
+      this.logger.debug('Listing charges', { organizationId, projectId, options });
+
+      const response = await this.httpClient.get<ApiResponse<ListResponse<Charge>>>(
+        `/payment/${organizationId}/${projectId}/charges`,
+        { params: options }
+      );
+
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to list charges', error);
+      throw error;
+    }
+  }
+
+  // ============================================
+  // Refund Management
+  // ============================================
+
+  /**
+   * Create a refund for a charge or payment intent
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param data Refund data
+   * @returns Created refund
+   *
+   * @example
+   * ```typescript
+   * // Full refund
+   * const refund = await client.payment.createRefund('org_123', 'proj_456', {
+   *   chargeId: 'ch_xxx',
+   *   reason: 'requested_by_customer'
+   * });
+   *
+   * // Partial refund
+   * const refund = await client.payment.createRefund('org_123', 'proj_456', {
+   *   paymentIntentId: 'pi_xxx',
+   *   amount: 1000,
+   *   reason: 'requested_by_customer',
+   *   metadata: { reason: 'Partial order cancellation' }
+   * });
+   * ```
+   */
+  async createRefund(
+    organizationId: string,
+    projectId: string,
+    data: CreateRefundRequest
+  ): Promise<Refund> {
+    try {
+      this.logger.debug('Creating refund', { organizationId, projectId, data });
+
+      const response = await this.httpClient.post<ApiResponse<Refund>>(
+        `/payment/${organizationId}/${projectId}/refunds`,
+        data
+      );
+
+      this.logger.debug('Refund created successfully', response.data);
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to create refund', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get refund details
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param refundId Refund ID
+   * @returns Refund details
+   *
+   * @example
+   * ```typescript
+   * const refund = await client.payment.getRefund('org_123', 'proj_456', 're_xxx');
+   * console.log('Refund status:', refund.status);
+   * ```
+   */
+  async getRefund(
+    organizationId: string,
+    projectId: string,
+    refundId: string
+  ): Promise<Refund> {
+    try {
+      this.logger.debug('Getting refund', { organizationId, projectId, refundId });
+
+      const response = await this.httpClient.get<ApiResponse<Refund>>(
+        `/payment/${organizationId}/${projectId}/refunds/${refundId}`
+      );
+
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to get refund', error);
+      throw error;
+    }
+  }
+
+  /**
+   * List all refunds
+   *
+   * @param organizationId Organization ID
+   * @param projectId Project ID
+   * @param options List options
+   * @returns List of refunds
+   *
+   * @example
+   * ```typescript
+   * const refunds = await client.payment.listRefunds('org_123', 'proj_456', {
+   *   limit: 10
+   * });
+   *
+   * refunds.data.forEach(refund => {
+   *   console.log(`Refund ${refund.id}: ${refund.amount} ${refund.currency} - ${refund.status}`);
+   * });
+   * ```
+   */
+  async listRefunds(
+    organizationId: string,
+    projectId: string,
+    options?: ListOptions & { chargeId?: string; paymentIntentId?: string }
+  ): Promise<ListResponse<Refund>> {
+    try {
+      this.logger.debug('Listing refunds', { organizationId, projectId, options });
+
+      const response = await this.httpClient.get<ApiResponse<ListResponse<Refund>>>(
+        `/payment/${organizationId}/${projectId}/refunds`,
+        { params: options }
+      );
+
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to list refunds', error);
       throw error;
     }
   }

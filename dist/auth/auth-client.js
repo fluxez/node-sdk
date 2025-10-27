@@ -119,8 +119,11 @@ class AuthClient {
     /**
      * Request password reset
      */
-    async requestPasswordReset(email) {
-        await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.FORGOT_PASSWORD, { email });
+    async requestPasswordReset(email, frontendUrl) {
+        await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.FORGOT_PASSWORD, {
+            email,
+            frontendUrl: frontendUrl || this.config.frontendUrl || 'http://localhost:3000'
+        });
     }
     /**
      * Reset password with token
