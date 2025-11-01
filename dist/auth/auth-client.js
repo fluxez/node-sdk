@@ -132,7 +132,7 @@ class AuthClient {
         await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.RESET_PASSWORD, request);
     }
     /**
-     * Change password
+     * Change password for authenticated user
      */
     async changePassword(request) {
         await this.httpClient.post('/tenant-auth/password/change', request);

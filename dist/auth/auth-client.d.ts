@@ -70,7 +70,7 @@ export declare class AuthClient {
      */
     resetPassword(request: PasswordResetRequest): Promise<void>;
     /**
-     * Change password
+     * Change password for authenticated user
      */
     changePassword(request: PasswordChangeRequest): Promise<void>;
     /**

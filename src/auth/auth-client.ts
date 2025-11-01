@@ -176,7 +176,7 @@ export class AuthClient {
   }
   
   /**
-   * Change password
+   * Change password for authenticated user
    */
   public async changePassword(request: PasswordChangeRequest): Promise<void> {
     await this.httpClient.post('/tenant-auth/password/change', request);
