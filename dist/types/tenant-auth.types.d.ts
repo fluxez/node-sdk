@@ -1,17 +1,5 @@
-export declare enum SocialProvider {
-    GOOGLE = "google",
-    GITHUB = "github",
-    FACEBOOK = "facebook",
-    APPLE = "apple",
-    TWITTER = "twitter"
-}
-export declare enum TeamRole {
-    OWNER = "owner",
-    ADMIN = "admin",
-    EDITOR = "editor",
-    VIEWER = "viewer",
-    MEMBER = "member"
-}
+export type SocialProvider = 'google' | 'github' | 'facebook' | 'apple' | 'twitter';
+export type TeamRole = 'owner' | 'admin' | 'editor' | 'viewer' | 'member';
 export interface TenantRegisterRequest {
     email: string;
     password: string;
@@ -88,11 +76,7 @@ export interface TenantAuthResponse {
     success: boolean;
     accessToken: string;
     refreshToken: string;
-    user: {
-        id: string;
-        email: string;
-        emailVerified: boolean;
-    };
+    user: TenantUser;
 }
 export interface TenantUser {
     id: string;

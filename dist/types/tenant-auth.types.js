@@ -1,24 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TenantAuthApiError = exports.TenantAuthNetworkError = exports.TenantAuthValidationError = exports.TeamRole = exports.SocialProvider = void 0;
-// Social Provider Enum
-var SocialProvider;
-(function (SocialProvider) {
-    SocialProvider["GOOGLE"] = "google";
-    SocialProvider["GITHUB"] = "github";
-    SocialProvider["FACEBOOK"] = "facebook";
-    SocialProvider["APPLE"] = "apple";
-    SocialProvider["TWITTER"] = "twitter";
-})(SocialProvider || (exports.SocialProvider = SocialProvider = {}));
-// Team Role Enum
-var TeamRole;
-(function (TeamRole) {
-    TeamRole["OWNER"] = "owner";
-    TeamRole["ADMIN"] = "admin";
-    TeamRole["EDITOR"] = "editor";
-    TeamRole["VIEWER"] = "viewer";
-    TeamRole["MEMBER"] = "member";
-})(TeamRole || (exports.TeamRole = TeamRole = {}));
+exports.TenantAuthApiError = exports.TenantAuthNetworkError = exports.TenantAuthValidationError = void 0;
 // Auth validation errors
 class TenantAuthValidationError extends Error {
     constructor(message, details) {

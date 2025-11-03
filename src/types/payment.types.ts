@@ -93,18 +93,19 @@ export enum SubscriptionStatus {
  */
 export interface Subscription {
   id?: string;
-  subscriptionId: string;
   organizationId: string;
   projectId: string;
-  customerId: string;
-  priceId: string;
+  appId?: string;
+  userId?: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId: string;
+  stripePriceId: string;
+  plan?: string;
+  interval?: string;
   status: SubscriptionStatus;
   currentPeriodStart?: string;
   currentPeriodEnd?: string;
   cancelAtPeriodEnd?: boolean;
-  canceledAt?: string;
-  trialStart?: string;
-  trialEnd?: string;
   metadata?: Record<string, any>;
   createdAt?: string;
   updatedAt?: string;

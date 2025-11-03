@@ -1,20 +1,8 @@
-// Social Provider Enum
-export enum SocialProvider {
-  GOOGLE = 'google',
-  GITHUB = 'github',
-  FACEBOOK = 'facebook',
-  APPLE = 'apple',
-  TWITTER = 'twitter',
-}
+// Social Provider Type (following Firebase/Supabase pattern - string literals instead of enums)
+export type SocialProvider = 'google' | 'github' | 'facebook' | 'apple' | 'twitter';
 
-// Team Role Enum
-export enum TeamRole {
-  OWNER = 'owner',
-  ADMIN = 'admin',
-  EDITOR = 'editor',
-  VIEWER = 'viewer',
-  MEMBER = 'member',
-}
+// Team Role Type (following Firebase/Supabase pattern - string literals instead of enums)
+export type TeamRole = 'owner' | 'admin' | 'editor' | 'viewer' | 'member';
 
 // Request DTOs
 export interface TenantRegisterRequest {
@@ -106,16 +94,12 @@ export interface ConfigureSocialProviderRequest {
   enabled?: boolean;
 }
 
-// Response Types
+// Response Types (matching Fluxez backend DTOs)
 export interface TenantAuthResponse {
   success: boolean;
   accessToken: string;
   refreshToken: string;
-  user: {
-    id: string;
-    email: string;
-    emailVerified: boolean;
-  };
+  user: TenantUser;
 }
 
 export interface TenantUser {
