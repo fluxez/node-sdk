@@ -150,6 +150,12 @@ class AuthClient {
         await this.httpClient.post(constants_1.API_ENDPOINTS.TENANT_AUTH.VERIFY_EMAIL, { token });
     }
     /**
+     * Resend email verification
+     */
+    async resendEmailVerification(email) {
+        await this.httpClient.post('/tenant-auth/verify-email/resend', { email });
+    }
+    /**
      * Enable two-factor authentication
      */
     async enable2FA() {

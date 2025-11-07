@@ -188,12 +188,19 @@ export class AuthClient {
   public async requestEmailVerification(): Promise<void> {
     await this.httpClient.post('/tenant-auth/email/verify/request');
   }
-  
+
   /**
    * Verify email with token
    */
   public async verifyEmail(token: string): Promise<void> {
     await this.httpClient.post(API_ENDPOINTS.TENANT_AUTH.VERIFY_EMAIL, { token });
+  }
+
+  /**
+   * Resend email verification
+   */
+  public async resendEmailVerification(email: string): Promise<void> {
+    await this.httpClient.post('/tenant-auth/verify-email/resend', { email });
   }
   
   /**

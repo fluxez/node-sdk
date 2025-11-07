@@ -82,6 +82,10 @@ export declare class AuthClient {
      */
     verifyEmail(token: string): Promise<void>;
     /**
+     * Resend email verification
+     */
+    resendEmailVerification(email: string): Promise<void>;
+    /**
      * Enable two-factor authentication
      */
     enable2FA(): Promise<{
