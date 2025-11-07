@@ -19,28 +19,42 @@ export interface CreateRoomOptions {
     lockOnJoin?: boolean;
 }
 /**
- * Video room details
+ * Video room details (matches backend API response)
  */
 export interface VideoRoom {
-    id: string;
-    name: string;
+    id?: string;
+    roomId?: string;
+    roomName?: string;
+    name?: string;
     description?: string;
-    status: 'active' | 'inactive' | 'ended' | 'expired';
-    maxParticipants: number;
-    currentParticipants: number;
-    recordingEnabled: boolean;
-    videoQuality: string;
-    audioOnly: boolean;
-    e2eeEnabled: boolean;
-    roomType: string;
+    status?: 'active' | 'inactive' | 'ended' | 'expired';
+    maxParticipants?: number;
+    currentParticipants?: number;
+    recordingEnabled?: boolean;
+    videoQuality?: string;
+    audioOnly?: boolean;
+    e2eeEnabled?: boolean;
+    roomType?: string;
     metadata?: Record<string, any>;
-    createdAt: string;
-    updatedAt: string;
+    createdAt?: string;
+    updatedAt?: string;
     expiresAt?: string;
     startedAt?: string;
     endedAt?: string;
     joinUrl?: string;
     embedUrl?: string;
+    session?: {
+        id: string;
+        roomId: string;
+        roomName: string;
+        organizationId?: string;
+        projectId?: string;
+        status: string;
+        maxParticipants: number;
+        [key: string]: any;
+    };
+    participants?: any[];
+    liveParticipants?: any[];
 }
 /**
  * Room filters for listing
@@ -57,6 +71,10 @@ export interface RoomFilters {
  * Options for generating room access token
  */
 export interface TokenOptions {
+    name?: string;
+    canPublish?: boolean;
+    canSubscribe?: boolean;
+    canPublishData?: boolean;
     permissions?: {
         canPublish?: boolean;
         canSubscribe?: boolean;
@@ -70,20 +88,22 @@ export interface TokenOptions {
     maxDuration?: number;
 }
 /**
- * Room access token
+ * Room access token (matches backend API response)
  */
 export interface RoomToken {
     token: string;
-    roomId: string;
+    url?: string;
+    roomId?: string;
+    roomName?: string;
     identity: string;
-    expiresAt: string;
-    permissions: {
-        canPublish: boolean;
-        canSubscribe: boolean;
-        canPublishData: boolean;
-        canUpdateMetadata: boolean;
-        hidden: boolean;
-        recorder: boolean;
+    expiresAt?: string;
+    permissions?: {
+        canPublish?: boolean;
+        canSubscribe?: boolean;
+        canPublishData?: boolean;
+        canUpdateMetadata?: boolean;
+        hidden?: boolean;
+        recorder?: boolean;
     };
 }
 /**
@@ -270,29 +290,28 @@ export declare class VideoConferencingClient {
      * @example
      * ```typescript
      * const room = await client.videoConferencing.createRoom({
-     *   name: 'Team Standup',
-     *   description: 'Daily team standup meeting',
+     *   roomName: 'Team Standup',
+     *   displayName: 'Daily team standup meeting',
      *   maxParticipants: 10,
-     *   recordingEnabled: true,
-     *   videoQuality: 'hd'
+     *   recordingEnabled: true
      * });
-     * console.log(`Room created: ${room.joinUrl}`);
+     * console.log(`Room created: ${room.id}`);
      * ```
      */
-    createRoom(options: CreateRoomOptions): Promise<VideoRoom>;
+    createRoom(options: any): Promise<any>;
     /**
      * Get room details
      *
-     * @param roomId - Room identifier
+     * @param roomName - Room name
      * @returns Room details
      *
      * @example
      * ```typescript
-     * const room = await client.videoConferencing.getRoom('room_abc123');
-     * console.log(`Participants: ${room.currentParticipants}/${room.maxParticipants}`);
+     * const room = await client.videoConferencing.getRoom('my-room-name');
+     * console.log(`Status: ${room.session.status}`);
      * ```
      */
-    getRoom(roomId: string): Promise<VideoRoom>;
+    getRoom(roomName: string): Promise<any>;
     /**
      * List all rooms with optional filters
      *
@@ -349,7 +368,7 @@ export declare class VideoConferencingClient {
     /**
      * Generate access token for participant
      *
-     * @param roomId - Room identifier
+     * @param roomName - Room name (not ID)
      * @param identity - Unique participant identifier
      * @param options - Token configuration options
      * @returns Room access token
@@ -357,20 +376,19 @@ export declare class VideoConferencingClient {
      * @example
      * ```typescript
      * const token = await client.videoConferencing.generateToken(
-     *   'room_abc123',
+     *   'my-room-name',
      *   'user_123',
      *   {
-     *     permissions: {
-     *       canPublish: true,
-     *       canSubscribe: true
-     *     },
-     *     expiresIn: 3600 // 1 hour
+     *     name: 'John Doe',
+     *     canPublish: true,
+     *     canSubscribe: true,
+     *     canPublishData: true
      *   }
      * );
      * // Send token to client to join the room
      * ```
      */
-    generateToken(roomId: string, identity: string, options?: TokenOptions): Promise<RoomToken>;
+    generateToken(roomName: string, identity: string, options?: any): Promise<any>;
     /**
      * List participants in a room
      *

@@ -22,21 +22,31 @@ class VideoConferencingClient {
      * @example
      * ```typescript
      * const room = await client.videoConferencing.createRoom({
-     *   name: 'Team Standup',
-     *   description: 'Daily team standup meeting',
+     *   roomName: 'Team Standup',
+     *   displayName: 'Daily team standup meeting',
      *   maxParticipants: 10,
-     *   recordingEnabled: true,
-     *   videoQuality: 'hd'
+     *   recordingEnabled: true
      * });
-     * console.log(`Room created: ${room.joinUrl}`);
+     * console.log(`Room created: ${room.id}`);
      * ```
      */
     async createRoom(options) {
         try {
             this.logger.debug('Creating video room', options);
-            const response = await this.httpClient.post('/video-conferencing/rooms', options);
-            this.logger.info('Video room created', { id: response.data.data.id, name: options.name });
-            return response.data.data;
+            const payload = {
+                roomName: options.roomName || options.name,
+                displayName: options.displayName || options.description,
+                maxParticipants: options.maxParticipants || 10,
+                recordingEnabled: options.recordingEnabled || false,
+                transcriptionEnabled: options.transcriptionEnabled || false,
+                emptyTimeout: options.emptyTimeout || 300,
+                maxDuration: options.maxDuration,
+                metadata: options.metadata || {}
+            };
+            const response = await this.httpClient.post('/video-conferencing/rooms', payload);
+            this.logger.info('Video room created', { roomName: payload.roomName });
+            // Response structure: { session: { id, roomId, roomName, ... } }
+            return response.data.session || response.data;
         }
         catch (error) {
             this.logger.error('Failed to create video room', error);
@@ -46,20 +56,21 @@ class VideoConferencingClient {
     /**
      * Get room details
      *
-     * @param roomId - Room identifier
+     * @param roomName - Room name
      * @returns Room details
      *
      * @example
      * ```typescript
-     * const room = await client.videoConferencing.getRoom('room_abc123');
-     * console.log(`Participants: ${room.currentParticipants}/${room.maxParticipants}`);
+     * const room = await client.videoConferencing.getRoom('my-room-name');
+     * console.log(`Status: ${room.session.status}`);
      * ```
      */
-    async getRoom(roomId) {
+    async getRoom(roomName) {
         try {
-            this.logger.debug('Getting video room', { roomId });
-            const response = await this.httpClient.get(`/video-conferencing/rooms/${roomId}`);
-            return response.data.data;
+            this.logger.debug('Getting video room', { roomName });
+            const response = await this.httpClient.get(`/video-conferencing/rooms/${roomName}`);
+            // Response structure: { session, participants, liveParticipants }
+            return response.data;
         }
         catch (error) {
             this.logger.error('Failed to get video room', error);
@@ -166,7 +177,7 @@ class VideoConferencingClient {
     /**
      * Generate access token for participant
      *
-     * @param roomId - Room identifier
+     * @param roomName - Room name (not ID)
      * @param identity - Unique participant identifier
      * @param options - Token configuration options
      * @returns Room access token
@@ -174,28 +185,34 @@ class VideoConferencingClient {
      * @example
      * ```typescript
      * const token = await client.videoConferencing.generateToken(
-     *   'room_abc123',
+     *   'my-room-name',
      *   'user_123',
      *   {
-     *     permissions: {
-     *       canPublish: true,
-     *       canSubscribe: true
-     *     },
-     *     expiresIn: 3600 // 1 hour
+     *     name: 'John Doe',
+     *     canPublish: true,
+     *     canSubscribe: true,
+     *     canPublishData: true
      *   }
      * );
      * // Send token to client to join the room
      * ```
      */
-    async generateToken(roomId, identity, options) {
+    async generateToken(roomName, identity, options) {
         try {
-            this.logger.debug('Generating room token', { roomId, identity });
-            const response = await this.httpClient.post(`/video-conferencing/rooms/${roomId}/tokens`, {
-                identity,
-                ...options,
-            });
-            this.logger.info('Room token generated', { roomId, identity });
-            return response.data.data;
+            this.logger.debug('Generating room token', { roomName, identity });
+            const payload = {
+                roomName: roomName,
+                identity: identity,
+                name: options?.name || identity,
+                canPublish: options?.canPublish !== false,
+                canSubscribe: options?.canSubscribe !== false,
+                canPublishData: options?.canPublishData !== false,
+                metadata: options?.metadata || {}
+            };
+            const response = await this.httpClient.post(`/video-conferencing/rooms/${roomName}/token`, payload);
+            this.logger.info('Room token generated', { roomName, identity });
+            // Response structure: { token, url, roomName, identity }
+            return response.data;
         }
         catch (error) {
             this.logger.error('Failed to generate room token', error);
