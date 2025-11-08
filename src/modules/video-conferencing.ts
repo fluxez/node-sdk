@@ -705,20 +705,21 @@ export class VideoConferencingClient {
   /**
    * Stop an active recording
    *
-   * @param recordingId - Recording identifier
+   * @param roomId - Room identifier
+   * @param recordingId - Recording identifier (egress ID)
    *
    * @example
    * ```typescript
-   * await client.videoConferencing.stopRecording('rec_abc123');
+   * await client.videoConferencing.stopRecording('room_abc123', 'EG_xyz789');
    * ```
    */
-  async stopRecording(recordingId: string): Promise<void> {
+  async stopRecording(roomId: string, recordingId: string): Promise<void> {
     try {
-      this.logger.debug('Stopping recording', { recordingId });
+      this.logger.debug('Stopping recording', { roomId, recordingId });
 
-      await this.httpClient.post(`/video-conferencing/recordings/${recordingId}/stop`);
+      await this.httpClient.delete(`/video-conferencing/rooms/${roomId}/recording/${recordingId}`);
 
-      this.logger.info('Recording stopped', { recordingId });
+      this.logger.info('Recording stopped', { roomId, recordingId });
     } catch (error) {
       this.logger.error('Failed to stop recording', error);
       throw error;
@@ -728,23 +729,23 @@ export class VideoConferencingClient {
   /**
    * Get recording details
    *
-   * @param recordingId - Recording identifier
+   * @param roomId - Room identifier
    * @returns Recording details
    *
    * @example
    * ```typescript
-   * const recording = await client.videoConferencing.getRecording('rec_abc123');
+   * const recording = await client.videoConferencing.getRecording('room_abc123');
    * if (recording.status === 'completed') {
    *   console.log(`Download: ${recording.downloadUrl}`);
    * }
    * ```
    */
-  async getRecording(recordingId: string): Promise<Recording> {
+  async getRecording(roomId: string): Promise<Recording> {
     try {
-      this.logger.debug('Getting recording details', { recordingId });
+      this.logger.debug('Getting recording details', { roomId });
 
       const response = await this.httpClient.get<ApiResponse<Recording>>(
-        `/video-conferencing/recordings/${recordingId}`
+        `/video-conferencing/rooms/${roomId}/recording`
       );
 
       return response.data.data;
