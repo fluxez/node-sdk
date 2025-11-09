@@ -512,6 +512,19 @@ export declare class VideoConferencingClient {
      */
     deleteRecording(recordingId: string): Promise<void>;
     /**
+     * Download a recording file
+     *
+     * @param egressId - Egress/recording identifier
+     * @returns Recording file as Buffer
+     *
+     * @example
+     * ```typescript
+     * const buffer = await client.videoConferencing.downloadRecording('EG_abc123');
+     * // Save to file or process the buffer
+     * ```
+     */
+    downloadRecording(egressId: string): Promise<Buffer>;
+    /**
      * Get session history with optional filters
      *
      * @param filters - Optional filters for session query

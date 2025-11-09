@@ -804,6 +804,41 @@ export class VideoConferencingClient {
     }
   }
 
+  /**
+   * Download a recording file
+   *
+   * @param egressId - Egress/recording identifier
+   * @returns Recording file as Buffer
+   *
+   * @example
+   * ```typescript
+   * const buffer = await client.videoConferencing.downloadRecording('EG_abc123');
+   * // Save to file or process the buffer
+   * ```
+   */
+  async downloadRecording(egressId: string): Promise<Buffer> {
+    try {
+      this.logger.debug('Downloading recording', { egressId });
+
+      const response = await this.httpClient.get(
+        `/video-conferencing/recordings/${egressId}/download`,
+        {
+          responseType: 'arraybuffer',
+        }
+      );
+
+      this.logger.info('Recording downloaded', {
+        egressId,
+        size: response.data ? response.data.byteLength || response.data.length : 0
+      });
+
+      return Buffer.isBuffer(response.data) ? response.data : Buffer.from(response.data);
+    } catch (error) {
+      this.logger.error('Failed to download recording', error);
+      throw error;
+    }
+  }
+
   // ============================================
   // Session Management
   // ============================================
