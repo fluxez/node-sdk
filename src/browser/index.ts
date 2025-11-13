@@ -9,7 +9,7 @@
  */
 
 // Hardcoded base URL for browser build
-const FLUXEZ_BASE_URL = 'https://api.fluxez.com/api/v1';
+const FLUXEZ_BASE_URL = 'https://api-dev.fluxez.com/api/v1';
 
 // Check if we're in a browser environment
 if (typeof window === 'undefined') {
