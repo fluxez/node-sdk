@@ -4,7 +4,7 @@
  */
 
 // API Base URL - will be patched for production deployments
-export const FLUXEZ_BASE_URL = 'https://api-dev.fluxez.com/api/v1';
+export const FLUXEZ_BASE_URL = 'https://api.fluxez.com/api/v1';
 
 // API Endpoints
 export const API_ENDPOINTS = {
