@@ -63,8 +63,10 @@ export declare class AuthClient {
     updateProfile(data: Partial<User>): Promise<User>;
     /**
      * Request password reset
+     * @param email - User's email address
+     * @param frontendUrl - Frontend URL where user will reset password (REQUIRED - must be provided by the calling application)
      */
-    requestPasswordReset(email: string, frontendUrl?: string): Promise<void>;
+    requestPasswordReset(email: string, frontendUrl: string): Promise<void>;
     /**
      * Reset password with token
      */

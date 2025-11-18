@@ -160,11 +160,17 @@ export class AuthClient {
   
   /**
    * Request password reset
+   * @param email - User's email address
+   * @param frontendUrl - Frontend URL where user will reset password (REQUIRED - must be provided by the calling application)
    */
-  public async requestPasswordReset(email: string, frontendUrl?: string): Promise<void> {
+  public async requestPasswordReset(email: string, frontendUrl: string): Promise<void> {
+    if (!frontendUrl) {
+      throw new Error('frontendUrl is required for password reset. Please provide the URL where users can reset their password.');
+    }
+
     await this.httpClient.post(API_ENDPOINTS.TENANT_AUTH.FORGOT_PASSWORD, {
       email,
-      frontendUrl: frontendUrl || this.config.frontendUrl || 'http://localhost:3000'
+      frontendUrl
     });
   }
   
