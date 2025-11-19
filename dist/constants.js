@@ -6,7 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RATE_LIMIT_HEADERS = exports.ERROR_CODES = exports.HTTP_METHODS = exports.CONTENT_TYPES = exports.AUTH_HEADER = exports.API_KEY_HEADER = exports.DEFAULT_RETRY_DELAY = exports.DEFAULT_MAX_RETRIES = exports.DEFAULT_TIMEOUT = exports.SDK_VERSION = exports.API_ENDPOINTS = exports.FLUXEZ_BASE_URL = void 0;
 // API Base URL - will be patched for production deployments
-exports.FLUXEZ_BASE_URL = 'https://api.fluxez.com/api/v1';
+exports.FLUXEZ_BASE_URL = 'https://api-dev.fluxez.com/api/v1';
 // API Endpoints
 exports.API_ENDPOINTS = {
     // Data operations
