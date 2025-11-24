@@ -37,6 +37,16 @@ export declare class AuthClient {
      */
     updateUser(userId: string, data: Partial<User>): Promise<User>;
     /**
+     * Delete user account (admin only)
+     * Permanently deletes a user and all associated data
+     * This action cannot be undone
+     * @param userId - The ID of the user to delete
+     */
+    deleteUser(userId: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    /**
      * List users (admin only)
      */
     listUsers(options?: {

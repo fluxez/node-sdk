@@ -1,13 +1,28 @@
 #!/bin/bash
 
 # Patch URLs for Public Repository
-# Changes localhost URLs to production API URLs
+# Changes localhost URLs to production/development API URLs based on branch
 
-echo "Patching URLs from localhost to production..."
+echo "Patching URLs from localhost to appropriate environment..."
 
-# Define the URL replacements
+# Detect current branch
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+echo "Current branch: $BRANCH"
+
+# Define the URL replacements based on branch
 OLD_URL="http://localhost:3000/api/v1"
-NEW_URL="https://api.fluxez.com/api/v1"
+
+if [ "$BRANCH" = "develop" ]; then
+    NEW_URL="https://api-dev.fluxez.com/api/v1"
+    echo "Using development API URL: $NEW_URL"
+elif [ "$BRANCH" = "main" ]; then
+    NEW_URL="https://api.fluxez.com/api/v1"
+    echo "Using production API URL: $NEW_URL"
+else
+    # Default to production for any other branch
+    NEW_URL="https://api.fluxez.com/api/v1"
+    echo "Unknown branch, defaulting to production API URL: $NEW_URL"
+fi
 
 # Function to patch a file
 patch_file() {
