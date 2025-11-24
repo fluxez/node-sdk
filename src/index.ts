@@ -137,9 +137,33 @@ export type {
   WorkflowStats,
   GenerateWorkflowOptions,
   WorkflowAnalysis,
-  ConnectorTestResult,
   WorkflowValidation
 } from './modules/workflow';
+
+// Connectors
+export { ConnectorClient } from './modules/connectors';
+export type {
+  ConnectorMetadata,
+  ConnectorConfigField,
+  ConnectorAction,
+  ConnectorTrigger,
+  ConnectorConfig,
+  ConnectorListOptions,
+  ConnectorTestResult as ConnectorTestResultType,
+  ConnectorActionResult,
+  ConnectorResource,
+  ConnectorUsageStats,
+  WebhookSetupResult,
+  GoogleDrive,
+  GoogleFolder,
+  GoogleFile,
+  GoogleSpreadsheet,
+  GoogleSheet,
+  GoogleSheetColumn,
+  GoogleCalendar,
+  NotionDatabase,
+  NotionPage
+} from './modules/connectors';
 
 // Schema Management
 export { SchemaClient } from './schema/schema-client';
