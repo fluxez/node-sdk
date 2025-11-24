@@ -300,8 +300,9 @@ export class ConnectorClient {
         { params: queryParams }
       );
 
-      console.log('[ConnectorClient] Raw response:', JSON.stringify(response));
       console.log('[ConnectorClient] response.data:', JSON.stringify(response.data));
+      console.log('[ConnectorClient] response.status:', response.status);
+      console.log('[ConnectorClient] response.data type:', typeof response.data);
 
       // Handle response - backend returns data directly, not wrapped in data.data
       return response.data as any;
