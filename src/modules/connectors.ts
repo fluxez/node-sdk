@@ -300,8 +300,13 @@ export class ConnectorClient {
         { params: queryParams }
       );
 
-      return response.data.data;
+      console.log('[ConnectorClient] Raw response:', JSON.stringify(response));
+      console.log('[ConnectorClient] response.data:', JSON.stringify(response.data));
+
+      // Handle response - backend returns data directly, not wrapped in data.data
+      return response.data as any;
     } catch (error) {
+      console.log('[ConnectorClient] Error in list():', error);
       this.logger.error('Failed to list connectors', error);
       throw error;
     }
