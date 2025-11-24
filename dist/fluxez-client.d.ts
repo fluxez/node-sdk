@@ -9,6 +9,7 @@ import { EmailClient } from './modules/email';
 import { QueueClient } from './modules/queue';
 import { AIModule } from './modules/ai';
 import { WorkflowClient } from './modules/workflow';
+import { ConnectorClient } from './modules/connectors';
 import { RealtimeClient } from './modules/realtime';
 import { PushClient } from './modules/push';
 import { EdgeFunctionsClient } from './modules/edge-functions';
@@ -97,6 +98,7 @@ export declare class FluxezClient {
     queue: QueueClient;
     ai: AIModule;
     workflow: WorkflowClient;
+    connectors: ConnectorClient;
     schema: SchemaClient;
     realtime: RealtimeClient;
     push: PushClient;

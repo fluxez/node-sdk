@@ -10,6 +10,7 @@ import { EmailClient } from './modules/email';
 import { QueueClient } from './modules/queue';
 import { AIModule } from './modules/ai';
 import { WorkflowClient } from './modules/workflow';
+import { ConnectorClient } from './modules/connectors';
 import { RealtimeClient } from './modules/realtime';
 import { PushClient } from './modules/push';
 import { EdgeFunctionsClient } from './modules/edge-functions';
@@ -108,6 +109,7 @@ export class FluxezClient {
   public queue!: QueueClient;
   public ai!: AIModule;
   public workflow!: WorkflowClient;
+  public connectors!: ConnectorClient;
   public schema!: SchemaClient;
   public realtime!: RealtimeClient;
   public push!: PushClient;
@@ -176,6 +178,7 @@ export class FluxezClient {
     this.queue = new QueueClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.ai = new AIModule(this.httpClient);
     this.workflow = new WorkflowClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+    this.connectors = new ConnectorClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.schema = new SchemaClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.realtime = new RealtimeClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.push = new PushClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());

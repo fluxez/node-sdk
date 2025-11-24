@@ -13,6 +13,7 @@ const email_1 = require("./modules/email");
 const queue_1 = require("./modules/queue");
 const ai_1 = require("./modules/ai");
 const workflow_1 = require("./modules/workflow");
+const connectors_1 = require("./modules/connectors");
 const realtime_1 = require("./modules/realtime");
 const push_1 = require("./modules/push");
 const edge_functions_1 = require("./modules/edge-functions");
@@ -139,6 +140,7 @@ class FluxezClient {
         this.queue = new queue_1.QueueClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.ai = new ai_1.AIModule(this.httpClient);
         this.workflow = new workflow_1.WorkflowClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+        this.connectors = new connectors_1.ConnectorClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.schema = new schema_client_1.SchemaClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.realtime = new realtime_1.RealtimeClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.push = new push_1.PushClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
