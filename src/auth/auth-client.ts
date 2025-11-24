@@ -133,6 +133,17 @@ export class AuthClient {
   }
 
   /**
+   * Delete user account (admin only)
+   * Permanently deletes a user and all associated data
+   * This action cannot be undone
+   * @param userId - The ID of the user to delete
+   */
+  public async deleteUser(userId: string): Promise<{ success: boolean; message: string }> {
+    const response = await this.httpClient.delete(`/tenant-auth/users/${userId}`);
+    return response.data;
+  }
+
+  /**
    * List users (admin only)
    */
   public async listUsers(options?: { page?: number; limit?: number; search?: string }): Promise<{ users: User[]; total: number }> {

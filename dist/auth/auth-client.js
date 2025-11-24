@@ -94,6 +94,16 @@ class AuthClient {
         return response.data;
     }
     /**
+     * Delete user account (admin only)
+     * Permanently deletes a user and all associated data
+     * This action cannot be undone
+     * @param userId - The ID of the user to delete
+     */
+    async deleteUser(userId) {
+        const response = await this.httpClient.delete(`/tenant-auth/users/${userId}`);
+        return response.data;
+    }
+    /**
      * List users (admin only)
      */
     async listUsers(options) {
