@@ -104,7 +104,8 @@ class ConnectorClient {
         try {
             this.logger.debug('Getting available connectors', { options });
             const response = await this.httpClient.get('/connectors/available', { params: options });
-            return response.data.data;
+            // Backend returns data directly, not wrapped in data.data
+            return response.data;
         }
         catch (error) {
             this.logger.error('Failed to get available connectors', error);
@@ -118,7 +119,8 @@ class ConnectorClient {
         try {
             this.logger.debug('Getting connector metadata', { connectorType });
             const response = await this.httpClient.get(`/connectors/available/${connectorType}`);
-            return response.data.data;
+            // Backend returns data directly, not wrapped in data.data
+            return response.data;
         }
         catch (error) {
             this.logger.error('Failed to get connector metadata', error);

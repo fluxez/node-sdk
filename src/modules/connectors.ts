@@ -391,7 +391,8 @@ export class ConnectorClient {
         { params: options }
       );
 
-      return response.data.data;
+      // Backend returns data directly, not wrapped in data.data
+      return response.data as any;
     } catch (error) {
       this.logger.error('Failed to get available connectors', error);
       throw error;
@@ -409,7 +410,8 @@ export class ConnectorClient {
         `/connectors/available/${connectorType}`
       );
 
-      return response.data.data;
+      // Backend returns data directly, not wrapped in data.data
+      return response.data as any;
     } catch (error) {
       this.logger.error('Failed to get connector metadata', error);
       throw error;
