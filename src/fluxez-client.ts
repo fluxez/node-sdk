@@ -5,7 +5,6 @@ import { SearchClient } from './search/search-client';
 import { AnalyticsClient } from './analytics/analytics-client';
 import { CacheClient } from './cache/cache-client';
 import { AuthClient } from './auth/auth-client';
-import { TenantAuthClient } from './tenant-auth/tenant-auth-client';
 import { EmailClient } from './modules/email';
 import { QueueClient } from './modules/queue';
 import { AIModule } from './modules/ai';
@@ -52,10 +51,11 @@ import {
  * 
  * // Queue
  * await client.queue.send('my-queue-url', { action: 'PROCESS', data: {...} });
- * 
- * // Tenant Auth
- * const authResult = await client.tenantAuth.login({ email: 'user@example.com', password: 'password' });
- * const teams = await client.tenantAuth.getTeams();
+ *
+ * // Auth (unified authentication)
+ * const authResult = await client.auth.login({ email: 'user@example.com', password: 'password' });
+ * const teams = await client.auth.getTeams();
+ * const oauthUrl = await client.auth.getOAuthUrl('github', 'https://myapp.com/callback');
  *
  * // AI
  * const result = await client.ai.generateText('Write a blog post about AI');
@@ -104,7 +104,6 @@ export class FluxezClient {
   public analytics!: AnalyticsClient;
   public cache!: CacheClient;
   public auth!: AuthClient;
-  public tenantAuth!: TenantAuthClient;
   public email!: EmailClient;
   public queue!: QueueClient;
   public ai!: AIModule;
@@ -173,7 +172,6 @@ export class FluxezClient {
     this.analytics = new AnalyticsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.cache = new CacheClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.auth = new AuthClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
-    this.tenantAuth = new TenantAuthClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.email = new EmailClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.queue = new QueueClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.ai = new AIModule(this.httpClient);

@@ -19,8 +19,6 @@ export { CacheClient } from './cache/cache-client';
 export { CacheOperation, CacheStats, CacheOptions } from './cache/types';
 export { AuthClient } from './auth/auth-client';
 export { LoginCredentials, RegisterData, AuthToken, User } from './auth/types';
-export { TenantAuthClient } from './tenant-auth/tenant-auth-client';
-export { TenantRegisterRequest, TenantLoginRequest, TenantVerifyEmailRequest, TenantForgotPasswordRequest, TenantResetPasswordRequest, TenantSocialAuthRequest, TenantLinkSocialRequest, TenantRefreshTokenRequest, TenantLogoutRequest, CreateTeamRequest, InviteMemberRequest, AcceptInvitationRequest, RemoveMemberRequest, UpdateMemberRoleRequest, ConfigureSocialProviderRequest, TenantAuthResponse, TenantUser, TenantTeam, TenantTeamMember, TenantSocialProvider, SocialProvider, TeamRole, TenantAuthApiError, TenantAuthNetworkError, TenantAuthValidationError } from './types/tenant-auth.types';
 export { EmailClient } from './modules/email';
 export type { EmailOptions, EmailAttachment, BulkEmailRecipient, EmailTemplate, EmailVerificationResult, QueuedEmail, EmailStats } from './modules/email';
 export { QueueClient } from './modules/queue';

@@ -4,7 +4,6 @@ import { SearchClient } from './search/search-client';
 import { AnalyticsClient } from './analytics/analytics-client';
 import { CacheClient } from './cache/cache-client';
 import { AuthClient } from './auth/auth-client';
-import { TenantAuthClient } from './tenant-auth/tenant-auth-client';
 import { EmailClient } from './modules/email';
 import { QueueClient } from './modules/queue';
 import { AIModule } from './modules/ai';
@@ -44,9 +43,10 @@ import { FluxezClientConfig, QueryResult } from './types';
  * // Queue
  * await client.queue.send('my-queue-url', { action: 'PROCESS', data: {...} });
  *
- * // Tenant Auth
- * const authResult = await client.tenantAuth.login({ email: 'user@example.com', password: 'password' });
- * const teams = await client.tenantAuth.getTeams();
+ * // Auth (unified authentication)
+ * const authResult = await client.auth.login({ email: 'user@example.com', password: 'password' });
+ * const teams = await client.auth.getTeams();
+ * const oauthUrl = await client.auth.getOAuthUrl('github', 'https://myapp.com/callback');
  *
  * // AI
  * const result = await client.ai.generateText('Write a blog post about AI');
@@ -93,7 +93,6 @@ export declare class FluxezClient {
     analytics: AnalyticsClient;
     cache: CacheClient;
     auth: AuthClient;
-    tenantAuth: TenantAuthClient;
     email: EmailClient;
     queue: QueueClient;
     ai: AIModule;

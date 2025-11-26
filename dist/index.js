@@ -18,7 +18,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Logger = exports.ErrorCode = exports.ApiError = exports.PaymentClient = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoConferencingClient = exports.PushClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.ConnectorClient = exports.WorkflowClient = exports.AIModule = exports.QueueClient = exports.EmailClient = exports.TenantAuthValidationError = exports.TenantAuthNetworkError = exports.TenantAuthApiError = exports.TenantAuthClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
+exports.Logger = exports.ErrorCode = exports.ApiError = exports.PaymentClient = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoConferencingClient = exports.PushClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.ConnectorClient = exports.WorkflowClient = exports.AIModule = exports.QueueClient = exports.EmailClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
 // Core Client
 var fluxez_client_1 = require("./fluxez-client");
 Object.defineProperty(exports, "FluxezClient", { enumerable: true, get: function () { return fluxez_client_1.FluxezClient; } });
@@ -47,13 +47,12 @@ Object.defineProperty(exports, "CacheClient", { enumerable: true, get: function 
 // Auth
 var auth_client_1 = require("./auth/auth-client");
 Object.defineProperty(exports, "AuthClient", { enumerable: true, get: function () { return auth_client_1.AuthClient; } });
-// Tenant Auth
-var tenant_auth_client_1 = require("./tenant-auth/tenant-auth-client");
-Object.defineProperty(exports, "TenantAuthClient", { enumerable: true, get: function () { return tenant_auth_client_1.TenantAuthClient; } });
-var tenant_auth_types_1 = require("./types/tenant-auth.types");
-Object.defineProperty(exports, "TenantAuthApiError", { enumerable: true, get: function () { return tenant_auth_types_1.TenantAuthApiError; } });
-Object.defineProperty(exports, "TenantAuthNetworkError", { enumerable: true, get: function () { return tenant_auth_types_1.TenantAuthNetworkError; } });
-Object.defineProperty(exports, "TenantAuthValidationError", { enumerable: true, get: function () { return tenant_auth_types_1.TenantAuthValidationError; } });
+// Tenant Auth types removed - all auth is now unified in AuthClient
+// Use AuthClient for all authentication needs including:
+// - User authentication (login, register, logout)
+// - OAuth/Social auth (getOAuthUrl, handleOAuthCallback)
+// - Team management (createTeam, getTeams, inviteMember)
+// - Password reset, email verification, 2FA
 // Email
 var email_1 = require("./modules/email");
 Object.defineProperty(exports, "EmailClient", { enumerable: true, get: function () { return email_1.EmailClient; } });
