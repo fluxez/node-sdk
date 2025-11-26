@@ -166,13 +166,42 @@ export declare class AuthClient {
      */
     validateApiKey(apiKey: string): Promise<boolean>;
     /**
+     * Get OAuth authorization URL for a provider
+     * @param provider - Social provider (google, github, facebook, apple)
+     * @param redirectUrl - URL to redirect to after OAuth authorization
+     */
+    getOAuthUrl(provider: 'google' | 'github' | 'facebook' | 'apple', redirectUrl?: string): Promise<string>;
+    /**
+     * Handle OAuth callback and authenticate user
+     * @param provider - Social provider
+     * @param code - OAuth authorization code
+     * @param state - OAuth state parameter
+     */
+    handleOAuthCallback(provider: 'google' | 'github' | 'facebook' | 'apple', code: string, state: string): Promise<AuthToken>;
+    /**
+     * Initiate OAuth flow - returns URL to redirect user to
+     * Convenience method that wraps getOAuthUrl
+     * @param provider - Social provider
+     */
+    initiateOAuthFlow(provider: 'google' | 'github' | 'facebook' | 'apple'): Promise<string>;
+    /**
      * Login with OAuth provider
+     * @deprecated Use getOAuthUrl or initiateOAuthFlow instead
      */
     socialLogin(provider: 'google' | 'github' | 'facebook'): Promise<string>;
     /**
      * Handle OAuth callback
+     * @deprecated Use handleOAuthCallback instead
      */
     socialCallback(provider: string, code: string): Promise<AuthToken>;
+    /**
+     * Link social account to existing user
+     */
+    linkSocial(provider: 'google' | 'github' | 'facebook' | 'apple', code: string): Promise<void>;
+    /**
+     * Get configured social providers
+     */
+    getSocialProviders(): Promise<any[]>;
     /**
      * Get active sessions
      */
@@ -185,5 +214,61 @@ export declare class AuthClient {
      * Revoke all sessions
      */
     revokeAllSessions(): Promise<void>;
+    /**
+     * Create a new team
+     */
+    createTeam(data: {
+        name: string;
+        slug?: string;
+    }): Promise<any>;
+    /**
+     * Get user's teams
+     */
+    getTeams(): Promise<any[]>;
+    /**
+     * Invite member to team
+     */
+    inviteMember(data: {
+        teamId: string;
+        email: string;
+        role: string;
+    }): Promise<void>;
+    /**
+     * Accept team invitation
+     */
+    acceptInvitation(data: {
+        token: string;
+    }): Promise<void>;
+    /**
+     * Remove member from team
+     */
+    removeMember(data: {
+        teamId: string;
+        userId: string;
+    }): Promise<void>;
+    /**
+     * Update member role
+     */
+    updateMemberRole(data: {
+        teamId: string;
+        userId: string;
+        newRole: string;
+    }): Promise<void>;
+    /**
+     * Get team members
+     */
+    getTeamMembers(teamId: string): Promise<any[]>;
+    /**
+     * Get current authenticated user
+     */
+    getCurrentUser(): User | null;
+    /**
+     * Check if user is authenticated
+     */
+    isAuthenticated(): boolean;
+    /**
+     * Clear authentication state
+     */
+    clearAuth(): void;
 }
 //# sourceMappingURL=auth-client.d.ts.map

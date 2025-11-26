@@ -8,7 +8,6 @@ const search_client_1 = require("./search/search-client");
 const analytics_client_1 = require("./analytics/analytics-client");
 const cache_client_1 = require("./cache/cache-client");
 const auth_client_1 = require("./auth/auth-client");
-const tenant_auth_client_1 = require("./tenant-auth/tenant-auth-client");
 const email_1 = require("./modules/email");
 const queue_1 = require("./modules/queue");
 const ai_1 = require("./modules/ai");
@@ -48,9 +47,10 @@ const constants_1 = require("./constants");
  * // Queue
  * await client.queue.send('my-queue-url', { action: 'PROCESS', data: {...} });
  *
- * // Tenant Auth
- * const authResult = await client.tenantAuth.login({ email: 'user@example.com', password: 'password' });
- * const teams = await client.tenantAuth.getTeams();
+ * // Auth (unified authentication)
+ * const authResult = await client.auth.login({ email: 'user@example.com', password: 'password' });
+ * const teams = await client.auth.getTeams();
+ * const oauthUrl = await client.auth.getOAuthUrl('github', 'https://myapp.com/callback');
  *
  * // AI
  * const result = await client.ai.generateText('Write a blog post about AI');
@@ -135,7 +135,6 @@ class FluxezClient {
         this.analytics = new analytics_client_1.AnalyticsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.cache = new cache_client_1.CacheClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.auth = new auth_client_1.AuthClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
-        this.tenantAuth = new tenant_auth_client_1.TenantAuthClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.email = new email_1.EmailClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.queue = new queue_1.QueueClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.ai = new ai_1.AIModule(this.httpClient);

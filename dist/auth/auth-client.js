@@ -271,7 +271,51 @@ class AuthClient {
     }
     // Social authentication
     /**
+     * Get OAuth authorization URL for a provider
+     * @param provider - Social provider (google, github, facebook, apple)
+     * @param redirectUrl - URL to redirect to after OAuth authorization
+     */
+    async getOAuthUrl(provider, redirectUrl) {
+        this.logger.debug('Getting OAuth URL', { provider, redirectUrl });
+        const params = redirectUrl ? { redirect_url: redirectUrl } : {};
+        const response = await this.httpClient.get(`/tenant-auth/social/${provider}/url`, { params });
+        return response.data.url;
+    }
+    /**
+     * Handle OAuth callback and authenticate user
+     * @param provider - Social provider
+     * @param code - OAuth authorization code
+     * @param state - OAuth state parameter
+     */
+    async handleOAuthCallback(provider, code, state) {
+        this.logger.debug('Handling OAuth callback', { provider });
+        const response = await this.httpClient.get(`/tenant-auth/social/${provider}/callback`, {
+            params: { code, state }
+        });
+        const authResponse = response.data;
+        // Store current user
+        this.currentUser = authResponse.user;
+        // Normalize response to match AuthToken interface
+        return {
+            token: authResponse.accessToken || authResponse.token,
+            refreshToken: authResponse.refreshToken,
+            expiresIn: authResponse.expiresIn || 3600,
+            tokenType: authResponse.tokenType || 'Bearer',
+            user: authResponse.user
+        };
+    }
+    /**
+     * Initiate OAuth flow - returns URL to redirect user to
+     * Convenience method that wraps getOAuthUrl
+     * @param provider - Social provider
+     */
+    async initiateOAuthFlow(provider) {
+        this.logger.debug('Initiating OAuth flow', { provider });
+        return this.getOAuthUrl(provider);
+    }
+    /**
      * Login with OAuth provider
+     * @deprecated Use getOAuthUrl or initiateOAuthFlow instead
      */
     async socialLogin(provider) {
         const response = await this.httpClient.get(`${constants_1.API_ENDPOINTS.TENANT_AUTH.SOCIAL}/${provider}`);
@@ -279,11 +323,31 @@ class AuthClient {
     }
     /**
      * Handle OAuth callback
+     * @deprecated Use handleOAuthCallback instead
      */
     async socialCallback(provider, code) {
         const response = await this.httpClient.post(`${constants_1.API_ENDPOINTS.TENANT_AUTH.SOCIAL}/${provider}/callback`, {
             code,
         });
+        return response.data;
+    }
+    /**
+     * Link social account to existing user
+     */
+    async linkSocial(provider, code) {
+        this.logger.debug('Linking social account', { provider });
+        const response = await this.httpClient.post('/tenant-auth/social/link', {
+            provider,
+            code
+        });
+        return response.data;
+    }
+    /**
+     * Get configured social providers
+     */
+    async getSocialProviders() {
+        this.logger.debug('Getting social providers');
+        const response = await this.httpClient.get('/tenant-auth/social/providers');
         return response.data;
     }
     // Session management
@@ -305,6 +369,83 @@ class AuthClient {
      */
     async revokeAllSessions() {
         await this.httpClient.delete('/tenant-auth/sessions');
+    }
+    // Team management
+    /**
+     * Create a new team
+     */
+    async createTeam(data) {
+        this.logger.debug('Creating team', { name: data.name });
+        const response = await this.httpClient.post('/tenant-auth/teams', data);
+        return response.data;
+    }
+    /**
+     * Get user's teams
+     */
+    async getTeams() {
+        this.logger.debug('Getting user teams');
+        const response = await this.httpClient.get('/tenant-auth/teams');
+        return response.data;
+    }
+    /**
+     * Invite member to team
+     */
+    async inviteMember(data) {
+        this.logger.debug('Inviting team member', { email: data.email, teamId: data.teamId });
+        const response = await this.httpClient.post('/tenant-auth/teams/invite', data);
+        return response.data;
+    }
+    /**
+     * Accept team invitation
+     */
+    async acceptInvitation(data) {
+        this.logger.debug('Accepting team invitation');
+        const response = await this.httpClient.post('/tenant-auth/teams/accept-invitation', data);
+        return response.data;
+    }
+    /**
+     * Remove member from team
+     */
+    async removeMember(data) {
+        this.logger.debug('Removing team member', { teamId: data.teamId, userId: data.userId });
+        const response = await this.httpClient.delete('/tenant-auth/teams/member', { data });
+        return response.data;
+    }
+    /**
+     * Update member role
+     */
+    async updateMemberRole(data) {
+        this.logger.debug('Updating member role', { teamId: data.teamId, userId: data.userId, role: data.newRole });
+        const response = await this.httpClient.put('/tenant-auth/teams/member/role', data);
+        return response.data;
+    }
+    /**
+     * Get team members
+     */
+    async getTeamMembers(teamId) {
+        this.logger.debug('Getting team members', { teamId });
+        const response = await this.httpClient.get(`/tenant-auth/teams/${teamId}/members`);
+        return response.data;
+    }
+    // Utility methods
+    /**
+     * Get current authenticated user
+     */
+    getCurrentUser() {
+        return this.currentUser;
+    }
+    /**
+     * Check if user is authenticated
+     */
+    isAuthenticated() {
+        return this.currentUser !== null;
+    }
+    /**
+     * Clear authentication state
+     */
+    clearAuth() {
+        delete this.httpClient.defaults.headers.common['Authorization'];
+        this.currentUser = null;
     }
 }
 exports.AuthClient = AuthClient;

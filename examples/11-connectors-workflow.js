@@ -12,12 +12,10 @@
 
 const { FluxezClient } = require('@fluxez/node-sdk');
 
-// Initialize client with your API key and context
+// Initialize client with your API key
+// The API key already contains the project/app context
 const client = new FluxezClient('service_your_api_key_here', {
-  organizationId: 'org_123',
-  projectId: 'proj_456',
-  appId: 'app_789', // Optional
-  debug: true
+  debug: true // Optional: enable debug logging
 });
 
 async function connectorExamples() {

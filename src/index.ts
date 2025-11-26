@@ -71,35 +71,12 @@ export {
   User 
 } from './auth/types';
 
-// Tenant Auth
-export { TenantAuthClient } from './tenant-auth/tenant-auth-client';
-export { 
-  TenantRegisterRequest,
-  TenantLoginRequest,
-  TenantVerifyEmailRequest,
-  TenantForgotPasswordRequest,
-  TenantResetPasswordRequest,
-  TenantSocialAuthRequest,
-  TenantLinkSocialRequest,
-  TenantRefreshTokenRequest,
-  TenantLogoutRequest,
-  CreateTeamRequest,
-  InviteMemberRequest,
-  AcceptInvitationRequest,
-  RemoveMemberRequest,
-  UpdateMemberRoleRequest,
-  ConfigureSocialProviderRequest,
-  TenantAuthResponse,
-  TenantUser,
-  TenantTeam,
-  TenantTeamMember,
-  TenantSocialProvider,
-  SocialProvider,
-  TeamRole,
-  TenantAuthApiError,
-  TenantAuthNetworkError,
-  TenantAuthValidationError
-} from './types/tenant-auth.types';
+// Tenant Auth types removed - all auth is now unified in AuthClient
+// Use AuthClient for all authentication needs including:
+// - User authentication (login, register, logout)
+// - OAuth/Social auth (getOAuthUrl, handleOAuthCallback)
+// - Team management (createTeam, getTeams, inviteMember)
+// - Password reset, email verification, 2FA
 
 // Email
 export { EmailClient } from './modules/email';
