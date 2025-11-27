@@ -8,9 +8,11 @@ import * as path from 'path';
 import { Readable } from 'stream';
 
 // Detect if we're in a Cloudflare Workers/Web environment
+// This enables proper FormData handling across different runtime environments
+// Check for absence of Node.js process.versions.node
 const isWorkersEnvironment = typeof globalThis !== 'undefined' &&
   typeof (globalThis as any).FormData !== 'undefined' &&
-  typeof fs.existsSync === 'undefined';
+  (typeof process === 'undefined' || !process.versions?.node);
 
 export interface UploadResult {
   id: string;
@@ -123,25 +125,66 @@ export class StorageClient {
         }
       }
 
-      const response = await this.httpClient.post<ApiResponse<UploadResult>>(
-        '/storage/upload',
-        formData,
-        {
-          headers,
-          maxBodyLength: Infinity,
-          maxContentLength: Infinity,
+      // In Workers environment, use fetch API directly since Axios doesn't properly serialize FormData
+      if (isWorkersEnvironment) {
+        const baseURL = this.httpClient.defaults.baseURL || '';
+        const url = `${baseURL}/storage/upload`;
+
+        // Get all headers from axios defaults (including x-api-key or Authorization)
+        const fetchHeaders: any = {};
+        if (this.httpClient.defaults.headers) {
+          // Copy headers from axios defaults
+          const defaultHeaders = this.httpClient.defaults.headers as any;
+          Object.assign(fetchHeaders, defaultHeaders.common || {});
+          Object.assign(fetchHeaders, defaultHeaders);
         }
-      );
 
-      // Handle both response formats: with success wrapper and direct data
-      if (response.data && (response.data.success === false)) {
-        throw new Error(response.data.message || 'Upload failed');
+        // Don't set Content-Type - let fetch handle it with FormData boundary
+        delete fetchHeaders['Content-Type'];
+        delete fetchHeaders['content-type'];
+
+        const fetchResponse = await fetch(url, {
+          method: 'POST',
+          headers: fetchHeaders, // Don't set Content-Type, let fetch handle it with boundary
+          body: formData,
+        });
+
+        if (!fetchResponse.ok) {
+          const errorText = await fetchResponse.text();
+          throw new Error(`Upload failed: ${fetchResponse.status} ${errorText}`);
+        }
+
+        const responseData = await fetchResponse.json() as ApiResponse<UploadResult>;
+
+        // Handle both response formats: with success wrapper and direct data
+        if (responseData && (responseData.success === false)) {
+          throw new Error(responseData.message || 'Upload failed');
+        }
+
+        this.logger.debug('File uploaded successfully', { path: filePath });
+        return responseData.data || (responseData as any);
+      } else {
+        // Node.js environment - use Axios
+        const response = await this.httpClient.post<ApiResponse<UploadResult>>(
+          '/storage/upload',
+          formData,
+          {
+            headers,
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+          }
+        );
+
+        // Handle both response formats: with success wrapper and direct data
+        if (response.data && (response.data.success === false)) {
+          throw new Error(response.data.message || 'Upload failed');
+        }
+
+        this.logger.debug('File uploaded successfully', { path: filePath });
+
+        // Return data directly if no success wrapper, otherwise return data.data
+        return response.data.data || response.data;
       }
-
-      this.logger.debug('File uploaded successfully', { path: filePath });
-
-      // Return data directly if no success wrapper, otherwise return data.data
-      return response.data.data || response.data;
 
     } catch (error: any) {
       this.logger.error('Upload failed', { error: error.message, path: filePath });
