@@ -14,14 +14,6 @@ const isWorkersEnvironment = typeof globalThis !== 'undefined' &&
   typeof (globalThis as any).FormData !== 'undefined' &&
   (typeof process === 'undefined' || !process.versions?.node);
 
-console.log('[StorageClient] Environment detection:', {
-  hasGlobalThis: typeof globalThis !== 'undefined',
-  hasFormData: typeof (globalThis as any).FormData !== 'undefined',
-  hasProcess: typeof process !== 'undefined',
-  hasNodeVersion: typeof process !== 'undefined' && !!process.versions?.node,
-  isWorkersEnvironment
-});
-
 export interface UploadResult {
   id: string;
   url: string;
@@ -71,16 +63,8 @@ export class StorageClient {
       let formData: any;
       const headers: any = {};
 
-      console.log('[StorageClient.upload] Upload attempt:', {
-        isWorkersEnvironment,
-        isBuffer: Buffer.isBuffer(content),
-        filePath,
-        contentType: options.contentType
-      });
-
       // In Cloudflare Workers/Web environment, use Web API FormData with Blob
       if (isWorkersEnvironment && Buffer.isBuffer(content)) {
-        console.log('[StorageClient.upload] Using Workers FormData + Blob');
         formData = new FormData(); // Web API FormData
 
         // Create Blob from Buffer for Workers environment
@@ -98,7 +82,6 @@ export class StorageClient {
 
         // Don't set Content-Type header - let browser/Workers set it with boundary
       } else {
-        console.log('[StorageClient.upload] Using Node.js form-data');
         // Node.js environment - use form-data package
         formData = new NodeFormData();
 
@@ -144,7 +127,6 @@ export class StorageClient {
 
       // In Workers environment, use fetch API directly since Axios doesn't properly serialize FormData
       if (isWorkersEnvironment) {
-        console.log('[StorageClient.upload] Using fetch API for Workers');
         const baseURL = this.httpClient.defaults.baseURL || '';
         const url = `${baseURL}/storage/upload`;
 
@@ -160,9 +142,6 @@ export class StorageClient {
         // Don't set Content-Type - let fetch handle it with FormData boundary
         delete fetchHeaders['Content-Type'];
         delete fetchHeaders['content-type'];
-
-        console.log('[StorageClient.upload] Fetch URL:', url);
-        console.log('[StorageClient.upload] Fetch headers:', Object.keys(fetchHeaders));
 
         const fetchResponse = await fetch(url, {
           method: 'POST',
