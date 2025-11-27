@@ -40,6 +40,10 @@ exports.StorageClient = void 0;
 const form_data_1 = __importDefault(require("form-data"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+// Detect if we're in a Cloudflare Workers/Web environment
+const isWorkersEnvironment = typeof globalThis !== 'undefined' &&
+    typeof globalThis.FormData !== 'undefined' &&
+    typeof fs.existsSync === 'undefined';
 class StorageClient {
     constructor(httpClient, config, logger) {
         this.httpClient = httpClient;
@@ -54,49 +58,65 @@ class StorageClient {
      */
     async upload(content, filePath, options = {}) {
         try {
-            const formData = new form_data_1.default();
-            // Handle different input types
-            if (typeof content === 'string') {
-                // File path provided
-                if (!fs.existsSync(content)) {
-                    throw new Error(`File not found: ${content}`);
-                }
-                const fileStream = fs.createReadStream(content);
-                const filename = path.basename(content);
-                formData.append('file', fileStream, {
-                    filename,
-                    contentType: options.contentType || 'application/octet-stream'
+            let formData;
+            const headers = {};
+            // In Cloudflare Workers/Web environment, use Web API FormData with Blob
+            if (isWorkersEnvironment && Buffer.isBuffer(content)) {
+                formData = new FormData(); // Web API FormData
+                // Create Blob from Buffer for Workers environment
+                const blob = new Blob([content], {
+                    type: options.contentType || 'application/octet-stream'
                 });
-            }
-            else if (Buffer.isBuffer(content)) {
-                // Buffer provided
                 const filename = path.basename(filePath) || 'file';
-                formData.append('file', content, {
-                    filename,
-                    contentType: options.contentType || 'application/octet-stream'
-                });
+                formData.append('file', blob, filename);
+                formData.append('path', filePath);
+                if (options.metadata) {
+                    formData.append('metadata', JSON.stringify(options.metadata));
+                }
+                // Don't set Content-Type header - let browser/Workers set it with boundary
             }
             else {
-                // Stream provided
-                const filename = path.basename(filePath) || 'file';
-                formData.append('file', content, {
-                    filename,
-                    contentType: options.contentType || 'application/octet-stream'
-                });
+                // Node.js environment - use form-data package
+                formData = new form_data_1.default();
+                // Handle different input types
+                if (typeof content === 'string') {
+                    // File path provided
+                    if (!fs.existsSync(content)) {
+                        throw new Error(`File not found: ${content}`);
+                    }
+                    const fileStream = fs.createReadStream(content);
+                    const filename = path.basename(content);
+                    formData.append('file', fileStream, {
+                        filename,
+                        contentType: options.contentType || 'application/octet-stream'
+                    });
+                }
+                else if (Buffer.isBuffer(content)) {
+                    // Buffer provided
+                    const filename = path.basename(filePath) || 'file';
+                    formData.append('file', content, {
+                        filename,
+                        contentType: options.contentType || 'application/octet-stream'
+                    });
+                }
+                else {
+                    // Stream provided
+                    const filename = path.basename(filePath) || 'file';
+                    formData.append('file', content, {
+                        filename,
+                        contentType: options.contentType || 'application/octet-stream'
+                    });
+                }
+                // Add file path and metadata
+                formData.append('path', filePath);
+                if (options.metadata) {
+                    formData.append('metadata', JSON.stringify(options.metadata));
+                }
+                // Get headers for Node.js FormData
+                if (typeof formData.getHeaders === 'function') {
+                    Object.assign(headers, formData.getHeaders());
+                }
             }
-            // Add file path and metadata
-            formData.append('path', filePath);
-            if (options.metadata) {
-                formData.append('metadata', JSON.stringify(options.metadata));
-            }
-            // Upload through backend API
-            // Check if we're in Node.js environment (formData.getHeaders exists) or Web/Workers environment
-            const headers = {};
-            // Only call getHeaders() if it exists (Node.js environment)
-            if (typeof formData.getHeaders === 'function') {
-                Object.assign(headers, formData.getHeaders());
-            }
-            // In Web/Workers environment, axios/fetch will automatically set Content-Type with boundary
             const response = await this.httpClient.post('/storage/upload', formData, {
                 headers,
                 maxBodyLength: Infinity,
