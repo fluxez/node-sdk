@@ -148,17 +148,25 @@ export class StorageClient {
         const baseURL = this.httpClient.defaults.baseURL || '';
         const url = `${baseURL}/storage/upload`;
 
-        // Get auth headers from axios config
-        const authHeaders: any = {};
-        if (this.httpClient.defaults.headers.common['Authorization']) {
-          authHeaders['Authorization'] = this.httpClient.defaults.headers.common['Authorization'];
+        // Get all headers from axios defaults (including x-api-key or Authorization)
+        const fetchHeaders: any = {};
+        if (this.httpClient.defaults.headers) {
+          // Copy headers from axios defaults
+          const defaultHeaders = this.httpClient.defaults.headers as any;
+          Object.assign(fetchHeaders, defaultHeaders.common || {});
+          Object.assign(fetchHeaders, defaultHeaders);
         }
 
+        // Don't set Content-Type - let fetch handle it with FormData boundary
+        delete fetchHeaders['Content-Type'];
+        delete fetchHeaders['content-type'];
+
         console.log('[StorageClient.upload] Fetch URL:', url);
+        console.log('[StorageClient.upload] Fetch headers:', Object.keys(fetchHeaders));
 
         const fetchResponse = await fetch(url, {
           method: 'POST',
-          headers: authHeaders, // Don't set Content-Type, let fetch handle it
+          headers: fetchHeaders, // Don't set Content-Type, let fetch handle it with boundary
           body: formData,
         });
 
