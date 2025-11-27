@@ -90,10 +90,15 @@ class StorageClient {
                 formData.append('metadata', JSON.stringify(options.metadata));
             }
             // Upload through backend API
+            // Check if we're in Node.js environment (formData.getHeaders exists) or Web/Workers environment
+            const headers = {};
+            // Only call getHeaders() if it exists (Node.js environment)
+            if (typeof formData.getHeaders === 'function') {
+                Object.assign(headers, formData.getHeaders());
+            }
+            // In Web/Workers environment, axios/fetch will automatically set Content-Type with boundary
             const response = await this.httpClient.post('/storage/upload', formData, {
-                headers: {
-                    ...formData.getHeaders(),
-                },
+                headers,
                 maxBodyLength: Infinity,
                 maxContentLength: Infinity,
             });
