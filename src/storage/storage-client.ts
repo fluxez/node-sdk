@@ -9,9 +9,18 @@ import { Readable } from 'stream';
 
 // Detect if we're in a Cloudflare Workers/Web environment
 // This enables proper FormData handling across different runtime environments
+// Check for absence of Node.js process.versions.node
 const isWorkersEnvironment = typeof globalThis !== 'undefined' &&
   typeof (globalThis as any).FormData !== 'undefined' &&
-  typeof fs.existsSync === 'undefined';
+  (typeof process === 'undefined' || !process.versions?.node);
+
+console.log('[StorageClient] Environment detection:', {
+  hasGlobalThis: typeof globalThis !== 'undefined',
+  hasFormData: typeof (globalThis as any).FormData !== 'undefined',
+  hasProcess: typeof process !== 'undefined',
+  hasNodeVersion: typeof process !== 'undefined' && !!process.versions?.node,
+  isWorkersEnvironment
+});
 
 export interface UploadResult {
   id: string;
@@ -62,8 +71,16 @@ export class StorageClient {
       let formData: any;
       const headers: any = {};
 
+      console.log('[StorageClient.upload] Upload attempt:', {
+        isWorkersEnvironment,
+        isBuffer: Buffer.isBuffer(content),
+        filePath,
+        contentType: options.contentType
+      });
+
       // In Cloudflare Workers/Web environment, use Web API FormData with Blob
       if (isWorkersEnvironment && Buffer.isBuffer(content)) {
+        console.log('[StorageClient.upload] Using Workers FormData + Blob');
         formData = new FormData(); // Web API FormData
 
         // Create Blob from Buffer for Workers environment
@@ -81,6 +98,7 @@ export class StorageClient {
 
         // Don't set Content-Type header - let browser/Workers set it with boundary
       } else {
+        console.log('[StorageClient.upload] Using Node.js form-data');
         // Node.js environment - use form-data package
         formData = new NodeFormData();
 

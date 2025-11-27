@@ -42,9 +42,17 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 // Detect if we're in a Cloudflare Workers/Web environment
 // This enables proper FormData handling across different runtime environments
+// Check for absence of Node.js process.versions.node
 const isWorkersEnvironment = typeof globalThis !== 'undefined' &&
     typeof globalThis.FormData !== 'undefined' &&
-    typeof fs.existsSync === 'undefined';
+    (typeof process === 'undefined' || !process.versions?.node);
+console.log('[StorageClient] Environment detection:', {
+    hasGlobalThis: typeof globalThis !== 'undefined',
+    hasFormData: typeof globalThis.FormData !== 'undefined',
+    hasProcess: typeof process !== 'undefined',
+    hasNodeVersion: typeof process !== 'undefined' && !!process.versions?.node,
+    isWorkersEnvironment
+});
 class StorageClient {
     constructor(httpClient, config, logger) {
         this.httpClient = httpClient;
@@ -61,8 +69,15 @@ class StorageClient {
         try {
             let formData;
             const headers = {};
+            console.log('[StorageClient.upload] Upload attempt:', {
+                isWorkersEnvironment,
+                isBuffer: Buffer.isBuffer(content),
+                filePath,
+                contentType: options.contentType
+            });
             // In Cloudflare Workers/Web environment, use Web API FormData with Blob
             if (isWorkersEnvironment && Buffer.isBuffer(content)) {
+                console.log('[StorageClient.upload] Using Workers FormData + Blob');
                 formData = new FormData(); // Web API FormData
                 // Create Blob from Buffer for Workers environment
                 const blob = new Blob([content], {
@@ -77,6 +92,7 @@ class StorageClient {
                 // Don't set Content-Type header - let browser/Workers set it with boundary
             }
             else {
+                console.log('[StorageClient.upload] Using Node.js form-data');
                 // Node.js environment - use form-data package
                 formData = new form_data_1.default();
                 // Handle different input types
