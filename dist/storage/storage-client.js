@@ -134,18 +134,49 @@ class StorageClient {
                     Object.assign(headers, formData.getHeaders());
                 }
             }
-            const response = await this.httpClient.post('/storage/upload', formData, {
-                headers,
-                maxBodyLength: Infinity,
-                maxContentLength: Infinity,
-            });
-            // Handle both response formats: with success wrapper and direct data
-            if (response.data && (response.data.success === false)) {
-                throw new Error(response.data.message || 'Upload failed');
+            // In Workers environment, use fetch API directly since Axios doesn't properly serialize FormData
+            if (isWorkersEnvironment) {
+                console.log('[StorageClient.upload] Using fetch API for Workers');
+                const baseURL = this.httpClient.defaults.baseURL || '';
+                const url = `${baseURL}/storage/upload`;
+                // Get auth headers from axios config
+                const authHeaders = {};
+                if (this.httpClient.defaults.headers.common['Authorization']) {
+                    authHeaders['Authorization'] = this.httpClient.defaults.headers.common['Authorization'];
+                }
+                console.log('[StorageClient.upload] Fetch URL:', url);
+                const fetchResponse = await fetch(url, {
+                    method: 'POST',
+                    headers: authHeaders, // Don't set Content-Type, let fetch handle it
+                    body: formData,
+                });
+                if (!fetchResponse.ok) {
+                    const errorText = await fetchResponse.text();
+                    throw new Error(`Upload failed: ${fetchResponse.status} ${errorText}`);
+                }
+                const responseData = await fetchResponse.json();
+                // Handle both response formats: with success wrapper and direct data
+                if (responseData && (responseData.success === false)) {
+                    throw new Error(responseData.message || 'Upload failed');
+                }
+                this.logger.debug('File uploaded successfully', { path: filePath });
+                return responseData.data || responseData;
             }
-            this.logger.debug('File uploaded successfully', { path: filePath });
-            // Return data directly if no success wrapper, otherwise return data.data
-            return response.data.data || response.data;
+            else {
+                // Node.js environment - use Axios
+                const response = await this.httpClient.post('/storage/upload', formData, {
+                    headers,
+                    maxBodyLength: Infinity,
+                    maxContentLength: Infinity,
+                });
+                // Handle both response formats: with success wrapper and direct data
+                if (response.data && (response.data.success === false)) {
+                    throw new Error(response.data.message || 'Upload failed');
+                }
+                this.logger.debug('File uploaded successfully', { path: filePath });
+                // Return data directly if no success wrapper, otherwise return data.data
+                return response.data.data || response.data;
+            }
         }
         catch (error) {
             this.logger.error('Upload failed', { error: error.message, path: filePath });
