@@ -1,27 +1,31 @@
 #!/bin/bash
 
 # Patch URLs for Public Repository
-# Changes localhost URLs to production/development API URLs based on branch
+# Changes development API URL to production API URL for main branch only
 
-echo "Patching URLs from localhost to appropriate environment..."
+echo "Checking if URL patching is needed..."
 
 # Detect current branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
 echo "Current branch: $BRANCH"
 
 # Define the URL replacements based on branch
-OLD_URL="http://localhost:3000/api/v1"
+OLD_URL="https://api-dev.fluxez.com/api/v1"
 
 if [ "$BRANCH" = "develop" ]; then
-    NEW_URL="https://api-dev.fluxez.com/api/v1"
-    echo "Using development API URL: $NEW_URL"
+    echo "Develop branch - no URL patching needed, keeping development API URL"
+    echo "Done!"
+    exit 0
 elif [ "$BRANCH" = "main" ]; then
     NEW_URL="https://api.fluxez.com/api/v1"
-    echo "Using production API URL: $NEW_URL"
+    echo "Main branch - patching from development to production API URL"
+    echo "  Old: $OLD_URL"
+    echo "  New: $NEW_URL"
 else
-    # Default to production for any other branch
-    NEW_URL="https://api.fluxez.com/api/v1"
-    echo "Unknown branch, defaulting to production API URL: $NEW_URL"
+    # For other branches, no patching
+    echo "Branch '$BRANCH' - no URL patching needed"
+    echo "Done!"
+    exit 0
 fi
 
 # Function to patch a file
@@ -55,11 +59,11 @@ for mapfile in dist/*.map lib/*.map dist/**/*.map lib/**/*.map; do
     fi
 done
 
-# Patch README if it contains localhost URLs
+# Patch README if it contains development API URLs
 if [ -f "README.md" ]; then
     echo "Patching README.md..."
     sed -i.tmp "s|${OLD_URL}|${NEW_URL}|g" README.md
-    sed -i.tmp "s|http://localhost:3000|https://fluxez.com|g" README.md
+    sed -i.tmp "s|https://api-dev.fluxez.com|https://api.fluxez.com|g" README.md
     rm -f README.md.tmp
 fi
 
@@ -81,14 +85,14 @@ echo "URL patching complete!"
 
 # Verify patching
 echo "Verification:"
-echo "- Checking for remaining localhost references..."
-remaining=$(grep -r "localhost:3000" --include="*.ts" --include="*.js" --include="*.json" --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null | wc -l)
+echo "- Checking for remaining development API references..."
+remaining=$(grep -r "api-dev.fluxez.com" --include="*.ts" --include="*.js" --include="*.json" --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null | wc -l)
 
 if [ "$remaining" -gt 0 ]; then
-    echo "  Warning: Found $remaining remaining localhost references"
-    grep -r "localhost:3000" --include="*.ts" --include="*.js" --include="*.json" --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null | head -5
+    echo "  Warning: Found $remaining remaining development API references"
+    grep -r "api-dev.fluxez.com" --include="*.ts" --include="*.js" --include="*.json" --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null | head -5
 else
-    echo "  ✓ No localhost references found"
+    echo "  ✓ All references patched to production API"
 fi
 
 echo "Done!"
