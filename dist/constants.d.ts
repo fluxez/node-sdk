@@ -2,7 +2,7 @@
  * Fluxez SDK Constants
  * Single source of truth for all SDK configuration
  */
-export declare const FLUXEZ_BASE_URL = "https://api.fluxez.com/api/v1";
+export declare const FLUXEZ_BASE_URL = "https://api-dev.fluxez.com/api/v1";
 export declare const API_ENDPOINTS: {
     QUERY: string;
     EXECUTE: string;
