@@ -414,13 +414,13 @@ async function demonstrateRAGWorkflow(client) {
   console.log('Step 1: Store document embeddings');
   console.log('--------------------------------');
   console.log(`
-    // Get embeddings from AI
-    const embedding = await client.ai.generateEmbedding(documentText);
+    // Get embeddings from AI using generateEmbeddings
+    const embedding = await client.ai.generateEmbeddings(documentText);
 
     // Store in vector database
     await client.vector.upsert('knowledge_base', [{
       id: 'doc_' + docId,
-      vector: embedding.vector,
+      vector: embedding.embeddings[0],  // Get first embedding vector
       payload: {
         title: document.title,
         content: document.content,
@@ -433,12 +433,12 @@ async function demonstrateRAGWorkflow(client) {
   console.log('\nStep 2: Query with user question');
   console.log('--------------------------------');
   console.log(`
-    // Embed the user's question
-    const questionEmbedding = await client.ai.generateEmbedding(userQuestion);
+    // Embed the user's question using generateEmbeddings
+    const questionEmbedding = await client.ai.generateEmbeddings(userQuestion);
 
     // Search for relevant documents
     const relevantDocs = await client.vector.search('knowledge_base', {
-      vector: questionEmbedding.vector,
+      vector: questionEmbedding.embeddings[0],  // Get first embedding vector
       limit: 5,
       threshold: 0.7
     });
