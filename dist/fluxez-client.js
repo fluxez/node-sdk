@@ -20,6 +20,7 @@ const video_conferencing_1 = require("./modules/video-conferencing");
 const documents_1 = require("./modules/documents");
 const chatbot_1 = require("./modules/chatbot");
 const payment_1 = require("./modules/payment");
+const vector_1 = require("./modules/vector");
 const schema_client_1 = require("./schema/schema-client");
 const constants_1 = require("./constants");
 /**
@@ -85,6 +86,20 @@ const constants_1 = require("./constants");
  *   }
  * });
  *
+ * // Vector Search (Qdrant)
+ * await client.vector.createCollection({
+ *   name: 'embeddings',
+ *   vectorSize: 1536,
+ *   distance: 'cosine'
+ * });
+ * await client.vector.upsert('embeddings', [
+ *   { id: 'doc1', vector: [...], payload: { title: 'Document 1' } }
+ * ]);
+ * const similar = await client.vector.search('embeddings', {
+ *   vector: [...],
+ *   limit: 10
+ * });
+ *
  * ```
  */
 class FluxezClient {
@@ -148,6 +163,7 @@ class FluxezClient {
         this.chatbot = new chatbot_1.ChatbotClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.edgeFunctions = new edge_functions_1.EdgeFunctionsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.payment = new payment_1.PaymentClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+        this.vector = new vector_1.VectorClient(this.httpClient);
     }
     getClientConfig() {
         // Convert our config to the format expected by existing clients

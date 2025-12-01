@@ -1,32 +1,30 @@
 /**
- * Fluxez SDK - AI/Brain Examples
- * 
- * This example demonstrates AI-powered app generation and brain capabilities using the Fluxez SDK.
- * Perfect for AI-powered development, rapid prototyping, and intelligent automation.
- * 
+ * Fluxez SDK - AI Examples
+ *
+ * This example demonstrates AI capabilities using the Fluxez SDK.
+ * Perfect for AI-powered content generation, text processing, and media creation.
+ *
  * Features demonstrated:
- * - Natural language app generation
- * - Prompt understanding and analysis
- * - Pattern matching and similarity search
- * - Architecture design automation
- * - Component selection and optimization
- * - Code generation orchestration
- * - Learning from user feedback
- * - Brain training and improvement
- * 
+ * - Text generation (chat, completion, code, summarization)
+ * - Image generation with multiple models
+ * - Audio processing (TTS, STT)
+ * - Video generation
+ * - AI job queue management
+ *
  * Time to complete: ~15 minutes
  */
 
 const { FluxezClient } = require('@fluxez/node-sdk');
+const fs = require('fs');
+const path = require('path');
 
 // Configuration
-const API_KEY = process.env.FLUXEZ_API_KEY || 'cgx_your_api_key_here';
+const API_KEY = process.env.FLUXEZ_API_KEY || 'service_your_api_key_here';
 
-async function aiBrainExamplesMain() {
-  console.log('🧠 Fluxez SDK AI/Brain Examples\n');
+async function aiExamplesMain() {
+  console.log('Fluxez SDK AI Examples\n');
 
   const client = new FluxezClient(API_KEY, {
-    
     debug: true,
     timeout: 120000, // Longer timeout for AI operations
   });
@@ -37,1043 +35,434 @@ async function aiBrainExamplesMain() {
     if (!connectionTest.connected) {
       throw new Error('Cannot connect to backend. Please ensure the Fluxez backend is running.');
     }
-    console.log('✅ Connected to Fluxez backend\n');
+    console.log('Connected to Fluxez backend\n');
 
-    // Set context
-    client.setOrganization('org_ai_demo');
-    client.setProject('proj_ai_demo');
-
-    await demonstratePromptUnderstanding(client);
-    await demonstrateAppGeneration(client);
-    await demonstratePatternMatching(client);
-    await demonstrateArchitectureDesign(client);
+    await demonstrateTextGeneration(client);
+    await demonstrateChatCompletion(client);
     await demonstrateCodeGeneration(client);
-    await demonstrateLearningSystem(client);
-    await demonstrateBrainTraining(client);
-    await demonstrateAdvancedAI(client);
+    await demonstrateTextProcessing(client);
+    await demonstrateImageGeneration(client);
+    await demonstrateAudioOperations(client);
+    await demonstrateVideoGeneration(client);
+    await demonstrateJobQueueManagement(client);
 
-    console.log('\n🎉 AI/Brain Examples Complete!');
-
+    console.log('\nAI Examples Complete!');
   } catch (error) {
-    console.error('❌ AI/Brain examples failed:', error);
-    console.log('\n🔧 Troubleshooting:');
+    console.error('AI examples failed:', error);
+    console.log('\nTroubleshooting:');
     console.log('- Ensure your backend has AI services configured');
-    console.log('- Check that OpenAI API key is properly set');
-    console.log('- Verify Qdrant vector database is accessible');
-    console.log('- Confirm your API key has AI/Brain permissions');
+    console.log('- Check that OpenAI/other AI provider API keys are set');
+    console.log('- Verify your API key has AI permissions');
   }
 }
 
-async function demonstratePromptUnderstanding(client) {
-  console.log('🎯 Prompt Understanding & Analysis\n');
+async function demonstrateTextGeneration(client) {
+  console.log('Text Generation\n');
   console.log('==========================================');
 
   try {
-    console.log('1. Basic prompt analysis:');
-    
-    const simplePrompt = "Create a simple blog application with user authentication";
-    const basicAnalysis = await client.brain.understand(simplePrompt);
+    console.log('1. Basic text generation:');
 
-    console.log('✅ Basic prompt analysis:', {
-      appType: basicAnalysis.appType,
-      complexity: basicAnalysis.complexity,
-      features: basicAnalysis.features,
-      technologies: basicAnalysis.technologies
-    });
+    const result = await client.ai.generateText(
+      'Write a short paragraph about the benefits of cloud computing',
+      { saveToDatabase: false }
+    );
 
-    console.log('\n2. Complex prompt understanding:');
-    
-    const complexPrompt = `Build a comprehensive e-commerce platform with the following requirements:
-    - Multi-vendor marketplace functionality
-    - Real-time inventory management
-    - Advanced search with filters and facets
-    - Payment processing with multiple gateways (Stripe, PayPal)
-    - Order tracking and notifications
-    - Admin dashboard with analytics
-    - Mobile-responsive design
-    - Social media integration
-    - Review and rating system
-    - Wishlist and cart functionality
-    - Email marketing integration
-    - RESTful API for mobile apps`;
-
-    const complexAnalysis = await client.brain.understand(complexPrompt, {
-      includeArchitecture: true,
-      includeDatabase: true,
-      includeWorkflows: true,
-      includeDeployment: true
-    });
-
-    console.log('✅ Complex prompt analysis:', {
-      appType: complexAnalysis.appType,
-      complexity: complexAnalysis.complexity,
-      estimatedTime: complexAnalysis.estimatedTime,
-      features: complexAnalysis.features.slice(0, 5), // Show first 5
-      architecture: complexAnalysis.architecture,
-      database: complexAnalysis.database
-    });
-
-    console.log('\n3. Industry-specific prompt analysis:');
-    
-    const industryPrompts = [
-      {
-        prompt: "Healthcare patient management system with HIPAA compliance",
-        industry: "healthcare"
-      },
-      {
-        prompt: "Fintech payment processing app with fraud detection",
-        industry: "fintech"
-      },
-      {
-        prompt: "Educational learning management system with video streaming",
-        industry: "education"
-      },
-      {
-        prompt: "Real estate property listing platform with virtual tours",
-        industry: "real-estate"
-      }
-    ];
-
-    for (const { prompt, industry } of industryPrompts) {
-      const industryAnalysis = await client.brain.understand(prompt, {
-        industry: industry,
-        includeCompliance: true,
-        includeIndustryBestPractices: true
-      });
-
-      console.log(`✅ ${industry} analysis:`, {
-        appType: industryAnalysis.appType,
-        compliance: industryAnalysis.compliance,
-        specialRequirements: industryAnalysis.specialRequirements
-      });
+    console.log('Generated text:', result.text?.substring(0, 200) + '...');
+    if (result.contentId) {
+      console.log('Content ID:', result.contentId);
     }
 
-    console.log('\n4. Prompt refinement and suggestions:');
-    
-    const vaguePrompt = "Make an app for my business";
-    const refinementSuggestions = await client.brain.refinePrompt(vaguePrompt);
+    console.log('\n2. Text generation with system message:');
 
-    console.log('✅ Prompt refinement suggestions:', refinementSuggestions);
-
-    console.log('\n5. Feature extraction and prioritization:');
-    
-    const featureAnalysis = await client.brain.extractFeatures(complexPrompt, {
-      prioritize: true,
-      categorize: true,
-      estimateEffort: true
-    });
-
-    console.log('✅ Feature analysis:', {
-      coreFeatures: featureAnalysis.coreFeatures,
-      additionalFeatures: featureAnalysis.additionalFeatures,
-      niceToHave: featureAnalysis.niceToHave,
-      totalEstimatedHours: featureAnalysis.totalEstimatedHours
-    });
-
-  } catch (error) {
-    console.error('❌ Prompt understanding failed:', error.message);
-  }
-}
-
-async function demonstrateAppGeneration(client) {
-  console.log('\n🚀 AI-Powered App Generation\n');
-  console.log('==========================================');
-
-  try {
-    console.log('1. Generate simple React app:');
-    
-    const simpleAppPrompt = "Create a personal task management app with categories and due dates";
-    
-    const simpleApp = await client.brain.generate(simpleAppPrompt, {
-      framework: 'react',
-      includeBackend: true,
-      includeDatabase: true,
-      includeAuthentication: true,
-      outputFormat: 'files'
-    });
-
-    console.log('✅ Simple app generated:', {
-      framework: simpleApp.framework,
-      fileCount: simpleApp.files?.length || 0,
-      components: simpleApp.components?.map(c => c.name) || [],
-      databaseTables: simpleApp.database?.tables?.length || 0
-    });
-
-    console.log('\n2. Generate full-stack application:');
-    
-    const fullStackPrompt = `Create a social media scheduling tool that allows users to:
-    - Connect multiple social media accounts (Twitter, LinkedIn, Instagram)
-    - Schedule posts for optimal times
-    - View analytics and engagement metrics
-    - Collaborate with team members
-    - Generate content suggestions using AI`;
-
-    const fullStackApp = await client.brain.generate(fullStackPrompt, {
-      framework: 'react',
-      backend: 'nestjs',
-      database: 'postgresql',
-      includeAuthentication: true,
-      includePayments: true,
-      includeAnalytics: true,
-      includeWorkflows: true,
-      deploymentTarget: 'cloud'
-    });
-
-    console.log('✅ Full-stack app generated:', {
-      frontend: fullStackApp.frontend,
-      backend: fullStackApp.backend,
-      database: fullStackApp.database,
-      integrations: fullStackApp.integrations,
-      deploymentConfig: fullStackApp.deployment
-    });
-
-    console.log('\n3. Generate mobile app:');
-    
-    const mobileAppPrompt = "Fitness tracking app with workout plans, progress tracking, and social features";
-    
-    const mobileApp = await client.brain.generate(mobileAppPrompt, {
-      framework: 'flutter',
-      includeBackend: true,
-      includeOfflineSupport: true,
-      includeNotifications: true,
-      includeSocialFeatures: true
-    });
-
-    console.log('✅ Mobile app generated:', {
-      platform: mobileApp.platform,
-      screens: mobileApp.screens?.length || 0,
-      features: mobileApp.features,
-      offline: mobileApp.offlineSupport
-    });
-
-    console.log('\n4. Generate API-first application:');
-    
-    const apiPrompt = "REST API for a restaurant ordering system with menu management, orders, and delivery tracking";
-    
-    const apiApp = await client.brain.generate(apiPrompt, {
-      type: 'api',
-      framework: 'nestjs',
-      includeDocumentation: true,
-      includeAuthentication: true,
-      includeRateLimiting: true,
-      includeMonitoring: true
-    });
-
-    console.log('✅ API application generated:', {
-      endpoints: apiApp.endpoints?.length || 0,
-      authentication: apiApp.authentication,
-      documentation: apiApp.documentation,
-      monitoring: apiApp.monitoring
-    });
-
-    console.log('\n5. Generate with custom requirements:');
-    
-    const customApp = await client.brain.generate("AI-powered content creation platform", {
-      requirements: {
-        scalability: 'high',
-        security: 'enterprise',
-        performance: 'optimized',
-        accessibility: 'wcag-aa',
-        internationalization: true,
-        monitoring: 'comprehensive'
-      },
-      constraints: {
-        budget: 'medium',
-        timeline: '3-months',
-        teamSize: 5,
-        experienceLevel: 'senior'
+    const technicalResult = await client.ai.generateText(
+      'Explain RESTful APIs',
+      {
+        systemMessage: 'You are a technical writer who explains concepts clearly and concisely.',
+        saveToDatabase: true,
       }
-    });
+    );
 
-    console.log('✅ Custom app generated:', {
-      architecture: customApp.architecture,
-      securityFeatures: customApp.security,
-      scalabilityFeatures: customApp.scalability,
-      timeline: customApp.timeline
-    });
-
+    console.log('Technical explanation:', technicalResult.text?.substring(0, 200) + '...');
   } catch (error) {
-    console.error('❌ App generation failed:', error.message);
+    console.error('Text generation failed:', error.message);
   }
 }
 
-async function demonstratePatternMatching(client) {
-  console.log('\n🔍 Pattern Matching & Similarity\n');
+async function demonstrateChatCompletion(client) {
+  console.log('\n\nChat Completion\n');
   console.log('==========================================');
 
   try {
-    console.log('1. Find similar apps:');
-    
-    const targetPrompt = "E-commerce marketplace with multiple vendors";
-    const similarApps = await client.brain.findSimilar(targetPrompt, {
-      limit: 5,
-      threshold: 0.7,
-      includeScore: true
-    });
+    console.log('1. Simple chat conversation:');
 
-    console.log('✅ Similar apps found:');
-    similarApps.forEach((app, index) => {
-      console.log(`  ${index + 1}. ${app.name} (similarity: ${app.score.toFixed(3)})`);
-      console.log(`     Type: ${app.type}, Features: ${app.features?.slice(0, 3).join(', ')}`);
-    });
+    const chatResult = await client.ai.chat([
+      { role: 'system', content: 'You are a helpful assistant.' },
+      { role: 'user', content: 'What are the main programming paradigms?' },
+    ]);
 
-    console.log('\n2. Pattern-based recommendations:');
-    
-    const recommendations = await client.brain.getRecommendations(targetPrompt, {
-      includeArchitecture: true,
-      includeFeatures: true,
-      includeTechnologies: true,
-      includeWorkflows: true
-    });
+    console.log('Assistant response:', chatResult.message?.substring(0, 200) + '...');
 
-    console.log('✅ Pattern-based recommendations:', {
-      architecturePatterns: recommendations.architecture,
-      recommendedFeatures: recommendations.features,
-      suggestedTechnologies: recommendations.technologies,
-      workflowPatterns: recommendations.workflows
-    });
+    console.log('\n2. Multi-turn conversation:');
 
-    console.log('\n3. Anti-pattern detection:');
-    
-    const antiPatterns = await client.brain.detectAntiPatterns(targetPrompt, {
-      categories: ['security', 'performance', 'scalability', 'maintainability'],
-      includeAlternatives: true
-    });
+    const multiTurnResult = await client.ai.chat([
+      { role: 'system', content: 'You are a programming tutor.' },
+      { role: 'user', content: 'What is a variable?' },
+      {
+        role: 'assistant',
+        content:
+          'A variable is a named storage location in a program that holds a value which can be changed during execution.',
+      },
+      { role: 'user', content: 'Can you give me an example in JavaScript?' },
+    ]);
 
-    console.log('✅ Anti-patterns detected:', antiPatterns);
-
-    console.log('\n4. Best practice suggestions:');
-    
-    const bestPractices = await client.brain.getBestPractices(targetPrompt, {
-      domains: ['architecture', 'security', 'performance', 'ux', 'development'],
-      prioritize: true
-    });
-
-    console.log('✅ Best practice suggestions:', bestPractices);
-
-    console.log('\n5. Technology compatibility analysis:');
-    
-    const techCompatibility = await client.brain.analyzeTechCompatibility({
-      frontend: 'react',
-      backend: 'nestjs',
-      database: 'mongodb',
-      cache: 'redis',
-      queue: 'rabbitmq',
-      storage: 'fluxez'
-    });
-
-    console.log('✅ Technology compatibility:', techCompatibility);
-
-    console.log('\n6. Success pattern analysis:');
-    
-    const successPatterns = await client.brain.analyzeSuccessPatterns(targetPrompt, {
-      metrics: ['user_satisfaction', 'performance', 'scalability', 'maintainability'],
-      includeFailurePatterns: true
-    });
-
-    console.log('✅ Success patterns:', successPatterns);
-
+    console.log('Follow-up response:', multiTurnResult.message?.substring(0, 200) + '...');
   } catch (error) {
-    console.error('❌ Pattern matching failed:', error.message);
-  }
-}
-
-async function demonstrateArchitectureDesign(client) {
-  console.log('\n🏗️  Architecture Design Automation\n');
-  console.log('==========================================');
-
-  try {
-    console.log('1. Generate microservices architecture:');
-    
-    const microservicesPrompt = "Large-scale social media platform with real-time features";
-    
-    const microservicesArch = await client.brain.designArchitecture(microservicesPrompt, {
-      style: 'microservices',
-      scale: 'large',
-      includeInfrastructure: true,
-      includeDeployment: true,
-      includeMonitoring: true
-    });
-
-    console.log('✅ Microservices architecture:', {
-      services: microservicesArch.services?.map(s => s.name) || [],
-      communication: microservicesArch.communication,
-      infrastructure: microservicesArch.infrastructure,
-      scalability: microservicesArch.scalability
-    });
-
-    console.log('\n2. Design serverless architecture:');
-    
-    const serverlessArch = await client.brain.designArchitecture("Event-driven document processing system", {
-      style: 'serverless',
-      provider: 'fluxez',
-      includeEventSourcing: true,
-      includeCQRS: true
-    });
-
-    console.log('✅ Serverless architecture:', {
-      functions: serverlessArch.functions?.map(f => f.name) || [],
-      events: serverlessArch.events,
-      storage: serverlessArch.storage,
-      costs: serverlessArch.estimatedCosts
-    });
-
-    console.log('\n3. Monolithic architecture design:');
-    
-    const monolithicArch = await client.brain.designArchitecture("Small business CRM system", {
-      style: 'monolithic',
-      modular: true,
-      includeUpgradePath: true
-    });
-
-    console.log('✅ Monolithic architecture:', {
-      modules: monolithicArch.modules?.map(m => m.name) || [],
-      database: monolithicArch.database,
-      upgradePath: monolithicArch.upgradePath
-    });
-
-    console.log('\n4. Hybrid architecture design:');
-    
-    const hybridArch = await client.brain.designArchitecture("E-commerce platform with AI recommendations", {
-      style: 'hybrid',
-      coreStyle: 'monolithic',
-      serviceStyles: ['microservices', 'serverless'],
-      includeDataMesh: true
-    });
-
-    console.log('✅ Hybrid architecture:', {
-      coreServices: hybridArch.core,
-      microservices: hybridArch.microservices,
-      serverlessFunctions: hybridArch.serverless,
-      dataMesh: hybridArch.dataMesh
-    });
-
-    console.log('\n5. Database architecture design:');
-    
-    const dbArchitecture = await client.brain.designDatabase(microservicesPrompt, {
-      includeSharding: true,
-      includeReplication: true,
-      includeCaching: true,
-      includeSearch: true,
-      includeAnalytics: true
-    });
-
-    console.log('✅ Database architecture:', {
-      primaryDb: dbArchitecture.primary,
-      sharding: dbArchitecture.sharding,
-      replication: dbArchitecture.replication,
-      caching: dbArchitecture.caching,
-      search: dbArchitecture.search
-    });
-
-    console.log('\n6. Security architecture:');
-    
-    const securityArch = await client.brain.designSecurity(microservicesPrompt, {
-      complianceStandards: ['gdpr', 'ccpa', 'sox'],
-      threatModel: true,
-      zeroTrust: true,
-      includeMonitoring: true
-    });
-
-    console.log('✅ Security architecture:', {
-      authentication: securityArch.authentication,
-      authorization: securityArch.authorization,
-      encryption: securityArch.encryption,
-      monitoring: securityArch.monitoring,
-      compliance: securityArch.compliance
-    });
-
-  } catch (error) {
-    console.error('❌ Architecture design failed:', error.message);
+    console.error('Chat completion failed:', error.message);
   }
 }
 
 async function demonstrateCodeGeneration(client) {
-  console.log('\n💻 Code Generation & Orchestration\n');
+  console.log('\n\nCode Generation\n');
   console.log('==========================================');
 
   try {
-    console.log('1. Generate React components:');
-    
-    const componentPrompt = "User profile component with avatar, bio, and social links";
-    
-    const reactComponent = await client.brain.generateComponent(componentPrompt, {
+    console.log('1. Generate TypeScript code:');
+
+    const tsCode = await client.ai.generateCode(
+      'Create a function that validates email addresses using regex',
+      {
+        language: 'typescript',
+        saveToDatabase: false,
+      }
+    );
+
+    console.log('Generated TypeScript:');
+    console.log(tsCode.code?.substring(0, 300) + '...');
+
+    console.log('\n2. Generate React component:');
+
+    const reactCode = await client.ai.generateCode('Create a simple button component with hover effect', {
+      language: 'typescript',
       framework: 'react',
-      typescript: true,
-      styling: 'tailwind',
-      includeTests: true,
-      includeStorybook: true
+      saveToDatabase: false,
     });
 
-    console.log('✅ React component generated:', {
-      componentName: reactComponent.name,
-      props: reactComponent.props,
-      hooks: reactComponent.hooks,
-      styling: reactComponent.styling,
-      testsIncluded: !!reactComponent.tests
+    console.log('Generated React component:');
+    console.log(reactCode.code?.substring(0, 300) + '...');
+
+    console.log('\n3. Generate Python code:');
+
+    const pythonCode = await client.ai.generateCode('Create a function to find prime numbers up to n', {
+      language: 'python',
+      saveToDatabase: false,
     });
 
-    console.log('\n2. Generate API endpoints:');
-    
-    const apiPrompt = "REST API for blog management with CRUD operations";
-    
-    const apiEndpoints = await client.brain.generateAPI(apiPrompt, {
-      framework: 'nestjs',
-      database: 'postgresql',
-      includeAuthentication: true,
-      includeValidation: true,
-      includeDocumentation: true,
-      includeTests: true
-    });
-
-    console.log('✅ API endpoints generated:', {
-      endpoints: apiEndpoints.endpoints?.map(e => `${e.method} ${e.path}`) || [],
-      controllers: apiEndpoints.controllers,
-      services: apiEndpoints.services,
-      entities: apiEndpoints.entities
-    });
-
-    console.log('\n3. Generate database schema:');
-    
-    const schemaPrompt = "Database schema for online course platform";
-    
-    const dbSchema = await client.brain.generateSchema(schemaPrompt, {
-      database: 'postgresql',
-      includeIndexes: true,
-      includeConstraints: true,
-      includeSeedData: true,
-      includeMigrations: true
-    });
-
-    console.log('✅ Database schema generated:', {
-      tables: dbSchema.tables?.map(t => t.name) || [],
-      relationships: dbSchema.relationships?.length || 0,
-      indexes: dbSchema.indexes?.length || 0,
-      migrations: dbSchema.migrations?.length || 0
-    });
-
-    console.log('\n4. Generate test suites:');
-    
-    const testPrompt = "Comprehensive test suite for user authentication system";
-    
-    const testSuite = await client.brain.generateTests(testPrompt, {
-      testTypes: ['unit', 'integration', 'e2e'],
-      framework: 'jest',
-      includeSnapshots: true,
-      includeMocks: true,
-      coverageThreshold: 90
-    });
-
-    console.log('✅ Test suite generated:', {
-      unitTests: testSuite.unit?.length || 0,
-      integrationTests: testSuite.integration?.length || 0,
-      e2eTests: testSuite.e2e?.length || 0,
-      coverage: testSuite.coverage
-    });
-
-    console.log('\n5. Generate deployment configuration:');
-    
-    const deploymentPrompt = "Kubernetes deployment for scalable web application";
-    
-    const deployment = await client.brain.generateDeployment(deploymentPrompt, {
-      platform: 'kubernetes',
-      includeIngress: true,
-      includeMonitoring: true,
-      includeLogging: true,
-      includeSecrets: true,
-      includeHPA: true
-    });
-
-    console.log('✅ Deployment configuration generated:', {
-      manifests: deployment.manifests?.map(m => m.kind) || [],
-      services: deployment.services,
-      ingress: deployment.ingress,
-      monitoring: deployment.monitoring
-    });
-
-    console.log('\n6. Generate documentation:');
-    
-    const docsPrompt = "API documentation for e-commerce platform";
-    
-    const documentation = await client.brain.generateDocumentation(docsPrompt, {
-      format: 'markdown',
-      includeExamples: true,
-      includeSDK: true,
-      includeArchitecture: true,
-      includeDeployment: true
-    });
-
-    console.log('✅ Documentation generated:', {
-      sections: documentation.sections?.map(s => s.title) || [],
-      examples: documentation.examples?.length || 0,
-      diagrams: documentation.diagrams?.length || 0,
-      sdkExamples: documentation.sdk?.length || 0
-    });
-
+    console.log('Generated Python:');
+    console.log(pythonCode.code?.substring(0, 300) + '...');
   } catch (error) {
-    console.error('❌ Code generation failed:', error.message);
+    console.error('Code generation failed:', error.message);
   }
 }
 
-async function demonstrateLearningSystem(client) {
-  console.log('\n📚 Learning System & Feedback\n');
+async function demonstrateTextProcessing(client) {
+  console.log('\n\nText Processing\n');
   console.log('==========================================');
 
   try {
-    console.log('1. Submit user feedback:');
-    
-    const feedbackData = [
-      {
-        appId: 'app_123',
-        rating: 4.5,
-        feedback: 'Great architecture but could use better error handling',
-        categories: ['architecture', 'error-handling'],
-        improvements: ['Add more try-catch blocks', 'Implement global error handler']
-      },
-      {
-        appId: 'app_456',
-        rating: 5.0,
-        feedback: 'Perfect component structure and clean code',
-        categories: ['components', 'code-quality'],
-        improvements: []
-      },
-      {
-        appId: 'app_789',
-        rating: 3.0,
-        feedback: 'Good functionality but performance could be better',
-        categories: ['performance', 'optimization'],
-        improvements: ['Add lazy loading', 'Optimize database queries', 'Implement caching']
-      }
-    ];
+    console.log('1. Summarize text:');
 
-    for (const feedback of feedbackData) {
-      await client.brain.submitFeedback(feedback);
+    const longText = `
+      Artificial intelligence (AI) has transformed numerous industries over the past decade.
+      From healthcare to finance, AI systems are being deployed to analyze vast amounts of data,
+      make predictions, and automate complex tasks. Machine learning, a subset of AI, enables
+      systems to learn from data without being explicitly programmed. Deep learning, which uses
+      neural networks with multiple layers, has achieved remarkable success in image recognition,
+      natural language processing, and game playing. However, the rapid advancement of AI also
+      raises important ethical considerations, including concerns about job displacement, privacy,
+      and the need for transparent and accountable AI systems.
+    `;
+
+    const summary = await client.ai.summarizeText(longText, { length: 'short' });
+
+    console.log('Original length:', longText.length, 'characters');
+    console.log('Summary:', summary.summary);
+    console.log('Compression ratio:', summary.compressionRatio + 'x');
+
+    console.log('\n2. Translate text:');
+
+    const translation = await client.ai.translateText('Hello, how are you today?', 'es', { sourceLanguage: 'en' });
+
+    console.log('Original: Hello, how are you today?');
+    console.log('Spanish:', translation.translatedText);
+    console.log('Confidence:', translation.confidence);
+
+    console.log('\n3. Translate to multiple languages:');
+
+    const languages = ['fr', 'de', 'ja', 'zh'];
+    const textToTranslate = 'Welcome to our platform!';
+
+    for (const lang of languages) {
+      const result = await client.ai.translateText(textToTranslate, lang);
+      console.log(`  ${lang}: ${result.translatedText}`);
+    }
+  } catch (error) {
+    console.error('Text processing failed:', error.message);
+  }
+}
+
+async function demonstrateImageGeneration(client) {
+  console.log('\n\nImage Generation\n');
+  console.log('==========================================');
+
+  try {
+    console.log('1. Generate image with default settings:');
+
+    const imageResult = await client.ai.generateImage('A beautiful sunset over mountains with dramatic clouds', {
+      size: '1024x1024',
+      quality: 'standard',
+    });
+
+    console.log('Image generation result:', {
+      success: imageResult.success,
+      images: imageResult.data?.images?.length || 0,
+      jobId: imageResult.data?.jobId,
+      status: imageResult.data?.status,
+    });
+
+    if (imageResult.data?.images?.[0]?.url) {
+      console.log('Image URL:', imageResult.data.images[0].url);
     }
 
-    console.log(`✅ Submitted ${feedbackData.length} feedback entries`);
+    console.log('\n2. Generate HD quality image:');
 
-    console.log('\n2. Analyze learning patterns:');
-    
-    const learningPatterns = await client.brain.analyzeLearningPatterns({
-      timeRange: 'last_30_days',
-      categories: ['all'],
-      includeImprovement: true
+    const hdImage = await client.ai.generateImage('A futuristic cyberpunk city at night with neon lights', {
+      size: '1024x1024',
+      quality: 'hd',
+      style: 'vivid',
     });
 
-    console.log('✅ Learning patterns:', {
-      totalFeedback: learningPatterns.totalFeedback,
-      averageRating: learningPatterns.averageRating,
-      topIssues: learningPatterns.topIssues,
-      improvements: learningPatterns.improvements
+    console.log('HD Image result:', {
+      success: hdImage.success,
+      cost: hdImage.data?.cost,
     });
 
-    console.log('\n3. Update brain knowledge:');
-    
-    const knowledgeUpdate = await client.brain.updateKnowledge({
-      category: 'architecture',
-      patterns: [
-        {
-          name: 'Microservices with Event Sourcing',
-          description: 'Use event sourcing for data consistency in microservices',
-          applicability: ['e-commerce', 'social-media', 'financial'],
-          benefits: ['audit-trail', 'scalability', 'consistency'],
-          drawbacks: ['complexity', 'learning-curve']
-        }
-      ],
-      antiPatterns: [
-        {
-          name: 'Synchronous Microservice Communication',
-          description: 'Direct synchronous calls between services',
-          problems: ['tight-coupling', 'cascading-failures'],
-          alternatives: ['async-messaging', 'event-driven']
-        }
-      ]
+    console.log('\n3. Generate image with negative prompt:');
+
+    const refinedImage = await client.ai.generateImage('Professional portrait photo of a business person', {
+      size: '1024x1024',
+      quality: 'hd',
+      negativePrompt: 'blurry, distorted, low quality, cartoon',
     });
 
-    console.log('✅ Knowledge updated:', knowledgeUpdate);
-
-    console.log('\n4. Retrain with new data:');
-    
-    const retrainingResult = await client.brain.retrain({
-      includeNewFeedback: true,
-      includeNewPatterns: true,
-      validateImprovement: true,
-      backupPrevious: true
+    console.log('Refined image result:', {
+      success: refinedImage.success,
     });
-
-    console.log('✅ Brain retrained:', {
-      newAccuracy: retrainingResult.accuracy,
-      improvement: retrainingResult.improvement,
-      validationScore: retrainingResult.validation
-    });
-
-    console.log('\n5. Knowledge graph exploration:');
-    
-    const knowledgeGraph = await client.brain.exploreKnowledge({
-      topic: 'react-components',
-      depth: 2,
-      includeRelated: true,
-      includeExamples: true
-    });
-
-    console.log('✅ Knowledge graph:', {
-      nodes: knowledgeGraph.nodes?.length || 0,
-      relationships: knowledgeGraph.relationships?.length || 0,
-      examples: knowledgeGraph.examples?.length || 0
-    });
-
-    console.log('\n6. Continuous learning metrics:');
-    
-    const learningMetrics = await client.brain.getLearningMetrics({
-      timeRange: 'last_90_days',
-      includeProgress: true,
-      includeAccuracy: true,
-      includeUsage: true
-    });
-
-    console.log('✅ Learning metrics:', {
-      accuracyTrend: learningMetrics.accuracy,
-      usageGrowth: learningMetrics.usage,
-      knowledgeExpansion: learningMetrics.knowledge,
-      userSatisfaction: learningMetrics.satisfaction
-    });
-
   } catch (error) {
-    console.error('❌ Learning system failed:', error.message);
+    console.error('Image generation failed:', error.message);
   }
 }
 
-async function demonstrateBrainTraining(client) {
-  console.log('\n🎯 Brain Training & Optimization\n');
+async function demonstrateAudioOperations(client) {
+  console.log('\n\nAudio Operations\n');
   console.log('==========================================');
 
   try {
-    console.log('1. Generate training data:');
-    
-    const trainingData = await client.brain.generateTrainingData({
-      appTypes: ['e-commerce', 'social-media', 'cms', 'crm', 'marketplace'],
-      variationsPerType: 20,
-      complexityLevels: ['simple', 'medium', 'complex'],
-      includeVariations: true
+    console.log('1. Text to Speech:');
+
+    const ttsResult = await client.ai.textToSpeech('Hello! This is a demonstration of text to speech capabilities.', {
+      voice: 'alloy',
+      speed: 1.0,
+      responseFormat: 'mp3',
     });
 
-    console.log('✅ Training data generated:', {
-      totalSamples: trainingData.samples?.length || 0,
-      appTypes: trainingData.appTypes,
-      complexityDistribution: trainingData.distribution
-    });
+    if (ttsResult instanceof Buffer) {
+      console.log('TTS Result: Audio buffer received');
+      console.log('Buffer size:', ttsResult.length, 'bytes');
 
-    console.log('\n2. Train specialized models:');
-    
-    const specializedTraining = await client.brain.trainSpecializedModel({
-      specialization: 'e-commerce',
-      trainingData: 'e-commerce-specific',
-      validationSplit: 0.2,
-      epochs: 10,
-      includeTransferLearning: true
-    });
-
-    console.log('✅ Specialized model trained:', {
-      specialization: specializedTraining.specialization,
-      accuracy: specializedTraining.accuracy,
-      loss: specializedTraining.loss,
-      improved: specializedTraining.improved
-    });
-
-    console.log('\n3. A/B test brain improvements:');
-    
-    const abTest = await client.brain.createABTest({
-      name: 'Improved Architecture Detection',
-      variants: [
-        { name: 'current', description: 'Current brain model' },
-        { name: 'improved', description: 'Enhanced pattern matching' }
-      ],
-      metrics: ['accuracy', 'user_satisfaction', 'generation_time'],
-      trafficSplit: { current: 50, improved: 50 },
-      duration: '14d'
-    });
-
-    console.log('✅ A/B test created:', abTest);
-
-    console.log('\n4. Evaluate model performance:');
-    
-    const evaluation = await client.brain.evaluatePerformance({
-      testSet: 'holdout',
-      metrics: ['accuracy', 'precision', 'recall', 'f1_score'],
-      includeConfusionMatrix: true,
-      includeBenchmarks: true
-    });
-
-    console.log('✅ Model evaluation:', {
-      accuracy: evaluation.accuracy,
-      precision: evaluation.precision,
-      recall: evaluation.recall,
-      f1Score: evaluation.f1Score,
-      benchmarkComparison: evaluation.benchmarks
-    });
-
-    console.log('\n5. Hyperparameter optimization:');
-    
-    const hyperparameterOpt = await client.brain.optimizeHyperparameters({
-      parameters: {
-        learning_rate: { min: 0.0001, max: 0.01, type: 'log' },
-        batch_size: { values: [16, 32, 64, 128] },
-        hidden_size: { min: 128, max: 1024, step: 128 },
-        dropout: { min: 0.1, max: 0.5, step: 0.1 }
-      },
-      optimization: 'bayesian',
-      maxTrials: 50,
-      metric: 'validation_accuracy'
-    });
-
-    console.log('✅ Hyperparameter optimization:', {
-      bestParams: hyperparameterOpt.bestParams,
-      bestScore: hyperparameterOpt.bestScore,
-      trialsCompleted: hyperparameterOpt.trials
-    });
-
-    console.log('\n6. Model interpretability:');
-    
-    const interpretability = await client.brain.explainDecisions({
-      samplePrompts: [
-        'E-commerce marketplace with payments',
-        'Social media platform with real-time chat',
-        'Blog CMS with user management'
-      ],
-      explanationTypes: ['feature_importance', 'attention_weights', 'decision_path']
-    });
-
-    console.log('✅ Model interpretability:', {
-      explanations: interpretability.explanations?.length || 0,
-      topFeatures: interpretability.topFeatures,
-      confidence: interpretability.confidence
-    });
-
-  } catch (error) {
-    console.error('❌ Brain training failed:', error.message);
-  }
-}
-
-async function demonstrateAdvancedAI(client) {
-  console.log('\n🔬 Advanced AI Features\n');
-  console.log('==========================================');
-
-  try {
-    console.log('1. Multi-modal app generation:');
-    
-    const multiModalPrompt = {
-      text: "Create a recipe sharing app",
-      images: ["mockup-sketch.jpg", "ui-wireframe.png"],
-      voice: "audio-description.mp3",
-      context: {
-        targetAudience: "home cooks",
-        platform: "mobile-first",
-        monetization: "freemium"
-      }
-    };
-
-    const multiModalApp = await client.brain.generateMultiModal(multiModalPrompt, {
-      analyzeImages: true,
-      processVoice: true,
-      combineInputs: true
-    });
-
-    console.log('✅ Multi-modal app generated:', {
-      textAnalysis: multiModalApp.text,
-      imageAnalysis: multiModalApp.images,
-      voiceAnalysis: multiModalApp.voice,
-      combinedInsights: multiModalApp.combined
-    });
-
-    console.log('\n2. Conversational app building:');
-    
-    const conversation = await client.brain.startConversation({
-      initialPrompt: "I want to build an app for my restaurant",
-      mode: 'guided',
-      includeQuestions: true
-    });
-
-    console.log('✅ Conversation started:', {
-      sessionId: conversation.sessionId,
-      questions: conversation.questions,
-      suggestions: conversation.suggestions
-    });
-
-    // Simulate conversation turns
-    const responses = [
-      "It's a fine dining restaurant with outdoor seating",
-      "We need reservations, menu display, and ordering",
-      "Yes, we want to integrate with our POS system"
-    ];
-
-    for (const response of responses) {
-      const turn = await client.brain.continueConversation(conversation.sessionId, response);
-      console.log(`✅ Conversation turn:`, {
-        understanding: turn.understanding,
-        nextQuestions: turn.nextQuestions?.slice(0, 2) || []
+      // Optionally save to file
+      // fs.writeFileSync('output.mp3', ttsResult);
+      // console.log('Saved to output.mp3');
+    } else {
+      console.log('TTS Result:', {
+        success: ttsResult.success,
+        jobId: ttsResult.jobId,
+        status: ttsResult.status,
       });
     }
 
-    console.log('\n3. Code review and suggestions:');
-    
-    const codeReview = await client.brain.reviewCode({
-      code: `
-function processOrder(order) {
-  // TODO: Add validation
-  const total = order.items.reduce((sum, item) => sum + item.price, 0);
-  return { orderId: Math.random(), total: total };
-}
-      `,
-      language: 'javascript',
-      includeSecurityCheck: true,
-      includePerformanceCheck: true,
-      includeBestPractices: true
-    });
+    console.log('\n2. Available voices:');
 
-    console.log('✅ Code review:', {
-      issues: codeReview.issues,
-      suggestions: codeReview.suggestions,
-      securityScore: codeReview.security,
-      performanceScore: codeReview.performance
-    });
+    const voices = await client.ai.getAvailableVoices();
+    console.log(
+      'Available voices:',
+      voices.map((v) => v.name || v.id).join(', ')
+    );
 
-    console.log('\n4. Automated refactoring:');
-    
-    const refactoring = await client.brain.suggestRefactoring({
-      codebase: 'sample-project',
-      refactoringTypes: ['extract-method', 'rename-variable', 'remove-duplication'],
-      applyChanges: false, // Just suggestions
-      includeTests: true
-    });
-
-    console.log('✅ Refactoring suggestions:', {
-      suggestions: refactoring.suggestions?.length || 0,
-      impact: refactoring.impact,
-      confidence: refactoring.confidence
-    });
-
-    console.log('\n5. Performance optimization:');
-    
-    const optimization = await client.brain.optimizePerformance({
-      appType: 'e-commerce',
-      currentMetrics: {
-        loadTime: 3.2,
-        bundleSize: 2.5, // MB
-        coreWebVitals: { lcp: 2.8, fid: 150, cls: 0.15 }
-      },
-      targetMetrics: {
-        loadTime: 1.5,
-        bundleSize: 1.0,
-        coreWebVitals: { lcp: 1.5, fid: 50, cls: 0.05 }
-      }
-    });
-
-    console.log('✅ Performance optimization:', {
-      optimizations: optimization.recommendations,
-      expectedImprovement: optimization.improvement,
-      implementationEffort: optimization.effort
-    });
-
-    console.log('\n6. AI-powered debugging:');
-    
-    const debugging = await client.brain.debugIssue({
-      errorMessage: "Cannot read property 'id' of undefined",
-      stackTrace: `at UserService.getUser (user.service.ts:45:12)
-        at UserController.getProfile (user.controller.ts:23:8)`,
-      context: {
-        framework: 'nestjs',
-        database: 'postgresql',
-        recentChanges: ['Updated user schema', 'Added new validation']
-      }
-    });
-
-    console.log('✅ AI debugging:', {
-      diagnosis: debugging.diagnosis,
-      solutions: debugging.solutions,
-      prevention: debugging.prevention,
-      confidence: debugging.confidence
-    });
-
-    console.log('\n7. Predictive analytics:');
-    
-    const predictions = await client.brain.predict({
-      scenario: 'app_success',
-      features: {
-        appType: 'social-media',
-        complexity: 'medium',
-        team_size: 3,
-        timeline: '6-months',
-        budget: 'medium',
-        market_competition: 'high'
-      },
-      predictions: ['success_probability', 'timeline_accuracy', 'budget_accuracy']
-    });
-
-    console.log('✅ Predictions:', {
-      successProbability: predictions.success_probability,
-      timelineAccuracy: predictions.timeline_accuracy,
-      budgetAccuracy: predictions.budget_accuracy,
-      recommendations: predictions.recommendations
-    });
-
+    console.log('\n3. Speech to Text (transcription):');
+    console.log('Note: Requires an audio file. Example code:');
+    console.log(`
+      const audioFile = fs.readFileSync('./audio.mp3');
+      const transcription = await client.ai.transcribeAudio(audioFile, {
+        language: 'en',
+        responseFormat: 'json'
+      });
+      console.log('Transcription:', transcription.text);
+    `);
   } catch (error) {
-    console.error('❌ Advanced AI features failed:', error.message);
+    console.error('Audio operations failed:', error.message);
   }
 }
 
-// Promise-based AI example
-function promiseBasedAIExample() {
-  console.log('\n🔄 Promise-based AI Operations\n');
+async function demonstrateVideoGeneration(client) {
+  console.log('\n\nVideo Generation\n');
+  console.log('==========================================');
 
-  const client = new FluxezClient(API_KEY, {
-    
-    debug: false
-  });
+  try {
+    console.log('1. Generate video from text prompt:');
 
-  return client.brain.understand('Simple todo app with drag and drop')
-    .then(understanding => {
-      console.log('✅ Promise understanding:', understanding.appType);
-      return client.brain.findSimilar('Simple todo app with drag and drop');
-    })
-    .then(similar => {
-      console.log('✅ Similar apps found:', similar.length);
-      return client.brain.generate('Simple todo app with drag and drop', {
-        framework: 'react',
-        includeBackend: false
-      });
-    })
-    .then(generated => {
-      console.log('✅ App generated:', generated.components?.length || 0, 'components');
-    })
-    .catch(error => {
-      console.error('❌ Promise chain failed:', error.message);
+    const videoResult = await client.ai.generateVideo('A cat playing with a ball of yarn', {
+      duration: 4,
+      aspectRatio: '16:9',
+      frameRate: 24,
     });
+
+    console.log('Video generation result:', {
+      success: videoResult.success,
+      taskId: videoResult.data?.taskId,
+      jobId: videoResult.data?.jobId,
+      status: videoResult.data?.status,
+      dimensions: videoResult.data?.dimensions,
+    });
+
+    console.log('\n2. Check video job status:');
+
+    if (videoResult.data?.taskId || videoResult.data?.jobId) {
+      const jobId = videoResult.data.taskId || videoResult.data.jobId;
+      const status = await client.ai.getVideoJobStatus(jobId);
+
+      console.log('Video job status:', {
+        status: status.data?.status,
+        videoUrl: status.data?.videoUrl,
+      });
+    }
+
+    console.log('\n3. Generate video with webhook notification:');
+
+    const videoWithWebhook = await client.ai.generateVideo('A bird flying over ocean waves', {
+      duration: 5,
+      aspectRatio: '1:1',
+      webhookUrl: 'https://your-domain.com/webhook/video-complete',
+    });
+
+    console.log('Video with webhook:', {
+      taskId: videoWithWebhook.data?.taskId,
+      message: 'Webhook will be called when video is ready',
+    });
+  } catch (error) {
+    console.error('Video generation failed:', error.message);
+  }
+}
+
+async function demonstrateJobQueueManagement(client) {
+  console.log('\n\nJob Queue Management\n');
+  console.log('==========================================');
+
+  try {
+    console.log('1. Enqueue a job:');
+
+    const job = await client.ai.enqueueJob(
+      'image',
+      {
+        prompt: 'Abstract art with vibrant colors',
+        size: '1024x1024',
+        quality: 'hd',
+      },
+      {
+        priority: 'normal',
+        webhookUrl: 'https://your-domain.com/webhook/ai',
+        autoRetry: true,
+        maxRetries: 3,
+      }
+    );
+
+    console.log('Enqueued job:', {
+      jobId: job.data?.jobId,
+      status: job.data?.status,
+      priority: job.data?.priority,
+    });
+
+    console.log('\n2. Get queue status:');
+
+    const queueStatus = await client.ai.getQueueStatus();
+
+    console.log('Queue status:', {
+      totalJobs: queueStatus.data?.totalJobs,
+      byType: queueStatus.data?.jobsByType,
+      byStatus: queueStatus.data?.jobsByStatus,
+    });
+
+    console.log('\n3. List jobs:');
+
+    const jobs = await client.ai.listJobs({
+      type: 'image',
+      limit: 5,
+    });
+
+    console.log('Recent image jobs:', {
+      total: jobs.data?.total,
+      jobs: jobs.data?.jobs?.map((j) => ({
+        jobId: j.jobId,
+        status: j.status,
+      })),
+    });
+
+    console.log('\n4. Get job details:');
+
+    if (job.data?.jobId) {
+      const jobDetails = await client.ai.getJobDetails(job.data.jobId);
+
+      console.log('Job details:', {
+        jobId: jobDetails.data?.jobId,
+        type: jobDetails.data?.jobType,
+        status: jobDetails.data?.status,
+        progress: jobDetails.data?.progress,
+        createdAt: jobDetails.data?.createdAt,
+      });
+    }
+
+    console.log('\n5. Cancel a job:');
+    console.log('Example: await client.ai.cancelJob(jobId)');
+    console.log('Note: Only pending/queued jobs can be cancelled');
+  } catch (error) {
+    console.error('Job queue management failed:', error.message);
+  }
 }
 
 // Run the examples
 if (require.main === module) {
-  console.log('🌟 Running Fluxez SDK AI/Brain Examples\n');
-  
-  aiBrainExamplesMain()
+  console.log('Running Fluxez SDK AI Examples\n');
+
+  aiExamplesMain()
     .then(() => {
-      setTimeout(() => {
-        console.log('\n' + '='.repeat(50));
-        promiseBasedAIExample();
-      }, 2000);
+      console.log('\n' + '='.repeat(50));
+      console.log('\nNext Steps:');
+      console.log('1. Check 17-ai-queue-webhooks.js for webhook examples');
+      console.log('2. Check 18-ai-models-and-workflows.js for advanced AI workflows');
+      console.log('3. Set up webhook endpoints to receive job notifications');
     })
     .catch(console.error);
 }
 
 // Export for use in other files
 module.exports = {
-  aiBrainExamplesMain,
-  demonstratePromptUnderstanding,
-  demonstrateAppGeneration,
-  demonstratePatternMatching,
-  demonstrateArchitectureDesign,
+  aiExamplesMain,
+  demonstrateTextGeneration,
+  demonstrateChatCompletion,
   demonstrateCodeGeneration,
-  demonstrateLearningSystem,
-  demonstrateBrainTraining,
-  demonstrateAdvancedAI,
-  promiseBasedAIExample
+  demonstrateTextProcessing,
+  demonstrateImageGeneration,
+  demonstrateAudioOperations,
+  demonstrateVideoGeneration,
+  demonstrateJobQueueManagement,
 };

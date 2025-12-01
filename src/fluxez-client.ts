@@ -17,6 +17,7 @@ import { VideoConferencingClient } from './modules/video-conferencing';
 import { DocumentsClient } from './modules/documents';
 import { ChatbotClient } from './modules/chatbot';
 import { PaymentClient } from './modules/payment';
+import { VectorClient } from './modules/vector';
 import { SchemaClient } from './schema/schema-client';
 import { FLUXEZ_BASE_URL } from './constants';
 import { 
@@ -89,7 +90,21 @@ import {
  *     ]
  *   }
  * });
- * 
+ *
+ * // Vector Search (Qdrant)
+ * await client.vector.createCollection({
+ *   name: 'embeddings',
+ *   vectorSize: 1536,
+ *   distance: 'cosine'
+ * });
+ * await client.vector.upsert('embeddings', [
+ *   { id: 'doc1', vector: [...], payload: { title: 'Document 1' } }
+ * ]);
+ * const similar = await client.vector.search('embeddings', {
+ *   vector: [...],
+ *   limit: 10
+ * });
+ *
  * ```
  */
 export class FluxezClient {
@@ -117,6 +132,7 @@ export class FluxezClient {
   public chatbot!: ChatbotClient;
   public edgeFunctions!: EdgeFunctionsClient;
   public payment!: PaymentClient;
+  public vector!: VectorClient;
 
   constructor(apiKey: string, config?: FluxezClientConfig) {
     if (!apiKey) {
@@ -185,6 +201,7 @@ export class FluxezClient {
     this.chatbot = new ChatbotClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.edgeFunctions = new EdgeFunctionsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.payment = new PaymentClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+    this.vector = new VectorClient(this.httpClient);
   }
 
   private getClientConfig(): any {

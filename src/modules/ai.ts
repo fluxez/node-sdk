@@ -1,4 +1,5 @@
 import { HttpClient } from '../core/http-client';
+import { API_ENDPOINTS } from '../constants';
 
 /**
  * AI Module - Comprehensive AI capabilities
@@ -27,7 +28,7 @@ export class AIModule {
     text: string;
     contentId?: string;
   }> {
-    const response = await this.httpClient.post('/ai/text/generate', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_TEXT.GENERATE, {
       prompt,
       ...options,
     });
@@ -49,7 +50,7 @@ export class AIModule {
     message: string;
     contentId?: string;
   }> {
-    const response = await this.httpClient.post('/ai/text/chat', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_TEXT.CHAT, {
       messages,
       ...options,
     });
@@ -70,7 +71,7 @@ export class AIModule {
     code: string;
     contentId?: string;
   }> {
-    const response = await this.httpClient.post('/ai/text/code/generate', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_TEXT.CODE_GENERATE, {
       prompt,
       language: options?.language || 'typescript',
       framework: options?.framework,
@@ -93,7 +94,7 @@ export class AIModule {
     summaryLength: number;
     compressionRatio: number;
   }> {
-    const response = await this.httpClient.post('/ai/text/summarize', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_TEXT.SUMMARIZE, {
       text,
       length: options?.length || 'medium',
     });
@@ -115,7 +116,7 @@ export class AIModule {
     targetLanguage: string;
     confidence: number;
   }> {
-    const response = await this.httpClient.post('/ai/text/translate', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_TEXT.TRANSLATE, {
       text,
       targetLanguage,
       sourceLanguage: options?.sourceLanguage,
@@ -156,7 +157,7 @@ export class AIModule {
     };
     error?: string;
   }> {
-    const response = await this.httpClient.post('/ai/image/generate', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_IMAGE.GENERATE, {
       prompt,
       model: options?.model,
       size: options?.size || '1024x1024',
@@ -185,7 +186,7 @@ export class AIModule {
     objects?: Array<{ name: string; confidence: number }>;
     confidence: number;
   }> {
-    const response = await this.httpClient.post('/ai/image/analyze', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_IMAGE.ANALYZE, {
       imageUrl,
       question: options?.question || 'What is in this image?',
       detail: options?.detail || 'auto',
@@ -206,7 +207,7 @@ export class AIModule {
     imageUrl: string;
     cost?: number;
   }> {
-    const response = await this.httpClient.post('/ai/image/edit', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_IMAGE.EDIT, {
       image: imageData,
       prompt,
       mask: options?.mask,
@@ -225,7 +226,7 @@ export class AIModule {
   ): Promise<{
     images: Array<{ url: string }>;
   }> {
-    const response = await this.httpClient.post('/ai/image/variations', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_IMAGE.VARIATION, {
       image: imageData,
       n: options?.n || 1,
     });
@@ -268,7 +269,7 @@ export class AIModule {
     if (options?.responseFormat) formData.append('responseFormat', options.responseFormat);
     if (options?.webhookUrl) formData.append('webhookUrl', options.webhookUrl);
 
-    const response = await this.httpClient.post('/ai/audio/stt/transcribe', formData, {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_AUDIO_STT.TRANSCRIBE, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -287,7 +288,8 @@ export class AIModule {
     duration?: number;
     error?: string;
   }> {
-    const response = await this.httpClient.get(`/ai/audio/stt/status/${jobId}`);
+    const url = API_ENDPOINTS.AI_AUDIO_STT.STATUS.replace(':jobId', jobId);
+    const response = await this.httpClient.get(url);
     return response.data;
   }
 
@@ -312,7 +314,7 @@ export class AIModule {
     stored?: boolean;
     contentId?: string;
   }> {
-    const response = await this.httpClient.post('/ai/audio/tts/generate', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_AUDIO_TTS.GENERATE, {
       text,
       voice: options?.voice || 'alloy',
       model: options?.model,
@@ -340,7 +342,8 @@ export class AIModule {
     audioUrl?: string;
     error?: string;
   }> {
-    const response = await this.httpClient.get(`/ai/audio/tts/status/${jobId}`);
+    const url = API_ENDPOINTS.AI_AUDIO_TTS.STATUS.replace(':jobId', jobId);
+    const response = await this.httpClient.get(url);
     return response.data;
   }
 
@@ -348,7 +351,8 @@ export class AIModule {
    * Download TTS generated audio file
    */
   async downloadTTSAudio(jobId: string): Promise<Buffer> {
-    const response = await this.httpClient.get(`/ai/audio/tts/download/${jobId}`, {
+    const url = API_ENDPOINTS.AI_AUDIO_TTS.DOWNLOAD.replace(':jobId', jobId);
+    const response = await this.httpClient.get(url, {
       responseType: 'arraybuffer',
     });
     return Buffer.from(response.data);
@@ -422,7 +426,7 @@ export class AIModule {
     };
     error?: string;
   }> {
-    const response = await this.httpClient.post('/ai/video/generate', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_VIDEO.GENERATE, {
       prompt,
       duration: options?.duration || 4,
       aspectRatio: options?.aspectRatio || '16:9',
@@ -446,7 +450,8 @@ export class AIModule {
     };
     error?: string;
   }> {
-    const response = await this.httpClient.get(`/ai/video/job/${jobId}`);
+    const url = API_ENDPOINTS.AI_VIDEO.JOB_STATUS.replace(':jobId', jobId);
+    const response = await this.httpClient.get(url);
     return response.data;
   }
 
@@ -476,7 +481,7 @@ export class AIModule {
     };
     error?: string;
   }> {
-    const response = await this.httpClient.post('/ai/queue/enqueue', {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_QUEUE.ENQUEUE, {
       jobType,
       jobData,
       priority: options?.priority || 'normal',
@@ -501,7 +506,7 @@ export class AIModule {
     };
     error?: string;
   }> {
-    const response = await this.httpClient.get('/ai/queue/status');
+    const response = await this.httpClient.get(API_ENDPOINTS.AI_QUEUE.STATUS);
     return response.data;
   }
 
@@ -529,7 +534,8 @@ export class AIModule {
     };
     error?: string;
   }> {
-    const response = await this.httpClient.get(`/ai/queue/job/${jobId}`);
+    const url = API_ENDPOINTS.AI_QUEUE.JOB_DETAILS.replace(':jobId', jobId);
+    const response = await this.httpClient.get(url);
     return response.data;
   }
 
@@ -545,7 +551,8 @@ export class AIModule {
     };
     error?: string;
   }> {
-    const response = await this.httpClient.delete(`/ai/queue/job/${jobId}`);
+    const url = API_ENDPOINTS.AI_QUEUE.CANCEL_JOB.replace(':jobId', jobId);
+    const response = await this.httpClient.delete(url);
     return response.data;
   }
 
@@ -570,7 +577,7 @@ export class AIModule {
     if (filters?.limit) params.append('limit', filters.limit.toString());
 
     const queryString = params.toString();
-    const url = queryString ? `/ai/queue/jobs?${queryString}` : '/ai/queue/jobs';
+    const url = queryString ? `${API_ENDPOINTS.AI_QUEUE.LIST_JOBS}?${queryString}` : API_ENDPOINTS.AI_QUEUE.LIST_JOBS;
 
     const response = await this.httpClient.get(url);
     return response.data;

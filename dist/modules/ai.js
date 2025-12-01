@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AIModule = void 0;
+const constants_1 = require("../constants");
 /**
  * AI Module - Comprehensive AI capabilities
  *
@@ -15,7 +16,7 @@ class AIModule {
      * Generate text using AI
      */
     async generateText(prompt, options) {
-        const response = await this.httpClient.post('/ai/text/generate', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_TEXT.GENERATE, {
             prompt,
             ...options,
         });
@@ -25,7 +26,7 @@ class AIModule {
      * Chat with AI using message history
      */
     async chat(messages, options) {
-        const response = await this.httpClient.post('/ai/text/chat', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_TEXT.CHAT, {
             messages,
             ...options,
         });
@@ -35,7 +36,7 @@ class AIModule {
      * Generate code in various programming languages
      */
     async generateCode(prompt, options) {
-        const response = await this.httpClient.post('/ai/text/code/generate', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_TEXT.CODE_GENERATE, {
             prompt,
             language: options?.language || 'typescript',
             framework: options?.framework,
@@ -47,7 +48,7 @@ class AIModule {
      * Summarize text content
      */
     async summarizeText(text, options) {
-        const response = await this.httpClient.post('/ai/text/summarize', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_TEXT.SUMMARIZE, {
             text,
             length: options?.length || 'medium',
         });
@@ -57,7 +58,7 @@ class AIModule {
      * Translate text from one language to another
      */
     async translateText(text, targetLanguage, options) {
-        const response = await this.httpClient.post('/ai/text/translate', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_TEXT.TRANSLATE, {
             text,
             targetLanguage,
             sourceLanguage: options?.sourceLanguage,
@@ -70,7 +71,7 @@ class AIModule {
      * Now supports queue system with webhook notifications
      */
     async generateImage(prompt, options) {
-        const response = await this.httpClient.post('/ai/image/generate', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_IMAGE.GENERATE, {
             prompt,
             model: options?.model,
             size: options?.size || '1024x1024',
@@ -87,7 +88,7 @@ class AIModule {
      * Analyze image content
      */
     async analyzeImage(imageUrl, options) {
-        const response = await this.httpClient.post('/ai/image/analyze', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_IMAGE.ANALYZE, {
             imageUrl,
             question: options?.question || 'What is in this image?',
             detail: options?.detail || 'auto',
@@ -98,7 +99,7 @@ class AIModule {
      * Edit images using AI
      */
     async editImage(imageData, prompt, options) {
-        const response = await this.httpClient.post('/ai/image/edit', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_IMAGE.EDIT, {
             image: imageData,
             prompt,
             mask: options?.mask,
@@ -109,7 +110,7 @@ class AIModule {
      * Create variations of an image
      */
     async createImageVariation(imageData, options) {
-        const response = await this.httpClient.post('/ai/image/variations', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_IMAGE.VARIATION, {
             image: imageData,
             n: options?.n || 1,
         });
@@ -131,7 +132,7 @@ class AIModule {
             formData.append('responseFormat', options.responseFormat);
         if (options?.webhookUrl)
             formData.append('webhookUrl', options.webhookUrl);
-        const response = await this.httpClient.post('/ai/audio/stt/transcribe', formData, {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_AUDIO_STT.TRANSCRIBE, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -142,7 +143,8 @@ class AIModule {
      * Check STT (Speech-to-Text) job status
      */
     async getSTTJobStatus(jobId) {
-        const response = await this.httpClient.get(`/ai/audio/stt/status/${jobId}`);
+        const url = constants_1.API_ENDPOINTS.AI_AUDIO_STT.STATUS.replace(':jobId', jobId);
+        const response = await this.httpClient.get(url);
         return response.data;
     }
     /**
@@ -150,7 +152,7 @@ class AIModule {
      * Now supports async processing with webhook notifications
      */
     async textToSpeech(text, options) {
-        const response = await this.httpClient.post('/ai/audio/tts/generate', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_AUDIO_TTS.GENERATE, {
             text,
             voice: options?.voice || 'alloy',
             model: options?.model,
@@ -170,14 +172,16 @@ class AIModule {
      * Check TTS (Text-to-Speech) job status
      */
     async getTTSJobStatus(jobId) {
-        const response = await this.httpClient.get(`/ai/audio/tts/status/${jobId}`);
+        const url = constants_1.API_ENDPOINTS.AI_AUDIO_TTS.STATUS.replace(':jobId', jobId);
+        const response = await this.httpClient.get(url);
         return response.data;
     }
     /**
      * Download TTS generated audio file
      */
     async downloadTTSAudio(jobId) {
-        const response = await this.httpClient.get(`/ai/audio/tts/download/${jobId}`, {
+        const url = constants_1.API_ENDPOINTS.AI_AUDIO_TTS.DOWNLOAD.replace(':jobId', jobId);
+        const response = await this.httpClient.get(url, {
             responseType: 'arraybuffer',
         });
         return Buffer.from(response.data);
@@ -209,7 +213,7 @@ class AIModule {
      * Now supports async processing with webhook notifications
      */
     async generateVideo(prompt, options) {
-        const response = await this.httpClient.post('/ai/video/generate', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_VIDEO.GENERATE, {
             prompt,
             duration: options?.duration || 4,
             aspectRatio: options?.aspectRatio || '16:9',
@@ -222,7 +226,8 @@ class AIModule {
      * Check video generation job status
      */
     async getVideoJobStatus(jobId) {
-        const response = await this.httpClient.get(`/ai/video/job/${jobId}`);
+        const url = constants_1.API_ENDPOINTS.AI_VIDEO.JOB_STATUS.replace(':jobId', jobId);
+        const response = await this.httpClient.get(url);
         return response.data;
     }
     // ============= AI JOB QUEUE MANAGEMENT =============
@@ -230,7 +235,7 @@ class AIModule {
      * Enqueue a new AI job to the processing queue
      */
     async enqueueJob(jobType, jobData, options) {
-        const response = await this.httpClient.post('/ai/queue/enqueue', {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_QUEUE.ENQUEUE, {
             jobType,
             jobData,
             priority: options?.priority || 'normal',
@@ -244,21 +249,23 @@ class AIModule {
      * Get overall queue status and statistics
      */
     async getQueueStatus() {
-        const response = await this.httpClient.get('/ai/queue/status');
+        const response = await this.httpClient.get(constants_1.API_ENDPOINTS.AI_QUEUE.STATUS);
         return response.data;
     }
     /**
      * Get detailed information about a specific job
      */
     async getJobDetails(jobId) {
-        const response = await this.httpClient.get(`/ai/queue/job/${jobId}`);
+        const url = constants_1.API_ENDPOINTS.AI_QUEUE.JOB_DETAILS.replace(':jobId', jobId);
+        const response = await this.httpClient.get(url);
         return response.data;
     }
     /**
      * Cancel a pending or processing job
      */
     async cancelJob(jobId) {
-        const response = await this.httpClient.delete(`/ai/queue/job/${jobId}`);
+        const url = constants_1.API_ENDPOINTS.AI_QUEUE.CANCEL_JOB.replace(':jobId', jobId);
+        const response = await this.httpClient.delete(url);
         return response.data;
     }
     /**
@@ -273,7 +280,7 @@ class AIModule {
         if (filters?.limit)
             params.append('limit', filters.limit.toString());
         const queryString = params.toString();
-        const url = queryString ? `/ai/queue/jobs?${queryString}` : '/ai/queue/jobs';
+        const url = queryString ? `${constants_1.API_ENDPOINTS.AI_QUEUE.LIST_JOBS}?${queryString}` : constants_1.API_ENDPOINTS.AI_QUEUE.LIST_JOBS;
         const response = await this.httpClient.get(url);
         return response.data;
     }

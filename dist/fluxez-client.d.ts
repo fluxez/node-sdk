@@ -16,6 +16,7 @@ import { VideoConferencingClient } from './modules/video-conferencing';
 import { DocumentsClient } from './modules/documents';
 import { ChatbotClient } from './modules/chatbot';
 import { PaymentClient } from './modules/payment';
+import { VectorClient } from './modules/vector';
 import { SchemaClient } from './schema/schema-client';
 import { FluxezClientConfig, QueryResult } from './types';
 /**
@@ -81,6 +82,20 @@ import { FluxezClientConfig, QueryResult } from './types';
  *   }
  * });
  *
+ * // Vector Search (Qdrant)
+ * await client.vector.createCollection({
+ *   name: 'embeddings',
+ *   vectorSize: 1536,
+ *   distance: 'cosine'
+ * });
+ * await client.vector.upsert('embeddings', [
+ *   { id: 'doc1', vector: [...], payload: { title: 'Document 1' } }
+ * ]);
+ * const similar = await client.vector.search('embeddings', {
+ *   vector: [...],
+ *   limit: 10
+ * });
+ *
  * ```
  */
 export declare class FluxezClient {
@@ -106,6 +121,7 @@ export declare class FluxezClient {
     chatbot: ChatbotClient;
     edgeFunctions: EdgeFunctionsClient;
     payment: PaymentClient;
+    vector: VectorClient;
     constructor(apiKey: string, config?: FluxezClientConfig);
     private initializeClients;
     private getClientConfig;
