@@ -91,10 +91,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/fluxez/node-sdk.git"
+    "url": "git+https://github.com/fluxez/node-sdk.git"
   },
   "bugs": {
     "url": "https://github.com/fluxez/node-sdk/issues"
   },
-  "homepage": "https://github.com/fluxez/node-sdk"
+  "homepage": "https://github.com/fluxez/node-sdk#readme"
 }
