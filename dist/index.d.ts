@@ -24,6 +24,8 @@ export type { EmailOptions, EmailAttachment, BulkEmailRecipient, EmailTemplate, 
 export { QueueClient } from './modules/queue';
 export type { QueueMessage, SendMessageOptions, ReceiveMessageOptions, ReceivedMessage, CreateQueueOptions, QueueAttributes, QueueInfo } from './modules/queue';
 export { AIModule } from './modules/ai';
+export { VectorClient } from './modules/vector';
+export type { VectorDocument, QdrantSearchQuery, VectorSearchResult, CollectionInfo, CollectionStats, VectorHealthStatus, ScrollResult, CreateCollectionOptions, RecommendOptions } from './modules/vector';
 export { WorkflowClient } from './modules/workflow';
 export type { WorkflowListOptions, WorkflowExecutionOptions, WorkflowTemplate, WorkflowStats, GenerateWorkflowOptions, WorkflowAnalysis, WorkflowValidation } from './modules/workflow';
 export { ConnectorClient } from './modules/connectors';

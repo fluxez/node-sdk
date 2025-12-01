@@ -95,11 +95,11 @@ node 02-data-operations.js
 - **Time**: 15 minutes
 - **Good for**: Search features, business intelligence
 
-### 7. AI/Brain Examples (`07-ai-brain.js`)
-- **Focus**: AI-powered app generation
-- **Features**: App generation, requirement understanding, pattern matching
+### 7. AI Examples (`07-ai-brain.js`)
+- **Focus**: AI capabilities and content generation
+- **Features**: Text generation, chat, code generation, image/video/audio generation, job queue management
 - **Time**: 15 minutes
-- **Good for**: AI-powered development, rapid prototyping
+- **Good for**: AI-powered applications, content generation, media creation
 
 ### 8. Workflow Examples (`08-workflows.js`)
 - **Focus**: Workflow automation
@@ -160,6 +160,18 @@ node 02-data-operations.js
 - **Features**: Queue-based image generation, video generation, TTS/STT with job tracking, webhook notifications, batch processing
 - **Time**: 20 minutes
 - **Good for**: Async AI workflows, event-driven architectures, scalable AI processing
+
+### 🆕 18. AI Models & Workflows (`18-ai-models-and-workflows.js`)
+- **Focus**: Advanced AI model usage and multi-step workflows
+- **Features**: Multiple image models (Flux, SDXL), video generation pipelines, custom audio/image inputs
+- **Time**: 15 minutes
+- **Good for**: Advanced AI usage, model comparison, video production workflows
+
+### 🆕 19. Vector Search (`19-vector-search.js`)
+- **Focus**: Vector database operations with Qdrant
+- **Features**: Collection management, vector upsert/search, similarity matching, filtered search, recommendations, RAG workflows
+- **Time**: 15 minutes
+- **Good for**: Semantic search, embeddings storage, recommendation systems, RAG applications
 
 ## Common Patterns
 

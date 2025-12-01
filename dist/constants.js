@@ -84,12 +84,49 @@ exports.API_ENDPOINTS = {
         FLUSH: '/cache/flush',
         STATS: '/cache/stats',
     },
-    // Brain/AI
-    BRAIN: {
-        UNDERSTAND: '/brain/understand',
-        GENERATE: '/brain/generate',
-        SUGGEST: '/brain/suggest',
-        LEARN: '/brain/learn',
+    // AI - Text Operations
+    AI_TEXT: {
+        GENERATE: '/ai/text/generate',
+        CHAT: '/ai/text/chat',
+        CODE_GENERATE: '/ai/text/code/generate',
+        SUMMARIZE: '/ai/text/summarize',
+        TRANSLATE: '/ai/text/translate',
+        ANALYZE_DOCUMENT: '/ai/text/analyze/document',
+    },
+    // AI - Image Operations
+    AI_IMAGE: {
+        GENERATE: '/ai/image/generate',
+        ANALYZE: '/ai/image/analyze',
+        UPLOAD_ANALYZE: '/ai/image/upload-analyze',
+        EDIT: '/ai/image/edit',
+        VARIATION: '/ai/image/variation',
+    },
+    // AI - Video Operations
+    AI_VIDEO: {
+        GENERATE: '/ai/video/generate',
+        JOB_STATUS: '/ai/video/job/:jobId',
+    },
+    // AI - Audio TTS (Text-to-Speech)
+    AI_AUDIO_TTS: {
+        GENERATE: '/ai/audio/tts/generate',
+        STATUS: '/ai/audio/tts/status/:jobId',
+        DOWNLOAD: '/ai/audio/tts/download/:jobId',
+    },
+    // AI - Audio STT (Speech-to-Text)
+    AI_AUDIO_STT: {
+        TRANSCRIBE: '/ai/audio/stt/transcribe',
+        STATUS: '/ai/audio/stt/status/:jobId',
+    },
+    // AI - Job Queue Management
+    AI_QUEUE: {
+        ENQUEUE: '/ai/queue/enqueue',
+        STATUS: '/ai/queue/status',
+        JOB_DETAILS: '/ai/queue/job/:jobId',
+        CANCEL_JOB: '/ai/queue/job/:jobId',
+        LIST_JOBS: '/ai/queue/jobs',
+        CHECK_CAPACITY: '/ai/queue/capacity/check',
+        DISPATCH: '/ai/queue/dispatch',
+        CLEANUP: '/ai/queue/cleanup',
     },
     // Workflow
     WORKFLOW: {
@@ -115,6 +152,15 @@ exports.API_ENDPOINTS = {
         DELETE: '/queue/delete',
         PURGE: '/queue/purge',
         STATS: '/queue/stats',
+    },
+    // Vectors (Qdrant)
+    VECTORS: {
+        COLLECTIONS: '/vectors/collections',
+        UPSERT: '/vectors/upsert',
+        SEARCH: '/vectors/search',
+        DELETE: '/vectors/vectors',
+        RECOMMEND: '/vectors/recommend',
+        HEALTH: '/vectors/health',
     },
 };
 // SDK Version

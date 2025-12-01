@@ -71,11 +71,43 @@ export declare const API_ENDPOINTS: {
         FLUSH: string;
         STATS: string;
     };
-    BRAIN: {
-        UNDERSTAND: string;
+    AI_TEXT: {
         GENERATE: string;
-        SUGGEST: string;
-        LEARN: string;
+        CHAT: string;
+        CODE_GENERATE: string;
+        SUMMARIZE: string;
+        TRANSLATE: string;
+        ANALYZE_DOCUMENT: string;
+    };
+    AI_IMAGE: {
+        GENERATE: string;
+        ANALYZE: string;
+        UPLOAD_ANALYZE: string;
+        EDIT: string;
+        VARIATION: string;
+    };
+    AI_VIDEO: {
+        GENERATE: string;
+        JOB_STATUS: string;
+    };
+    AI_AUDIO_TTS: {
+        GENERATE: string;
+        STATUS: string;
+        DOWNLOAD: string;
+    };
+    AI_AUDIO_STT: {
+        TRANSCRIBE: string;
+        STATUS: string;
+    };
+    AI_QUEUE: {
+        ENQUEUE: string;
+        STATUS: string;
+        JOB_DETAILS: string;
+        CANCEL_JOB: string;
+        LIST_JOBS: string;
+        CHECK_CAPACITY: string;
+        DISPATCH: string;
+        CLEANUP: string;
     };
     WORKFLOW: {
         CREATE: string;
@@ -98,6 +130,14 @@ export declare const API_ENDPOINTS: {
         DELETE: string;
         PURGE: string;
         STATS: string;
+    };
+    VECTORS: {
+        COLLECTIONS: string;
+        UPSERT: string;
+        SEARCH: string;
+        DELETE: string;
+        RECOMMEND: string;
+        HEALTH: string;
     };
 };
 export declare const SDK_VERSION = "1.0.0";

@@ -392,16 +392,190 @@ const results = await client.search.bool({
 });
 ```
 
-### Vector Search
+### Vector Search (Legacy - via Search module)
 
 ```javascript
-// Similarity search
+// Similarity search via search module
 const similar = await client.search.vectorSearch({
   vector: [0.1, 0.2, 0.3, ...], // 1536-dimensional vector
   collection: 'documents',
   limit: 10,
   threshold: 0.8
 });
+```
+
+## Vector Database (Qdrant)
+
+Full vector database operations for embeddings, similarity search, and RAG applications:
+
+### Collection Management
+
+```javascript
+// Create a collection
+await client.vector.createCollection({
+  name: 'documents',
+  vectorSize: 1536,     // OpenAI embedding dimension
+  distance: 'cosine'    // 'cosine', 'euclid', or 'dot'
+});
+
+// List all collections
+const { collections } = await client.vector.listCollections();
+console.log('Collections:', collections);
+
+// Get collection statistics
+const { stats } = await client.vector.getCollectionStats('documents');
+console.log('Points count:', stats.pointsCount);
+
+// Delete a collection
+await client.vector.deleteCollection('documents');
+
+// Ensure collection exists (create if not)
+const created = await client.vector.ensureCollection({
+  name: 'embeddings',
+  vectorSize: 768,
+  distance: 'cosine'
+});
+```
+
+### Vector Operations
+
+```javascript
+// Insert a single vector
+await client.vector.insert('documents', {
+  id: 'doc_001',
+  vector: embeddingVector,  // Array of floats
+  payload: {
+    title: 'Introduction to ML',
+    content: 'Machine learning is...',
+    category: 'technology',
+    author: 'John Doe'
+  }
+});
+
+// Upsert multiple vectors
+await client.vector.upsert('documents', [
+  {
+    id: 'doc_002',
+    vector: embedding1,
+    payload: { title: 'Deep Learning', category: 'ai' }
+  },
+  {
+    id: 'doc_003',
+    vector: embedding2,
+    payload: { title: 'NLP Guide', category: 'ai' }
+  }
+]);
+
+// Delete a vector
+await client.vector.delete('documents', 'doc_001');
+
+// Delete multiple vectors
+await client.vector.deleteMany('documents', ['doc_002', 'doc_003']);
+```
+
+### Similarity Search
+
+```javascript
+// Basic similarity search
+const results = await client.vector.search('documents', {
+  vector: queryEmbedding,
+  limit: 10
+});
+
+console.log('Similar documents:', results.results.map(r => ({
+  id: r.id,
+  score: r.score,
+  title: r.payload?.title
+})));
+
+// Simple search by vector
+const similar = await client.vector.searchByVector('documents', queryVector, 5);
+
+// Search with score threshold
+const filtered = await client.vector.search('documents', {
+  vector: queryVector,
+  limit: 20,
+  threshold: 0.7  // Only results with score > 0.7
+});
+
+// Search with payload filter
+const techDocs = await client.vector.searchWithFilter(
+  'documents',
+  queryVector,
+  { category: 'technology' },  // Filter condition
+  10                           // Limit
+);
+```
+
+### Recommendations
+
+```javascript
+// Get recommendations based on positive examples
+const recs = await client.vector.recommend('documents', {
+  positive: ['doc_001', 'doc_002'],  // Find similar to these
+  limit: 5
+});
+
+// With negative examples (find similar but NOT like these)
+const refined = await client.vector.recommend('documents', {
+  positive: ['doc_001'],
+  negative: ['doc_003'],  // Exclude similar to this
+  limit: 5
+});
+
+// With filter
+const filteredRecs = await client.vector.recommend('documents', {
+  positive: ['doc_001'],
+  limit: 10,
+  filter: { category: 'technology' }
+});
+```
+
+### RAG (Retrieval-Augmented Generation) Workflow
+
+```javascript
+// Step 1: Store document embeddings
+const embedding = await client.ai.generateEmbedding(documentText);
+await client.vector.upsert('knowledge_base', [{
+  id: 'doc_' + docId,
+  vector: embedding.vector,
+  payload: {
+    title: document.title,
+    content: document.content,
+    source: document.source
+  }
+}]);
+
+// Step 2: Query with user question
+const questionEmbedding = await client.ai.generateEmbedding(userQuestion);
+const relevantDocs = await client.vector.search('knowledge_base', {
+  vector: questionEmbedding.vector,
+  limit: 5,
+  threshold: 0.7
+});
+
+// Step 3: Generate answer with context
+const context = relevantDocs.results
+  .map(doc => doc.payload.content)
+  .join('\n\n');
+
+const answer = await client.ai.chat([
+  { role: 'system', content: 'Answer based on the provided context.' },
+  { role: 'user', content: `Context: ${context}\n\nQuestion: ${userQuestion}` }
+]);
+
+console.log('Answer:', answer.message);
+console.log('Sources:', relevantDocs.results.map(r => r.payload.source));
+```
+
+### Health Check
+
+```javascript
+// Check vector database health
+const health = await client.vector.getHealth();
+console.log('Status:', health.status);       // 'healthy', 'unhealthy', or 'disabled'
+console.log('Configured:', health.configured);
+console.log('Collections:', health.collections);
 ```
 
 ## Analytics

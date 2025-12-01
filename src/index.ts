@@ -105,6 +105,20 @@ export type {
 // AI Module
 export { AIModule } from './modules/ai';
 
+// Vector Search (Qdrant)
+export { VectorClient } from './modules/vector';
+export type {
+  VectorDocument,
+  QdrantSearchQuery,
+  VectorSearchResult,
+  CollectionInfo,
+  CollectionStats,
+  VectorHealthStatus,
+  ScrollResult,
+  CreateCollectionOptions,
+  RecommendOptions
+} from './modules/vector';
+
 // Workflow
 export { WorkflowClient } from './modules/workflow';
 export type {
