@@ -534,11 +534,11 @@ const filteredRecs = await client.vector.recommend('documents', {
 ### RAG (Retrieval-Augmented Generation) Workflow
 
 ```javascript
-// Step 1: Store document embeddings
-const embedding = await client.ai.generateEmbedding(documentText);
+// Step 1: Store document embeddings using generateEmbeddings
+const embedding = await client.ai.generateEmbeddings(documentText);
 await client.vector.upsert('knowledge_base', [{
   id: 'doc_' + docId,
-  vector: embedding.vector,
+  vector: embedding.embeddings[0],  // Get first embedding vector
   payload: {
     title: document.title,
     content: document.content,
@@ -547,9 +547,9 @@ await client.vector.upsert('knowledge_base', [{
 }]);
 
 // Step 2: Query with user question
-const questionEmbedding = await client.ai.generateEmbedding(userQuestion);
+const questionEmbedding = await client.ai.generateEmbeddings(userQuestion);
 const relevantDocs = await client.vector.search('knowledge_base', {
-  vector: questionEmbedding.vector,
+  vector: questionEmbedding.embeddings[0],  // Get first embedding vector
   limit: 5,
   threshold: 0.7
 });
@@ -879,6 +879,22 @@ const translation = await client.ai.translateText(
   { sourceLanguage: 'en' }
 );
 console.log(translation.translatedText);
+
+// Generate embeddings for text (useful for vector search & RAG)
+const embeddings = await client.ai.generateEmbeddings(
+  'Machine learning is a subset of artificial intelligence',
+  { model: 'text-embedding-3-small' }  // Optional model
+);
+console.log(`Dimensions: ${embeddings.dimensions}`);
+console.log(`Embedding vector: ${embeddings.embeddings[0].slice(0, 5)}...`);
+
+// Batch embeddings for multiple texts
+const batchEmbeddings = await client.ai.generateEmbeddings([
+  'Introduction to AI',
+  'Deep learning fundamentals',
+  'Natural language processing'
+]);
+console.log(`Generated ${batchEmbeddings.count} embeddings`);
 
 // ========== IMAGE AI ==========
 

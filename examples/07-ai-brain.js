@@ -40,6 +40,7 @@ async function aiExamplesMain() {
     await demonstrateTextGeneration(client);
     await demonstrateChatCompletion(client);
     await demonstrateCodeGeneration(client);
+    await demonstrateEmbeddings(client);
     await demonstrateTextProcessing(client);
     await demonstrateImageGeneration(client);
     await demonstrateAudioOperations(client);
@@ -162,6 +163,62 @@ async function demonstrateCodeGeneration(client) {
     console.log(pythonCode.code?.substring(0, 300) + '...');
   } catch (error) {
     console.error('Code generation failed:', error.message);
+  }
+}
+
+async function demonstrateEmbeddings(client) {
+  console.log('\n\nEmbeddings Generation\n');
+  console.log('==========================================');
+
+  try {
+    console.log('1. Generate embeddings for single text:');
+
+    const singleEmbedding = await client.ai.generateEmbeddings(
+      'Machine learning is a subset of artificial intelligence that enables systems to learn from data.',
+      { model: 'text-embedding-3-small' }
+    );
+
+    console.log('Embedding result:', {
+      dimensions: singleEmbedding.dimensions,
+      count: singleEmbedding.count,
+      vectorPreview: singleEmbedding.embeddings[0]?.slice(0, 5).map(v => v.toFixed(4)) + '...',
+    });
+
+    console.log('\n2. Generate embeddings for multiple texts (batch):');
+
+    const batchEmbeddings = await client.ai.generateEmbeddings([
+      'Introduction to deep learning',
+      'Natural language processing fundamentals',
+      'Computer vision applications',
+    ]);
+
+    console.log('Batch embedding result:', {
+      count: batchEmbeddings.count,
+      dimensions: batchEmbeddings.dimensions,
+      texts: batchEmbeddings.texts?.map(t => t.text),
+    });
+
+    console.log('\n3. Use embeddings with vector database:');
+    console.log(`
+      // Generate embedding for a document
+      const docEmbedding = await client.ai.generateEmbeddings(documentContent);
+
+      // Store in vector database
+      await client.vector.upsert('documents', [{
+        id: 'doc_001',
+        vector: docEmbedding.embeddings[0],
+        payload: { title: 'Document Title', content: documentContent }
+      }]);
+
+      // Search similar documents
+      const queryEmbedding = await client.ai.generateEmbeddings(searchQuery);
+      const results = await client.vector.search('documents', {
+        vector: queryEmbedding.embeddings[0],
+        limit: 5
+      });
+    `);
+  } catch (error) {
+    console.error('Embeddings generation failed:', error.message);
   }
 }
 
@@ -460,6 +517,7 @@ module.exports = {
   demonstrateTextGeneration,
   demonstrateChatCompletion,
   demonstrateCodeGeneration,
+  demonstrateEmbeddings,
   demonstrateTextProcessing,
   demonstrateImageGeneration,
   demonstrateAudioOperations,

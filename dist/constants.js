@@ -91,6 +91,7 @@ exports.API_ENDPOINTS = {
         CODE_GENERATE: '/ai/text/code/generate',
         SUMMARIZE: '/ai/text/summarize',
         TRANSLATE: '/ai/text/translate',
+        EMBEDDINGS: '/ai/text/embeddings',
         ANALYZE_DOCUMENT: '/ai/text/analyze/document',
     },
     // AI - Image Operations

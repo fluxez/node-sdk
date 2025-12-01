@@ -65,6 +65,17 @@ class AIModule {
         });
         return response.data.data;
     }
+    /**
+     * Generate embeddings for text
+     * Useful for semantic search, similarity comparison, and RAG applications
+     */
+    async generateEmbeddings(text, options) {
+        const response = await this.httpClient.post(constants_1.API_ENDPOINTS.AI_TEXT.EMBEDDINGS, {
+            text,
+            model: options?.model,
+        });
+        return response.data.data;
+    }
     // ============= IMAGE AI OPERATIONS =============
     /**
      * Generate images from text prompts

@@ -77,6 +77,7 @@ export declare const API_ENDPOINTS: {
         CODE_GENERATE: string;
         SUMMARIZE: string;
         TRANSLATE: string;
+        EMBEDDINGS: string;
         ANALYZE_DOCUMENT: string;
     };
     AI_IMAGE: {

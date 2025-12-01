@@ -124,6 +124,29 @@ export class AIModule {
     return response.data.data;
   }
 
+  /**
+   * Generate embeddings for text
+   * Useful for semantic search, similarity comparison, and RAG applications
+   */
+  async generateEmbeddings(
+    text: string | string[],
+    options?: {
+      model?: string;
+    }
+  ): Promise<{
+    embeddings: number[][];
+    model: string;
+    dimensions: number;
+    count: number;
+    texts: Array<{ index: number; text: string }>;
+  }> {
+    const response = await this.httpClient.post(API_ENDPOINTS.AI_TEXT.EMBEDDINGS, {
+      text,
+      model: options?.model,
+    });
+    return response.data.data;
+  }
+
   // ============= IMAGE AI OPERATIONS =============
 
   /**

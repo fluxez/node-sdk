@@ -63,6 +63,22 @@ export declare class AIModule {
         confidence: number;
     }>;
     /**
+     * Generate embeddings for text
+     * Useful for semantic search, similarity comparison, and RAG applications
+     */
+    generateEmbeddings(text: string | string[], options?: {
+        model?: string;
+    }): Promise<{
+        embeddings: number[][];
+        model: string;
+        dimensions: number;
+        count: number;
+        texts: Array<{
+            index: number;
+            text: string;
+        }>;
+    }>;
+    /**
      * Generate images from text prompts
      * Now supports queue system with webhook notifications
      */
