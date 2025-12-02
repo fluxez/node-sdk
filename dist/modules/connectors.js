@@ -387,7 +387,7 @@ class ConnectorClient {
         }
     }
     /**
-     * Get OAuth authorization URL
+     * Get OAuth authorization URL (simple string URL)
      */
     getOAuthUrl(connectorType, redirectUri, state) {
         const baseUrl = this.config.baseURL || 'http://localhost:3000/api/v1';
@@ -397,6 +397,144 @@ class ConnectorClient {
             ...(state && { state })
         });
         return `${baseUrl}/connectors/oauth/authorize?${params.toString()}`;
+    }
+    // ============= OAuth Integration (One-Click Flow) =============
+    /**
+     * Initiate OAuth flow for a connector
+     * Returns the authorization URL to redirect the user to
+     *
+     * @example
+     * ```typescript
+     * // Create connector first
+     * const connector = await fluxez.connectors.create({
+     *   connector_type: 'google_drive',
+     *   name: 'My Google Drive',
+     *   config: { authMode: 'oneclick' }
+     * });
+     *
+     * // Get OAuth URL
+     * const { authorization_url } = await fluxez.connectors.initiateOAuth(connector.id);
+     *
+     * // Open in popup
+     * window.open(authorization_url, 'oauth', 'width=600,height=700');
+     * ```
+     */
+    async initiateOAuth(connectorId, options = {}) {
+        try {
+            this.logger.debug('Initiating OAuth flow', { connectorId, options });
+            const params = {};
+            if (options.redirectUri) {
+                params.redirect_uri = options.redirectUri;
+            }
+            const response = await this.httpClient.get(`/connectors/${connectorId}/oauth/url`, { params });
+            this.logger.debug('OAuth URL generated', response.data);
+            // Backend returns data directly
+            return response.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to initiate OAuth', error);
+            throw error;
+        }
+    }
+    /**
+     * Get OAuth connection status for a connector
+     *
+     * @example
+     * ```typescript
+     * const status = await fluxez.connectors.getOAuthStatus(connectorId);
+     * if (status.connected) {
+     *   console.log(`Connected as ${status.email}`);
+     * }
+     * ```
+     */
+    async getOAuthStatus(connectorId) {
+        try {
+            this.logger.debug('Getting OAuth status', { connectorId });
+            const response = await this.httpClient.get(`/connectors/${connectorId}/oauth/status`);
+            // Backend returns data directly
+            return response.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to get OAuth status', error);
+            throw error;
+        }
+    }
+    /**
+     * Revoke OAuth connection for a connector
+     * This will disconnect the OAuth integration and clear stored tokens
+     *
+     * @example
+     * ```typescript
+     * await fluxez.connectors.revokeOAuth(connectorId);
+     * console.log('Disconnected from Google Drive');
+     * ```
+     */
+    async revokeOAuth(connectorId) {
+        try {
+            this.logger.debug('Revoking OAuth', { connectorId });
+            const response = await this.httpClient.post(`/connectors/${connectorId}/oauth/revoke`);
+            this.logger.debug('OAuth revoked', response.data);
+            // Backend returns data directly
+            return response.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to revoke OAuth', error);
+            throw error;
+        }
+    }
+    /**
+     * Manually refresh OAuth token for a connector
+     * Usually tokens are auto-refreshed, but this can be used to force a refresh
+     *
+     * @example
+     * ```typescript
+     * const result = await fluxez.connectors.refreshOAuthToken(connectorId);
+     * console.log(`Token refreshed, expires at ${result.expiresAt}`);
+     * ```
+     */
+    async refreshOAuthToken(connectorId) {
+        try {
+            this.logger.debug('Refreshing OAuth token', { connectorId });
+            const response = await this.httpClient.post(`/connectors/${connectorId}/oauth/refresh`);
+            this.logger.debug('OAuth token refreshed', response.data);
+            // Backend returns data directly
+            return response.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to refresh OAuth token', error);
+            throw error;
+        }
+    }
+    /**
+     * Handle OAuth callback (used by frontend after redirect)
+     * This exchanges the authorization code for tokens
+     *
+     * @example
+     * ```typescript
+     * // After OAuth redirect, get code from URL params
+     * const urlParams = new URLSearchParams(window.location.search);
+     * const code = urlParams.get('code');
+     * const state = urlParams.get('state');
+     *
+     * await fluxez.connectors.handleOAuthCallback(connectorId, code, state);
+     * ```
+     */
+    async handleOAuthCallback(connectorId, code, state, codeVerifier) {
+        try {
+            this.logger.debug('Handling OAuth callback', { connectorId });
+            const response = await this.httpClient.post(`/connectors/${connectorId}/oauth/callback`, {
+                code,
+                state,
+                ...(codeVerifier && { code_verifier: codeVerifier })
+            });
+            this.logger.debug('OAuth callback handled', response.data);
+            // Backend returns data directly
+            return response.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to handle OAuth callback', error);
+            throw error;
+        }
     }
     /**
      * Search connectors by category
