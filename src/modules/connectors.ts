@@ -340,7 +340,19 @@ export class ConnectorClient {
         `/connectors/${connectorId}`
       );
 
-      return response.data.data;
+      console.log('[ConnectorClient] get() response.data:', JSON.stringify(response.data));
+
+      // Backend returns data directly, not wrapped in data.data
+      const resData = response.data as any;
+      if (resData?.data) {
+        return resData.data;
+      }
+      // If response.data is the connector directly
+      if (resData?.id) {
+        return resData as ConnectorConfig;
+      }
+
+      return resData;
     } catch (error) {
       this.logger.error('Failed to get connector', error);
       throw error;
@@ -367,7 +379,16 @@ export class ConnectorClient {
       );
 
       this.logger.debug('Connector updated successfully', response.data);
-      return response.data.data;
+
+      // Backend returns data directly, not wrapped in data.data
+      const resData = response.data as any;
+      if (resData?.data) {
+        return resData.data;
+      }
+      if (resData?.id) {
+        return resData as ConnectorConfig;
+      }
+      return resData;
     } catch (error) {
       this.logger.error('Failed to update connector', error);
       throw error;
