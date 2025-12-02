@@ -361,9 +361,102 @@ export declare class ConnectorClient {
      */
     supportsOAuth(connectorType: string): Promise<boolean>;
     /**
-     * Get OAuth authorization URL
+     * Get OAuth authorization URL (simple string URL)
      */
     getOAuthUrl(connectorType: string, redirectUri: string, state?: string): string;
+    /**
+     * Initiate OAuth flow for a connector
+     * Returns the authorization URL to redirect the user to
+     *
+     * @example
+     * ```typescript
+     * // Create connector first
+     * const connector = await fluxez.connectors.create({
+     *   connector_type: 'google_drive',
+     *   name: 'My Google Drive',
+     *   config: { authMode: 'oneclick' }
+     * });
+     *
+     * // Get OAuth URL
+     * const { authorization_url } = await fluxez.connectors.initiateOAuth(connector.id);
+     *
+     * // Open in popup
+     * window.open(authorization_url, 'oauth', 'width=600,height=700');
+     * ```
+     */
+    initiateOAuth(connectorId: string, options?: {
+        redirectUri?: string;
+    }): Promise<{
+        authorization_url: string;
+        state: string;
+        code_verifier?: string;
+    }>;
+    /**
+     * Get OAuth connection status for a connector
+     *
+     * @example
+     * ```typescript
+     * const status = await fluxez.connectors.getOAuthStatus(connectorId);
+     * if (status.connected) {
+     *   console.log(`Connected as ${status.email}`);
+     * }
+     * ```
+     */
+    getOAuthStatus(connectorId: string): Promise<{
+        connected: boolean;
+        email?: string;
+        expiresAt?: string;
+        scopes?: string[];
+        connectorType: string;
+        lastRefreshedAt?: string;
+    }>;
+    /**
+     * Revoke OAuth connection for a connector
+     * This will disconnect the OAuth integration and clear stored tokens
+     *
+     * @example
+     * ```typescript
+     * await fluxez.connectors.revokeOAuth(connectorId);
+     * console.log('Disconnected from Google Drive');
+     * ```
+     */
+    revokeOAuth(connectorId: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    /**
+     * Manually refresh OAuth token for a connector
+     * Usually tokens are auto-refreshed, but this can be used to force a refresh
+     *
+     * @example
+     * ```typescript
+     * const result = await fluxez.connectors.refreshOAuthToken(connectorId);
+     * console.log(`Token refreshed, expires at ${result.expiresAt}`);
+     * ```
+     */
+    refreshOAuthToken(connectorId: string): Promise<{
+        success: boolean;
+        expiresAt: string;
+        message: string;
+    }>;
+    /**
+     * Handle OAuth callback (used by frontend after redirect)
+     * This exchanges the authorization code for tokens
+     *
+     * @example
+     * ```typescript
+     * // After OAuth redirect, get code from URL params
+     * const urlParams = new URLSearchParams(window.location.search);
+     * const code = urlParams.get('code');
+     * const state = urlParams.get('state');
+     *
+     * await fluxez.connectors.handleOAuthCallback(connectorId, code, state);
+     * ```
+     */
+    handleOAuthCallback(connectorId: string, code: string, state: string, codeVerifier?: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     /**
      * Search connectors by category
      */
