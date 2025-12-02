@@ -219,6 +219,7 @@ export declare class ConnectorClient {
         name: string;
         config: Record<string, any>;
         enabled?: boolean;
+        user_id?: string;
     }): Promise<ConnectorConfig>;
     /**
      * List connector configurations with filtering
