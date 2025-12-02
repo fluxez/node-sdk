@@ -268,7 +268,22 @@ export class ConnectorClient {
       );
 
       this.logger.debug('Connector created successfully', response.data);
-      return response.data.data;
+
+      // Handle different response formats
+      const resData = response.data as any;
+      if (resData?.data) {
+        return resData.data;
+      }
+      // If response.data is the connector directly
+      if (resData?.id) {
+        return resData as ConnectorConfig;
+      }
+      // If response itself is the connector
+      if ((response as any)?.id) {
+        return response as unknown as ConnectorConfig;
+      }
+
+      return resData?.data || resData;
     } catch (error) {
       this.logger.error('Failed to create connector', error);
       throw error;

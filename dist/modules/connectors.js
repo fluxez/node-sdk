@@ -20,7 +20,20 @@ class ConnectorClient {
             });
             const response = await this.httpClient.post('/connectors', data);
             this.logger.debug('Connector created successfully', response.data);
-            return response.data.data;
+            // Handle different response formats
+            const resData = response.data;
+            if (resData?.data) {
+                return resData.data;
+            }
+            // If response.data is the connector directly
+            if (resData?.id) {
+                return resData;
+            }
+            // If response itself is the connector
+            if (response?.id) {
+                return response;
+            }
+            return resData?.data || resData;
         }
         catch (error) {
             this.logger.error('Failed to create connector', error);
