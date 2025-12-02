@@ -254,6 +254,7 @@ export class ConnectorClient {
     name: string;
     config: Record<string, any>;
     enabled?: boolean;
+    user_id?: string; // Optional user/owner ID (e.g., workspace ID from external apps)
   }): Promise<ConnectorConfig> {
     try {
       this.logger.debug('Creating connector configuration', {
