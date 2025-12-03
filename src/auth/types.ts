@@ -8,6 +8,7 @@ export interface RegisterData {
   email: string;
   password: string;
   name: string;
+  role?: string; // User role (default: 'user')
   metadata?: Record<string, any>;
 }
 
@@ -23,6 +24,7 @@ export interface User {
   // Core fields from auth.users table
   id: string;
   email: string;
+  role?: string; // User role (admin, user, etc.)
   name?: string;
   username?: string;
   avatar_url?: string;

@@ -7,6 +7,7 @@ export interface RegisterData {
     email: string;
     password: string;
     name: string;
+    role?: string;
     metadata?: Record<string, any>;
 }
 export interface AuthToken {
@@ -19,6 +20,7 @@ export interface AuthToken {
 export interface User {
     id: string;
     email: string;
+    role?: string;
     name?: string;
     username?: string;
     avatar_url?: string;
