@@ -657,6 +657,104 @@ const { token } = await client.auth.refresh(refreshToken);
 client.setAuth({ jwt: token });
 ```
 
+## Role Management
+
+Manage custom roles for your application users. The `auth.roles` table is automatically created when you first access roles.
+
+```javascript
+// Get all roles (auto-creates auth.roles table if not exists)
+const roles = await client.auth.getRoles();
+console.log('Available roles:', roles.map(r => r.name));
+
+// Create a new custom role
+const editorRole = await client.auth.createRole({
+  name: 'editor',
+  description: 'Can edit and publish content'
+});
+console.log('Created role:', editorRole.name);
+
+// Delete a role (cannot delete default roles)
+await client.auth.deleteRole(editorRole.id);
+
+// Update a user's role
+await client.auth.updateUserRole('user_123', 'admin');
+console.log('User role updated to admin');
+
+// List users with their roles
+const { users } = await client.auth.listUsers();
+users.forEach(user => {
+  console.log(`${user.email}: ${user.role || 'user'}`);
+});
+```
+
+### Default Roles
+
+When the `auth.roles` table is created, two default roles are seeded:
+- `admin` - Administrator with full access
+- `user` - Regular user with limited access
+
+You can create additional roles as needed for your application.
+
+## Auth Settings
+
+Configure authentication behavior per tenant. Settings are stored in `auth.settings` table (auto-created).
+
+```javascript
+// Get current auth settings (returns defaults if not configured)
+const settings = await client.auth.getAuthSettings();
+console.log('Email verification required:', settings.requireEmailVerification);
+console.log('Min password length:', settings.minPasswordLength);
+
+// Update auth settings
+await client.auth.updateAuthSettings({
+  // Email verification
+  requireEmailVerification: true,
+  verificationUrl: 'https://myapp.com/verify-email',
+  verificationEmailSubject: 'Please verify your email',
+
+  // Password policies
+  minPasswordLength: 10,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireNumbers: true,
+  requireSpecialChars: false,
+
+  // Session settings
+  sessionDurationHours: 24,
+  refreshTokenDurationDays: 7,
+
+  // Registration settings
+  allowRegistration: true,
+  defaultRole: 'user'
+});
+```
+
+### Auth Settings Reference
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `requireEmailVerification` | boolean | `false` | Require email verification before login |
+| `verificationUrl` | string | `null` | URL for email verification (required if verification enabled) |
+| `verificationEmailSubject` | string | `'Verify your email'` | Email subject for verification emails |
+| `minPasswordLength` | number | `8` | Minimum password length |
+| `requireUppercase` | boolean | `false` | Require uppercase letters in password |
+| `requireLowercase` | boolean | `false` | Require lowercase letters in password |
+| `requireNumbers` | boolean | `false` | Require numbers in password |
+| `requireSpecialChars` | boolean | `false` | Require special characters in password |
+| `sessionDurationHours` | number | `24` | Access token duration in hours |
+| `refreshTokenDurationDays` | number | `7` | Refresh token duration in days |
+| `allowRegistration` | boolean | `true` | Allow new user registration |
+| `defaultRole` | string | `'user'` | Default role for new users |
+
+### Auto-Creation Behavior
+
+When you call `getRoles()`, `getAuthSettings()`, or register a new user:
+1. The backend automatically creates `auth.roles` and `auth.settings` tables if they don't exist
+2. Default roles (`admin`, `user`) are seeded
+3. Default settings are applied
+
+This means existing projects will work seamlessly - tables are created on first access.
+
 ## SDK Playground
 
 The SDK includes an interactive playground for testing all features:
@@ -1704,6 +1802,8 @@ import {
   UploadResult,
   SearchResult,
   User,
+  Role,
+  AuthSettings,
   // AI Job Queue Types
   AIJob,
   AIJobDetails,
@@ -1748,6 +1848,23 @@ const textResult = await client.ai.generateText(
 const imageResult = await client.ai.generateImage(
   'A modern office workspace'
 );
+
+// Typed role management
+const roles: Role[] = await client.auth.getRoles();
+const newRole: Role = await client.auth.createRole({
+  name: 'moderator',
+  description: 'Can moderate content'
+});
+
+// Typed auth settings
+const settings: AuthSettings = await client.auth.getAuthSettings();
+console.log('Verification required:', settings.requireEmailVerification);
+
+await client.auth.updateAuthSettings({
+  requireEmailVerification: true,
+  minPasswordLength: 12,
+  defaultRole: 'user'
+});
 
 // Typed AI job queue operations
 const job: AIJob = await client.ai.enqueueJob('image', {

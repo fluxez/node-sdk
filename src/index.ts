@@ -64,11 +64,13 @@ export {
 
 // Auth
 export { AuthClient } from './auth/auth-client';
-export { 
-  LoginCredentials, 
-  RegisterData, 
+export {
+  LoginCredentials,
+  RegisterData,
   AuthToken,
-  User 
+  User,
+  Role,
+  AuthSettings
 } from './auth/types';
 
 // Tenant Auth types removed - all auth is now unified in AuthClient

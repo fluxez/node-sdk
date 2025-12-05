@@ -427,6 +427,63 @@ class AuthClient {
         const response = await this.httpClient.get(`/tenant-auth/teams/${teamId}/members`);
         return response.data;
     }
+    // Role management
+    /**
+     * Get all roles for the tenant
+     * Creates auth.roles table if it doesn't exist
+     */
+    async getRoles() {
+        this.logger.debug('Getting roles');
+        const response = await this.httpClient.get('/tenant-auth/roles');
+        return response.data.roles || response.data;
+    }
+    /**
+     * Create a new role
+     * @param data - Role data (name, description)
+     */
+    async createRole(data) {
+        this.logger.debug('Creating role', { name: data.name });
+        const response = await this.httpClient.post('/tenant-auth/roles', data);
+        return response.data.role || response.data;
+    }
+    /**
+     * Delete a role
+     * @param roleId - The ID of the role to delete
+     */
+    async deleteRole(roleId) {
+        this.logger.debug('Deleting role', { roleId });
+        const response = await this.httpClient.delete(`/tenant-auth/roles/${roleId}`);
+        return response.data;
+    }
+    /**
+     * Update a user's role
+     * @param userId - The ID of the user
+     * @param role - The new role name
+     */
+    async updateUserRole(userId, role) {
+        this.logger.debug('Updating user role', { userId, role });
+        const response = await this.httpClient.put(`/tenant-auth/users/${userId}/role`, { role });
+        return response.data;
+    }
+    // Auth Settings management
+    /**
+     * Get auth settings for the tenant
+     * Creates auth.settings table if it doesn't exist and returns defaults
+     */
+    async getAuthSettings() {
+        this.logger.debug('Getting auth settings');
+        const response = await this.httpClient.get('/tenant-auth/settings');
+        return response.data.settings || response.data;
+    }
+    /**
+     * Update auth settings for the tenant
+     * @param settings - Partial settings to update
+     */
+    async updateAuthSettings(settings) {
+        this.logger.debug('Updating auth settings');
+        const response = await this.httpClient.put('/tenant-auth/settings', settings);
+        return response.data;
+    }
     // Utility methods
     /**
      * Get current authenticated user

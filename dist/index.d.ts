@@ -18,7 +18,7 @@ export { AnalyticsQuery, AnalyticsResult, EventData, AggregationType } from './a
 export { CacheClient } from './cache/cache-client';
 export { CacheOperation, CacheStats, CacheOptions } from './cache/types';
 export { AuthClient } from './auth/auth-client';
-export { LoginCredentials, RegisterData, AuthToken, User } from './auth/types';
+export { LoginCredentials, RegisterData, AuthToken, User, Role, AuthSettings } from './auth/types';
 export { EmailClient } from './modules/email';
 export type { EmailOptions, EmailAttachment, BulkEmailRecipient, EmailTemplate, EmailVerificationResult, QueuedEmail, EmailStats } from './modules/email';
 export { QueueClient } from './modules/queue';

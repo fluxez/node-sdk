@@ -88,4 +88,30 @@ export interface ApiKey {
     createdAt: string;
     updatedAt: string;
 }
+export interface Role {
+    id: string;
+    name: string;
+    description?: string;
+    isDefault: boolean;
+    createdAt: string;
+    updatedAt?: string;
+}
+export interface AuthSettings {
+    id?: string;
+    requireEmailVerification: boolean;
+    verificationUrl?: string;
+    verificationEmailSubject?: string;
+    verificationEmailTemplate?: string;
+    minPasswordLength: number;
+    requireUppercase: boolean;
+    requireLowercase: boolean;
+    requireNumbers: boolean;
+    requireSpecialChars: boolean;
+    sessionDurationHours: number;
+    refreshTokenDurationDays: number;
+    allowRegistration: boolean;
+    defaultRole: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
 //# sourceMappingURL=types.d.ts.map

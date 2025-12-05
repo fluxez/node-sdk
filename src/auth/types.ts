@@ -109,3 +109,36 @@ export interface ApiKey {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface AuthSettings {
+  id?: string;
+  // Email verification settings
+  requireEmailVerification: boolean;
+  verificationUrl?: string;
+  verificationEmailSubject?: string;
+  verificationEmailTemplate?: string;
+  // Password settings
+  minPasswordLength: number;
+  requireUppercase: boolean;
+  requireLowercase: boolean;
+  requireNumbers: boolean;
+  requireSpecialChars: boolean;
+  // Session settings
+  sessionDurationHours: number;
+  refreshTokenDurationDays: number;
+  // Registration settings
+  allowRegistration: boolean;
+  defaultRole: string;
+  // Timestamps
+  createdAt?: string;
+  updatedAt?: string;
+}
