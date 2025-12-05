@@ -10,6 +10,7 @@ export interface RegisterData {
   name: string;
   role?: string; // User role (default: 'user')
   metadata?: Record<string, any>;
+  frontendUrl?: string; // Frontend URL for email verification redirect
 }
 
 export interface AuthToken {

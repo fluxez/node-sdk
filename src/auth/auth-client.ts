@@ -73,7 +73,7 @@ export class AuthClient {
    */
   public async refresh(refreshToken: string): Promise<AuthToken> {
     this.logger.debug('Refreshing token');
-    
+
     const response = await this.httpClient.post(API_ENDPOINTS.TENANT_AUTH.REFRESH, {
       refreshToken,
     });
@@ -85,7 +85,14 @@ export class AuthClient {
     
     return token;
   }
-  
+
+  /**
+   * Refresh access token (alias for refresh)
+   */
+  public async refreshToken(refreshToken: string): Promise<AuthToken> {
+    return this.refresh(refreshToken);
+  }
+
   /**
    * Logout
    */
