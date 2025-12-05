@@ -21,6 +21,10 @@ export declare class AuthClient {
      */
     refresh(refreshToken: string): Promise<AuthToken>;
     /**
+     * Refresh access token (alias for refresh)
+     */
+    refreshToken(refreshToken: string): Promise<AuthToken>;
+    /**
      * Logout
      */
     logout(): Promise<void>;

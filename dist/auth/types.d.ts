@@ -9,6 +9,7 @@ export interface RegisterData {
     name: string;
     role?: string;
     metadata?: Record<string, any>;
+    frontendUrl?: string;
 }
 export interface AuthToken {
     token: string;

@@ -53,6 +53,12 @@ class AuthClient {
         return token;
     }
     /**
+     * Refresh access token (alias for refresh)
+     */
+    async refreshToken(refreshToken) {
+        return this.refresh(refreshToken);
+    }
+    /**
      * Logout
      */
     async logout() {
