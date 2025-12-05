@@ -14,6 +14,8 @@ import {
   Organization,
   Project,
   ApiKey,
+  Role,
+  AuthSettings,
 } from './types';
 
 export class AuthClient {
@@ -543,6 +545,77 @@ export class AuthClient {
     this.logger.debug('Getting team members', { teamId });
 
     const response = await this.httpClient.get(`/tenant-auth/teams/${teamId}/members`);
+    return response.data;
+  }
+
+  // Role management
+
+  /**
+   * Get all roles for the tenant
+   * Creates auth.roles table if it doesn't exist
+   */
+  public async getRoles(): Promise<Role[]> {
+    this.logger.debug('Getting roles');
+
+    const response = await this.httpClient.get('/tenant-auth/roles');
+    return response.data.roles || response.data;
+  }
+
+  /**
+   * Create a new role
+   * @param data - Role data (name, description)
+   */
+  public async createRole(data: { name: string; description?: string }): Promise<Role> {
+    this.logger.debug('Creating role', { name: data.name });
+
+    const response = await this.httpClient.post('/tenant-auth/roles', data);
+    return response.data.role || response.data;
+  }
+
+  /**
+   * Delete a role
+   * @param roleId - The ID of the role to delete
+   */
+  public async deleteRole(roleId: string): Promise<{ success: boolean; message: string }> {
+    this.logger.debug('Deleting role', { roleId });
+
+    const response = await this.httpClient.delete(`/tenant-auth/roles/${roleId}`);
+    return response.data;
+  }
+
+  /**
+   * Update a user's role
+   * @param userId - The ID of the user
+   * @param role - The new role name
+   */
+  public async updateUserRole(userId: string, role: string): Promise<{ success: boolean; message: string }> {
+    this.logger.debug('Updating user role', { userId, role });
+
+    const response = await this.httpClient.put(`/tenant-auth/users/${userId}/role`, { role });
+    return response.data;
+  }
+
+  // Auth Settings management
+
+  /**
+   * Get auth settings for the tenant
+   * Creates auth.settings table if it doesn't exist and returns defaults
+   */
+  public async getAuthSettings(): Promise<AuthSettings> {
+    this.logger.debug('Getting auth settings');
+
+    const response = await this.httpClient.get('/tenant-auth/settings');
+    return response.data.settings || response.data;
+  }
+
+  /**
+   * Update auth settings for the tenant
+   * @param settings - Partial settings to update
+   */
+  public async updateAuthSettings(settings: Partial<AuthSettings>): Promise<{ success: boolean; message: string }> {
+    this.logger.debug('Updating auth settings');
+
+    const response = await this.httpClient.put('/tenant-auth/settings', settings);
     return response.data;
   }
 

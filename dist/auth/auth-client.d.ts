@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { FluxezConfig } from '../types/config';
 import { Logger } from '../utils/logger';
-import { LoginCredentials, RegisterData, AuthToken, User, PasswordResetRequest, PasswordChangeRequest, Organization, Project, ApiKey } from './types';
+import { LoginCredentials, RegisterData, AuthToken, User, PasswordResetRequest, PasswordChangeRequest, Organization, Project, ApiKey, Role, AuthSettings } from './types';
 export declare class AuthClient {
     private httpClient;
     private config;
@@ -258,6 +258,49 @@ export declare class AuthClient {
      * Get team members
      */
     getTeamMembers(teamId: string): Promise<any[]>;
+    /**
+     * Get all roles for the tenant
+     * Creates auth.roles table if it doesn't exist
+     */
+    getRoles(): Promise<Role[]>;
+    /**
+     * Create a new role
+     * @param data - Role data (name, description)
+     */
+    createRole(data: {
+        name: string;
+        description?: string;
+    }): Promise<Role>;
+    /**
+     * Delete a role
+     * @param roleId - The ID of the role to delete
+     */
+    deleteRole(roleId: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    /**
+     * Update a user's role
+     * @param userId - The ID of the user
+     * @param role - The new role name
+     */
+    updateUserRole(userId: string, role: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    /**
+     * Get auth settings for the tenant
+     * Creates auth.settings table if it doesn't exist and returns defaults
+     */
+    getAuthSettings(): Promise<AuthSettings>;
+    /**
+     * Update auth settings for the tenant
+     * @param settings - Partial settings to update
+     */
+    updateAuthSettings(settings: Partial<AuthSettings>): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     /**
      * Get current authenticated user
      */
