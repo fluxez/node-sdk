@@ -311,8 +311,6 @@ export type {
   PaymentConfig,
   CreatePaymentConfigRequest,
   UpdatePaymentConfigRequest,
-  PriceIdConfig,
-  AddPriceIdRequest,
   Subscription,
   CreateSubscriptionRequest,
   UpdateSubscriptionRequest,
