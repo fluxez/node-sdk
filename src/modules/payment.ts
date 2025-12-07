@@ -8,6 +8,7 @@ import {
   UpdatePaymentConfigRequest,
   Subscription,
   CreateSubscriptionRequest,
+  CreateCheckoutSessionRequest,
 } from '../types/payment.types';
 
 /**
@@ -249,7 +250,7 @@ export class PaymentClient {
    * ```
    */
   async createCheckoutSession(
-    data: CreateSubscriptionRequest
+    data: CreateCheckoutSessionRequest
   ): Promise<{ url: string; sessionId: string }> {
     try {
       this.logger.debug('Creating subscription checkout session', { data });

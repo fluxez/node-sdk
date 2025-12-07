@@ -112,7 +112,7 @@ export interface Subscription {
 }
 
 /**
- * Request to create a subscription
+ * Request to create a subscription directly
  */
 export interface CreateSubscriptionRequest {
   customerId: string;
@@ -122,6 +122,20 @@ export interface CreateSubscriptionRequest {
   paymentMethodId?: string;
   couponId?: string;
   promotionCode?: string;
+}
+
+/**
+ * Request to create a checkout session for subscription
+ */
+export interface CreateCheckoutSessionRequest {
+  priceId: string;
+  customerEmail?: string;
+  customerId?: string;
+  successUrl: string;
+  cancelUrl: string;
+  trialPeriodDays?: number;
+  metadata?: Record<string, any>;
+  allowPromotionCodes?: boolean;
 }
 
 /**
