@@ -2,6 +2,8 @@
 /**
  * Fluxez Payment Module Types
  * Multi-tenant Stripe integration for subscription and payment management
+ *
+ * Payment configuration is stored in tenant DB (auth.payment_providers)
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SubscriptionStatus = void 0;

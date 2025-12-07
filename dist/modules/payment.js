@@ -7,17 +7,23 @@ exports.PaymentClient = void 0;
  * Multi-tenant Stripe integration for subscription management.
  * Uses tenant context (org/project/app) via headers automatically.
  *
+ * Payment configuration is stored in tenant DB (auth.payment_providers).
+ *
  * @example
  * ```typescript
- * // Create payment configuration (uses API key's tenant context)
- * await client.payment.createConfig({
- *   stripePublishableKey: 'pk_...',
- *   stripeSecretKey: 'sk_...',
- *   stripeWebhookSecret: 'whsec_...'
+ * // Get payment configuration (uses API key's tenant context)
+ * const config = await client.payment.getConfig();
+ *
+ * // Configure payment provider
+ * await client.payment.configureProvider({
+ *   usePlatformKeys: true,
+ *   enabled: true,
+ *   subscriptionEnabled: true,
+ *   priceIds: ['price_xxx', 'price_yyy']
  * });
  *
  * // Create subscription checkout session
- * const session = await client.payment.createCheckoutSession(orgId, projectId, {
+ * const session = await client.payment.createCheckoutSession({
  *   priceId: 'price_xxx',
  *   customerEmail: 'user@example.com',
  *   successUrl: 'https://yourapp.com/success',
@@ -32,82 +38,114 @@ class PaymentClient {
         this.logger = logger;
     }
     // ============================================
-    // Payment Configuration
+    // Payment Configuration (via tenant-auth)
     // ============================================
     /**
-     * Create payment configuration
-     * Uses the API key's tenant context (org/project/app) automatically
-     *
-     * @param config Payment configuration details
-     * @returns Created payment configuration
-     *
-     * @example
-     * ```typescript
-     * // API key determines which org/project/app this config belongs to
-     * const config = await client.payment.createConfig({
-     *   stripePublishableKey: 'pk_test_...',
-     *   stripeSecretKey: 'sk_test_...',
-     *   stripeWebhookSecret: 'whsec_...',
-     *   currency: 'usd'
-     * });
-     * ```
-     */
-    async createConfig(config) {
-        try {
-            this.logger.debug('Creating payment configuration');
-            const response = await this.httpClient.post(`/tenant-payment/config`, config);
-            this.logger.debug('Payment configuration created successfully', response.data);
-            return response.data.data;
-        }
-        catch (error) {
-            this.logger.error('Failed to create payment configuration', error);
-            throw error;
-        }
-    }
-    /**
-     * Get payment configuration
+     * Get payment provider configuration
      * Uses the API key's tenant context automatically
+     * Configuration is stored in tenant DB (auth.payment_providers)
      *
      * @returns Payment configuration
      *
      * @example
      * ```typescript
      * const config = await client.payment.getConfig();
-     * console.log('Stripe publishable key:', config.stripePublishableKey);
+     * console.log('Enabled:', config.enabled);
+     * console.log('Price IDs:', config.priceIds);
      * ```
      */
     async getConfig() {
         try {
-            this.logger.debug('Getting payment configuration');
-            const response = await this.httpClient.get(`/tenant-payment/config`);
-            return response.data.data;
+            this.logger.debug('Getting payment configuration from tenant-auth');
+            const response = await this.httpClient.get(`/tenant-auth/payment-providers`);
+            // Handle the response structure from tenant-auth
+            const result = response.data;
+            if (!result?.configured || !result?.provider) {
+                this.logger.debug('No payment provider configured');
+                return null;
+            }
+            // Map tenant-auth response to PaymentConfig format
+            const provider = result.provider;
+            const config = {
+                id: provider.id,
+                publishableKey: provider.publishableKey,
+                hasSecretKey: provider.hasSecretKey,
+                hasWebhookSecret: provider.hasWebhookSecret,
+                enabled: provider.enabled,
+                usePlatformKeys: provider.usePlatformKeys,
+                subscriptionEnabled: provider.subscriptionEnabled,
+                oneTimeEnabled: provider.oneTimeEnabled,
+                priceIds: provider.priceIds || [],
+                displayName: provider.displayName,
+                createdAt: provider.createdAt,
+                updatedAt: provider.updatedAt,
+            };
+            this.logger.debug('Payment config retrieved:', JSON.stringify(config));
+            return config;
         }
         catch (error) {
+            // If 404 or no config, return null instead of throwing
+            if (error?.response?.status === 404 || error?.status === 404) {
+                this.logger.debug('No payment configuration found');
+                return null;
+            }
             this.logger.error('Failed to get payment configuration', error);
             throw error;
         }
     }
     /**
-     * Update payment configuration
+     * Configure payment provider
      * Uses the API key's tenant context automatically
+     * Configuration is stored in tenant DB (auth.payment_providers)
      *
-     * @param updates Configuration updates
-     * @returns Updated payment configuration
+     * @param config Payment configuration details
+     * @returns Success status
      *
      * @example
      * ```typescript
-     * const config = await client.payment.updateConfig({
-     *   currency: 'eur',
-     *   isActive: true
+     * // Use Fluxez platform Stripe keys
+     * await client.payment.configureProvider({
+     *   usePlatformKeys: true,
+     *   enabled: true,
+     *   subscriptionEnabled: true,
+     *   priceIds: ['price_starter_monthly', 'price_pro_yearly']
+     * });
+     *
+     * // Or use your own Stripe keys
+     * await client.payment.configureProvider({
+     *   usePlatformKeys: false,
+     *   publishableKey: 'pk_live_...',
+     *   secretKey: 'sk_live_...',
+     *   webhookSecret: 'whsec_...',
+     *   enabled: true
      * });
      * ```
+     */
+    async configureProvider(config) {
+        try {
+            this.logger.debug('Configuring payment provider');
+            const response = await this.httpClient.post(`/tenant-auth/payment-providers`, config);
+            this.logger.debug('Payment provider configured successfully');
+            return { success: true };
+        }
+        catch (error) {
+            this.logger.error('Failed to configure payment provider', error);
+            throw error;
+        }
+    }
+    /**
+     * Update payment provider configuration
+     * Uses the API key's tenant context automatically
+     *
+     * @param updates Configuration updates
+     * @returns Success status
      */
     async updateConfig(updates) {
         try {
             this.logger.debug('Updating payment configuration', { updates });
-            const response = await this.httpClient.put(`/tenant-payment/config`, updates);
-            this.logger.debug('Payment configuration updated successfully', response.data);
-            return response.data.data;
+            const response = await this.httpClient.post(`/tenant-auth/payment-providers`, updates);
+            this.logger.debug('Payment configuration updated successfully');
+            return { success: true };
         }
         catch (error) {
             this.logger.error('Failed to update payment configuration', error);
@@ -115,7 +153,7 @@ class PaymentClient {
         }
     }
     /**
-     * Delete payment configuration
+     * Delete payment provider configuration
      * Uses the API key's tenant context automatically
      *
      * @example
@@ -126,7 +164,7 @@ class PaymentClient {
     async deleteConfig() {
         try {
             this.logger.debug('Deleting payment configuration');
-            await this.httpClient.delete(`/tenant-payment/config`);
+            await this.httpClient.delete(`/tenant-auth/payment-providers`);
             this.logger.debug('Payment configuration deleted successfully');
         }
         catch (error) {
@@ -134,80 +172,15 @@ class PaymentClient {
             throw error;
         }
     }
-    // ============================================
-    // Price ID Management
-    // ============================================
     /**
-     * Add a price ID to the organization/project
-     *
-     * @param organizationId Organization ID
-     * @param projectId Project ID
-     * @param priceId Stripe price ID
-     * @returns Created price ID configuration
-     *
-     * @example
-     * ```typescript
-     * const priceConfig = await client.payment.addPriceId('org_123', 'proj_456', 'price_xxx');
-     * ```
+     * @deprecated Use configureProvider() instead
+     * Legacy method for backwards compatibility
      */
-    async addPriceId(organizationId, projectId, priceId) {
-        try {
-            this.logger.debug('Adding price ID', { organizationId, projectId, priceId });
-            const response = await this.httpClient.post(`/tenant-payment/${organizationId}/${projectId}/prices`, { priceId });
-            this.logger.debug('Price ID added successfully', response.data);
-            return response.data.data;
-        }
-        catch (error) {
-            this.logger.error('Failed to add price ID', error);
-            throw error;
-        }
-    }
-    /**
-     * Get all price IDs for an organization/project
-     *
-     * @param organizationId Organization ID
-     * @param projectId Project ID
-     * @returns List of price ID configurations
-     *
-     * @example
-     * ```typescript
-     * const prices = await client.payment.getPriceIds('org_123', 'proj_456');
-     * console.log('Available price IDs:', prices);
-     * ```
-     */
-    async getPriceIds(organizationId, projectId) {
-        try {
-            this.logger.debug('Getting price IDs', { organizationId, projectId });
-            const response = await this.httpClient.get(`/tenant-payment/${organizationId}/${projectId}/prices`);
-            return response.data.data;
-        }
-        catch (error) {
-            this.logger.error('Failed to get price IDs', error);
-            throw error;
-        }
-    }
-    /**
-     * Remove a price ID from the organization/project
-     *
-     * @param organizationId Organization ID
-     * @param projectId Project ID
-     * @param priceId Stripe Price ID
-     *
-     * @example
-     * ```typescript
-     * await client.payment.removePriceId('org_123', 'proj_456', 'price_xxx');
-     * ```
-     */
-    async removePriceId(organizationId, projectId, priceId) {
-        try {
-            this.logger.debug('Removing price ID', { organizationId, projectId, priceId });
-            await this.httpClient.delete(`/tenant-payment/${organizationId}/${projectId}/prices/${priceId}`);
-            this.logger.debug('Price ID removed successfully');
-        }
-        catch (error) {
-            this.logger.error('Failed to remove price ID', error);
-            throw error;
-        }
+    async createConfig(config) {
+        this.logger.warn('createConfig is deprecated, use configureProvider instead');
+        await this.configureProvider(config);
+        const result = await this.getConfig();
+        return result;
     }
     // ============================================
     // Subscription Management
@@ -217,18 +190,18 @@ class PaymentClient {
      * This creates a Stripe Checkout session URL that customers use to subscribe
      * Organization and project context is determined from the API key
      *
-     * @param data Subscription checkout data (priceId must be from tenant_payment_configs.price_ids)
+     * @param data Subscription checkout data
      * @returns Checkout session with URL
      *
      * @example
      * ```typescript
-     * // First, get the payment config to see available price IDs
+     * // Get the payment config to see available price IDs
      * const config = await client.payment.getConfig();
-     * console.log('Available plans:', config.priceIds); // ["price_xxx", "price_yyy"]
+     * console.log('Available plans:', config.priceIds);
      *
      * // Create checkout session with one of the configured price IDs
      * const session = await client.payment.createCheckoutSession({
-     *   priceId: config.priceIds[0], // Use a price ID from the config
+     *   priceId: config.priceIds[0],
      *   successUrl: 'https://yourapp.com/success',
      *   cancelUrl: 'https://yourapp.com/cancel',
      *   customerEmail: 'user@example.com',
@@ -314,19 +287,14 @@ class PaymentClient {
         try {
             const url = `/tenant-payment/subscriptions/active/${metadataKey}/${metadataValue}`;
             this.logger.debug(`[SDK] Getting active subscription by ${metadataKey}=${metadataValue}`);
-            this.logger.debug(`[SDK] Full URL path: ${url}`);
-            this.logger.debug(`[SDK] Base URL: ${this.httpClient.config?.baseURL || 'unknown'}`);
             const response = await this.httpClient.get(url);
             this.logger.debug(`[SDK] Response received:`, JSON.stringify(response.data, null, 2));
             return response.data;
         }
         catch (error) {
-            this.logger.error(`[SDK] Error calling ${metadataKey}=${metadataValue}:`, error?.message || error);
-            this.logger.error(`[SDK] Error status:`, error?.status);
-            this.logger.error(`[SDK] Error response:`, error?.response?.data);
-            if (error.status === 404) {
+            if (error?.response?.status === 404 || error?.status === 404) {
                 // No active subscription found - return null instead of throwing
-                this.logger.debug(`[SDK] 404 - returning null`);
+                this.logger.debug(`[SDK] 404 - no active subscription found, returning null`);
                 return null;
             }
             this.logger.error('Failed to get active subscription', error);
@@ -356,6 +324,132 @@ class PaymentClient {
         }
         catch (error) {
             this.logger.error('Failed to cancel subscription', error);
+            throw error;
+        }
+    }
+    /**
+     * Resume a canceled subscription
+     * This undoes cancel_at_period_end and continues the subscription
+     *
+     * @param subscriptionId Subscription ID (internal UUID or Stripe sub_xxx)
+     * @returns Updated subscription
+     *
+     * @example
+     * ```typescript
+     * const subscription = await client.payment.resumeSubscription('sub_xxx');
+     * console.log('Subscription resumed:', subscription.status);
+     * ```
+     */
+    async resumeSubscription(subscriptionId) {
+        try {
+            this.logger.debug('Resuming subscription', { subscriptionId });
+            const response = await this.httpClient.post(`/tenant-payment/subscriptions/${subscriptionId}/resume`, {});
+            this.logger.debug('Subscription resumed successfully', response.data);
+            return response.data.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to resume subscription', error);
+            throw error;
+        }
+    }
+    // ============================================
+    // Stripe Connect
+    // ============================================
+    /**
+     * Create a Stripe Connect Express account
+     * This initiates the Connect onboarding flow for tenants using platform Stripe keys
+     *
+     * @param businessInfo Optional business information
+     * @returns Account ID and onboarding URL
+     *
+     * @example
+     * ```typescript
+     * const result = await client.payment.createConnectAccount({
+     *   email: 'business@example.com',
+     *   businessName: 'My Business',
+     *   country: 'US'
+     * });
+     * // Redirect user to onboarding URL
+     * window.location.href = result.onboardingUrl;
+     * ```
+     */
+    async createConnectAccount(businessInfo) {
+        try {
+            this.logger.debug('Creating Stripe Connect account', businessInfo);
+            const response = await this.httpClient.post(`/tenant-payment/connect/account`, businessInfo || {});
+            this.logger.debug('Connect account created successfully', response.data);
+            return response.data.data || response.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to create Connect account', error);
+            throw error;
+        }
+    }
+    /**
+     * Get Stripe Connect onboarding link for an existing account
+     *
+     * @returns Onboarding URL
+     *
+     * @example
+     * ```typescript
+     * const { onboardingUrl } = await client.payment.getConnectOnboardingLink();
+     * window.location.href = onboardingUrl;
+     * ```
+     */
+    async getConnectOnboardingLink() {
+        try {
+            this.logger.debug('Getting Connect onboarding link');
+            const response = await this.httpClient.get(`/tenant-payment/connect/onboarding`);
+            return response.data.data || response.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to get Connect onboarding link', error);
+            throw error;
+        }
+    }
+    /**
+     * Get Stripe Connect account status
+     *
+     * @returns Account status including onboarding completion and payment capabilities
+     *
+     * @example
+     * ```typescript
+     * const status = await client.payment.getConnectAccountStatus();
+     * if (status.chargesEnabled && status.payoutsEnabled) {
+     *   console.log('Account is fully set up!');
+     * }
+     * ```
+     */
+    async getConnectAccountStatus() {
+        try {
+            this.logger.debug('Getting Connect account status');
+            const response = await this.httpClient.get(`/tenant-payment/connect/status`);
+            return response.data.data || response.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to get Connect account status', error);
+            throw error;
+        }
+    }
+    /**
+     * Get Stripe Connect Express dashboard login link
+     *
+     * @returns Dashboard URL for the connected account
+     *
+     * @example
+     * ```typescript
+     * const { dashboardUrl } = await client.payment.getConnectDashboardLink();
+     * window.open(dashboardUrl, '_blank');
+     * ```
+     */
+    async getConnectDashboardLink() {
+        try {
+            this.logger.debug('Getting Connect dashboard link');
+            const response = await this.httpClient.get(`/tenant-payment/connect/dashboard`);
+            return response.data.data || response.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to get Connect dashboard link', error);
             throw error;
         }
     }
@@ -398,6 +492,209 @@ class PaymentClient {
         }
         catch (error) {
             this.logger.error('Failed to handle webhook event', error);
+            throw error;
+        }
+    }
+    // ============================================
+    // Payment Methods Management
+    // ============================================
+    /**
+     * List all payment methods for a customer
+     * Returns saved cards, bank accounts, etc.
+     *
+     * @param userId User ID to get payment methods for
+     * @param type Optional filter by type (e.g., 'card', 'us_bank_account')
+     * @returns Array of payment methods
+     *
+     * @example
+     * ```typescript
+     * const paymentMethods = await client.payment.listPaymentMethods('user_123');
+     * paymentMethods.forEach(pm => {
+     *   if (pm.type === 'card') {
+     *     console.log(`${pm.card.brand} ending in ${pm.card.last4}`);
+     *   }
+     * });
+     * ```
+     */
+    async listPaymentMethods(userId, type) {
+        try {
+            this.logger.debug('Listing payment methods', { userId, type });
+            const params = new URLSearchParams({ userId });
+            if (type)
+                params.append('type', type);
+            const response = await this.httpClient.get(`/tenant-payment/payment-methods?${params.toString()}`);
+            return response.data.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to list payment methods', error);
+            throw error;
+        }
+    }
+    /**
+     * Add a payment method to a customer
+     * The paymentMethodId should be created client-side using Stripe.js
+     *
+     * @param userId User ID to attach payment method to
+     * @param paymentMethodId Stripe payment method ID (pm_xxx)
+     * @param setAsDefault Whether to set as default payment method
+     * @returns The attached payment method
+     *
+     * @example
+     * ```typescript
+     * // After creating payment method with Stripe.js
+     * const pm = await client.payment.addPaymentMethod(
+     *   'user_123',
+     *   'pm_xxx_from_stripe_js',
+     *   true // set as default
+     * );
+     * console.log('Added card:', pm.card?.last4);
+     * ```
+     */
+    async addPaymentMethod(userId, paymentMethodId, setAsDefault = false) {
+        try {
+            this.logger.debug('Adding payment method', { userId, paymentMethodId, setAsDefault });
+            const response = await this.httpClient.post(`/tenant-payment/payment-methods`, { userId, paymentMethodId, setAsDefault });
+            this.logger.debug('Payment method added successfully', response.data);
+            return response.data.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to add payment method', error);
+            throw error;
+        }
+    }
+    /**
+     * Remove a payment method
+     *
+     * @param paymentMethodId Stripe payment method ID (pm_xxx)
+     * @returns Success status
+     *
+     * @example
+     * ```typescript
+     * await client.payment.removePaymentMethod('pm_xxx');
+     * console.log('Payment method removed');
+     * ```
+     */
+    async removePaymentMethod(paymentMethodId) {
+        try {
+            this.logger.debug('Removing payment method', { paymentMethodId });
+            const response = await this.httpClient.delete(`/tenant-payment/payment-methods/${paymentMethodId}`);
+            this.logger.debug('Payment method removed successfully');
+            return response.data.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to remove payment method', error);
+            throw error;
+        }
+    }
+    /**
+     * Set a payment method as the default for a customer
+     *
+     * @param userId User ID
+     * @param paymentMethodId Stripe payment method ID (pm_xxx)
+     * @returns Success status
+     *
+     * @example
+     * ```typescript
+     * await client.payment.setDefaultPaymentMethod('user_123', 'pm_xxx');
+     * console.log('Default payment method updated');
+     * ```
+     */
+    async setDefaultPaymentMethod(userId, paymentMethodId) {
+        try {
+            this.logger.debug('Setting default payment method', { userId, paymentMethodId });
+            const response = await this.httpClient.put(`/tenant-payment/payment-methods/${paymentMethodId}/default`, { userId });
+            this.logger.debug('Default payment method set successfully');
+            return response.data.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to set default payment method', error);
+            throw error;
+        }
+    }
+    // ============================================
+    // Invoice Management
+    // ============================================
+    /**
+     * List all invoices for a customer
+     *
+     * @param userId User ID to get invoices for
+     * @param limit Maximum number of invoices to return (default 10)
+     * @returns Array of invoices
+     *
+     * @example
+     * ```typescript
+     * const invoices = await client.payment.listInvoices('user_123', 20);
+     * invoices.forEach(inv => {
+     *   console.log(`Invoice ${inv.number}: $${inv.amountDue / 100} - ${inv.status}`);
+     * });
+     * ```
+     */
+    async listInvoices(userId, limit) {
+        try {
+            this.logger.debug('Listing invoices', { userId, limit });
+            const params = new URLSearchParams({ userId });
+            if (limit)
+                params.append('limit', limit.toString());
+            const response = await this.httpClient.get(`/tenant-payment/invoices?${params.toString()}`);
+            return response.data.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to list invoices', error);
+            throw error;
+        }
+    }
+    /**
+     * Get a specific invoice by ID
+     *
+     * @param invoiceId Stripe invoice ID (in_xxx)
+     * @returns Invoice details
+     *
+     * @example
+     * ```typescript
+     * const invoice = await client.payment.getInvoice('in_xxx');
+     * console.log('Amount due:', invoice.amountDue / 100);
+     * console.log('PDF URL:', invoice.invoicePdf);
+     * ```
+     */
+    async getInvoice(invoiceId) {
+        try {
+            this.logger.debug('Getting invoice', { invoiceId });
+            const response = await this.httpClient.get(`/tenant-payment/invoices/${invoiceId}`);
+            return response.data.data;
+        }
+        catch (error) {
+            this.logger.error('Failed to get invoice', error);
+            throw error;
+        }
+    }
+    /**
+     * Get upcoming invoice preview for a customer
+     * Shows what the next invoice will look like before it's finalized
+     *
+     * @param userId User ID to get upcoming invoice for
+     * @returns Upcoming invoice preview or null if no upcoming invoice
+     *
+     * @example
+     * ```typescript
+     * const upcoming = await client.payment.getUpcomingInvoice('user_123');
+     * if (upcoming) {
+     *   console.log('Next billing amount:', upcoming.amountDue / 100);
+     *   console.log('Next billing date:', new Date(upcoming.created * 1000));
+     * }
+     * ```
+     */
+    async getUpcomingInvoice(userId) {
+        try {
+            this.logger.debug('Getting upcoming invoice', { userId });
+            const response = await this.httpClient.get(`/tenant-payment/invoices/upcoming?userId=${userId}`);
+            return response.data.data;
+        }
+        catch (error) {
+            // No upcoming invoice is not an error
+            if (error?.response?.status === 404) {
+                return null;
+            }
+            this.logger.error('Failed to get upcoming invoice', error);
             throw error;
         }
     }

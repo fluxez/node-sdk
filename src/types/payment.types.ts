@@ -1,77 +1,78 @@
 /**
  * Fluxez Payment Module Types
  * Multi-tenant Stripe integration for subscription and payment management
+ *
+ * Payment configuration is stored in tenant DB (auth.payment_providers)
  */
 
 /**
- * Payment configuration for an organization/project
+ * Payment configuration from auth.payment_providers
  */
 export interface PaymentConfig {
   id?: string;
-  organizationId: string;
-  projectId: string;
-  stripePublishableKey: string;
-  stripeSecretKey: string;
-  stripeWebhookSecret: string;
-  currency?: string;
-  isActive?: boolean;
+
+  // Stripe keys (only if not using platform keys)
+  publishableKey?: string;
+  hasSecretKey?: boolean;
+  hasWebhookSecret?: boolean;
+
+  // Platform keys setting
+  enabled?: boolean;
+  usePlatformKeys?: boolean;
+
+  // Payment types
+  subscriptionEnabled?: boolean;
+  oneTimeEnabled?: boolean;
+
+  // Price IDs for subscription plans
+  priceIds?: string[];
+
+  // Display
+  displayName?: string;
+
   createdAt?: string;
   updatedAt?: string;
 }
 
 /**
- * Request to create payment configuration
+ * Request to configure payment provider
  */
 export interface CreatePaymentConfigRequest {
-  stripePublishableKey: string;
-  stripeSecretKey: string;
-  stripeWebhookSecret: string;
-  currency?: string;
+  // Use Fluxez platform Stripe keys or your own
+  usePlatformKeys?: boolean;
+
+  // Your own Stripe keys (required if usePlatformKeys=false)
+  publishableKey?: string;
+  secretKey?: string;
+  webhookSecret?: string;
+
+  // Enable/disable payment
+  enabled?: boolean;
+
+  // Payment types
+  subscriptionEnabled?: boolean;
+  oneTimeEnabled?: boolean;
+
+  // Price IDs for subscription plans
+  priceIds?: string[];
+
+  // Display name shown in checkout
+  displayName?: string;
 }
 
 /**
  * Request to update payment configuration
  */
 export interface UpdatePaymentConfigRequest {
-  stripePublishableKey?: string;
-  stripeSecretKey?: string;
-  stripeWebhookSecret?: string;
-  currency?: string;
-  isActive?: boolean;
-}
-
-/**
- * Price ID configuration for subscription plans
- */
-export interface PriceIdConfig {
-  id?: string;
-  organizationId: string;
-  projectId: string;
-  priceId: string;
-  name: string;
-  description?: string;
-  interval: 'day' | 'week' | 'month' | 'year';
-  intervalCount?: number;
-  amount?: number;
-  currency?: string;
-  isActive?: boolean;
-  metadata?: Record<string, any>;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-/**
- * Request to add a price ID
- */
-export interface AddPriceIdRequest {
-  priceId: string;
-  name: string;
-  description?: string;
-  interval: 'day' | 'week' | 'month' | 'year';
-  intervalCount?: number;
-  amount?: number;
-  currency?: string;
-  metadata?: Record<string, any>;
+  usePlatformKeys?: boolean;
+  publishableKey?: string;
+  secretKey?: string;
+  webhookSecret?: string;
+  enabled?: boolean;
+  subscriptionEnabled?: boolean;
+  oneTimeEnabled?: boolean;
+  priceIds?: string[];
+  displayName?: string;
 }
 
 /**
@@ -89,20 +90,19 @@ export enum SubscriptionStatus {
 }
 
 /**
- * Subscription details
+ * Subscription details from auth.subscriptions
  */
 export interface Subscription {
   id?: string;
-  organizationId: string;
-  projectId: string;
+  projectId?: string;
   appId?: string;
   userId?: string;
   stripeCustomerId?: string;
-  stripeSubscriptionId: string;
-  stripePriceId: string;
+  stripeSubscriptionId?: string;
+  stripePriceId?: string;
   plan?: string;
   interval?: string;
-  status: SubscriptionStatus;
+  status: SubscriptionStatus | string;
   currentPeriodStart?: string;
   currentPeriodEnd?: string;
   cancelAtPeriodEnd?: boolean;
