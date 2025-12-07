@@ -108,3 +108,59 @@ export interface SuggestResult {
   suggestions: string[];
   scores?: number[];
 }
+
+// ============================================
+// UNIFIED SEARCH TYPES (PostgreSQL pg_trgm + pgvector)
+// ============================================
+
+export type SearchMode = 'keyword' | 'semantic' | 'hybrid';
+
+export interface UnifiedSearchQuery {
+  table: string;
+  query: string;
+  mode?: SearchMode;
+  columns?: string[];
+  limit?: number;
+  offset?: number;
+  filters?: Record<string, any>;
+  highlight?: boolean;
+  threshold?: number;
+}
+
+export interface UnifiedSearchHit<T = any> {
+  id: string;
+  score: number;
+  data: T;
+  highlights?: Record<string, string>;
+  matchType: 'keyword' | 'semantic' | 'both';
+}
+
+export interface UnifiedSearchResponse<T = any> {
+  success: boolean;
+  results: UnifiedSearchHit<T>[];
+  total: number;
+  query: string;
+  mode: SearchMode;
+  executionTimeMs: number;
+}
+
+export interface ConfigureSearchOptions {
+  fullTextColumns: string[];
+  semanticColumns?: string[];
+  vectorDimension?: number;
+}
+
+export interface SearchConfig {
+  table: string;
+  fullTextColumns: string[];
+  semanticColumns: string[];
+  vectorColumn: string;
+  vectorDimension: number;
+  hasFullTextIndex: boolean;
+  hasVectorIndex: boolean;
+}
+
+export interface BulkIndexOptions {
+  columns?: string[];
+  reindex?: boolean;
+}
