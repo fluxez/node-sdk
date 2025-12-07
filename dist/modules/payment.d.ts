@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { FluxezConfig } from '../types/config';
 import { Logger } from '../utils/logger';
-import { PaymentConfig, CreatePaymentConfigRequest, UpdatePaymentConfigRequest, Subscription, CreateSubscriptionRequest } from '../types/payment.types';
+import { PaymentConfig, CreatePaymentConfigRequest, UpdatePaymentConfigRequest, Subscription, CreateCheckoutSessionRequest } from '../types/payment.types';
 /**
  * Payment Client
  *
@@ -135,7 +135,7 @@ export declare class PaymentClient {
      * window.location.href = session.url;
      * ```
      */
-    createCheckoutSession(data: CreateSubscriptionRequest): Promise<{
+    createCheckoutSession(data: CreateCheckoutSessionRequest): Promise<{
         url: string;
         sessionId: string;
     }>;
