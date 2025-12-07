@@ -1,124 +1,133 @@
 import { AxiosInstance } from 'axios';
 import { FluxezConfig } from '../types/config';
 import { Logger } from '../utils/logger';
-import { SearchQuery, SearchResult, VectorSearchQuery, VectorSearchResult, SearchOptions, AggregationQuery, AggregationResult, SuggestQuery, SuggestResult } from './types';
+import { SearchQuery, SearchResult, VectorSearchQuery, VectorSearchResult, SearchOptions, AggregationQuery, AggregationResult, SuggestQuery, SuggestResult, UnifiedSearchResponse, SearchMode, ConfigureSearchOptions, SearchConfig, BulkIndexOptions } from './types';
 export declare class SearchClient {
     private httpClient;
     private config;
     private logger;
     constructor(httpClient: AxiosInstance, config: FluxezConfig, logger: Logger);
     /**
-     * Full-text search
+     * Unified search - supports keyword, semantic (vector), and hybrid search modes
+     * @param table - Table name to search in
+     * @param query - Search query text
+     * @param options - Search options including mode, columns, filters, etc.
+     */
+    unifiedSearch<T = any>(table: string, query: string, options?: {
+        mode?: SearchMode;
+        columns?: string[];
+        limit?: number;
+        offset?: number;
+        filters?: Record<string, any>;
+        highlight?: boolean;
+        threshold?: number;
+    }): Promise<UnifiedSearchResponse<T>>;
+    /**
+     * Keyword search - uses PostgreSQL pg_trgm for fuzzy text matching
+     * @param table - Table name to search in
+     * @param query - Search query text
+     * @param options - Search options
+     */
+    keywordSearch<T = any>(table: string, query: string, options?: Omit<Parameters<typeof this.unifiedSearch>[2], 'mode'>): Promise<UnifiedSearchResponse<T>>;
+    /**
+     * Semantic search - uses PostgreSQL pgvector for AI-powered similarity search
+     * @param table - Table name to search in
+     * @param query - Search query text (will be converted to embedding)
+     * @param options - Search options
+     */
+    semanticSearch<T = any>(table: string, query: string, options?: Omit<Parameters<typeof this.unifiedSearch>[2], 'mode'>): Promise<UnifiedSearchResponse<T>>;
+    /**
+     * Hybrid search - combines keyword and semantic search with RRF ranking
+     * @param table - Table name to search in
+     * @param query - Search query text
+     * @param options - Search options
+     */
+    hybridSearch<T = any>(table: string, query: string, options?: Omit<Parameters<typeof this.unifiedSearch>[2], 'mode'>): Promise<UnifiedSearchResponse<T>>;
+    /**
+     * Configure search for a table - sets up indexes for full-text and vector search
+     * @param table - Table name to configure
+     * @param options - Configuration options
+     */
+    configureSearch(table: string, options: ConfigureSearchOptions): Promise<{
+        success: boolean;
+        config: SearchConfig;
+    }>;
+    /**
+     * Get search configuration for a table
+     * @param table - Table name
+     */
+    getSearchConfig(table: string): Promise<SearchConfig | null>;
+    /**
+     * Index a single document for semantic search
+     * @param table - Table name
+     * @param recordId - Record ID to index
+     * @param content - Optional content to index (auto-extracted if not provided)
+     */
+    indexDocument(table: string, recordId: string, content?: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    /**
+     * Bulk index all unindexed documents in a table
+     * @param table - Table name
+     * @param options - Bulk index options
+     */
+    bulkIndex(table: string, options?: BulkIndexOptions): Promise<{
+        success: boolean;
+        indexed: number;
+        failed: number;
+    }>;
+    /**
+     * Get search service status
+     */
+    getStatus(): Promise<{
+        keywordSearchAvailable: boolean;
+        semanticSearchAvailable: boolean;
+        extensions: {
+            pg_trgm: boolean;
+            pgvector: boolean;
+            unaccent: boolean;
+        };
+    }>;
+    /**
+     * Full-text search (legacy Elasticsearch-style)
+     * @deprecated Use unifiedSearch() instead
      */
     search<T = any>(query: SearchQuery): Promise<SearchResult<T>>;
     /**
-     * Vector similarity search
+     * Vector similarity search (legacy)
+     * @deprecated Use semanticSearch() instead
      */
     vectorSearch<T = any>(query: VectorSearchQuery): Promise<VectorSearchResult<T>>;
     /**
-     * Search with simple string query
+     * Search with simple string query (legacy)
+     * @deprecated Use keywordSearch() instead
      */
     query<T = any>(q: string, options?: SearchOptions): Promise<SearchResult<T>>;
     /**
-     * Multi-match search across multiple fields
+     * Multi-match search across multiple fields (legacy)
+     * @deprecated Use unifiedSearch() with columns option instead
      */
     multiMatch<T = any>(query: string, fields: string[], options?: SearchOptions): Promise<SearchResult<T>>;
     /**
-     * Match phrase search
-     */
-    matchPhrase<T = any>(field: string, phrase: string, options?: SearchOptions): Promise<SearchResult<T>>;
-    /**
-     * Term search (exact match)
-     */
-    term<T = any>(field: string, value: any, options?: SearchOptions): Promise<SearchResult<T>>;
-    /**
-     * Terms search (match any of the values)
-     */
-    terms<T = any>(field: string, values: any[], options?: SearchOptions): Promise<SearchResult<T>>;
-    /**
-     * Range search
-     */
-    range<T = any>(field: string, range: {
-        gte?: any;
-        gt?: any;
-        lte?: any;
-        lt?: any;
-    }, options?: SearchOptions): Promise<SearchResult<T>>;
-    /**
-     * Prefix search
-     */
-    prefix<T = any>(field: string, prefix: string, options?: SearchOptions): Promise<SearchResult<T>>;
-    /**
-     * Wildcard search
-     */
-    wildcard<T = any>(field: string, pattern: string, options?: SearchOptions): Promise<SearchResult<T>>;
-    /**
-     * Fuzzy search
+     * Fuzzy search (legacy)
+     * @deprecated Use keywordSearch() instead - pg_trgm provides fuzzy matching
      */
     fuzzy<T = any>(field: string, value: string, fuzziness?: number | 'AUTO', options?: SearchOptions): Promise<SearchResult<T>>;
     /**
-     * Boolean search with must, should, must_not clauses
-     */
-    bool<T = any>(clauses: {
-        must?: SearchQuery[];
-        should?: SearchQuery[];
-        mustNot?: SearchQuery[];
-        filter?: SearchQuery[];
-    }, options?: SearchOptions): Promise<SearchResult<T>>;
-    /**
-     * Aggregation query
+     * Aggregation query (legacy)
      */
     aggregate(query: AggregationQuery): Promise<AggregationResult>;
     /**
-     * Get search suggestions
+     * Get search suggestions (legacy)
      */
     suggest(query: SuggestQuery): Promise<SuggestResult>;
     /**
-     * Autocomplete search
+     * Autocomplete search (legacy)
      */
     autocomplete(field: string, prefix: string, options?: {
         size?: number;
         fuzzy?: boolean;
     }): Promise<string[]>;
-    /**
-     * More like this - find similar documents
-     */
-    moreLikeThis<T = any>(documentId: string, options?: SearchOptions): Promise<SearchResult<T>>;
-    /**
-     * Highlight search terms in results
-     */
-    searchWithHighlight<T = any>(query: string, fields: string[], options?: SearchOptions): Promise<SearchResult<T>>;
-    /**
-     * Count matching documents
-     */
-    count(query: SearchQuery): Promise<number>;
-    /**
-     * Delete documents by query
-     */
-    deleteByQuery(query: SearchQuery): Promise<{
-        deleted: number;
-    }>;
-    /**
-     * Reindex documents
-     */
-    reindex(source: string, destination: string, query?: SearchQuery): Promise<{
-        indexed: number;
-    }>;
-    /**
-     * Create a search index
-     */
-    createIndex(name: string, mappings?: any, settings?: any): Promise<{
-        created: boolean;
-    }>;
-    /**
-     * Delete a search index
-     */
-    deleteIndex(name: string): Promise<{
-        deleted: boolean;
-    }>;
-    /**
-     * Get index information
-     */
-    getIndex(name: string): Promise<any>;
 }
 //# sourceMappingURL=search-client.d.ts.map
