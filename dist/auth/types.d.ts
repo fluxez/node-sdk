@@ -51,6 +51,7 @@ export interface PasswordResetRequest {
 export interface PasswordChangeRequest {
     currentPassword: string;
     newPassword: string;
+    userId?: string;
 }
 export interface EmailVerificationRequest {
     token: string;

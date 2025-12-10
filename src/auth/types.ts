@@ -68,6 +68,7 @@ export interface PasswordResetRequest {
 export interface PasswordChangeRequest {
   currentPassword: string;
   newPassword: string;
+  userId?: string; // Optional: Required when using service key (server-side)
 }
 
 export interface EmailVerificationRequest {
