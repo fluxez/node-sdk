@@ -1,15 +1,16 @@
 /**
  * Fluxez SDK - Browser Entry Point
  *
- * This file exports ONLY browser-compatible features.
- * Currently, that's just the chatbot widget.
+ * This file exports browser-compatible features:
+ * - Chatbot widget
+ * - Analytics tracking (lightweight, privacy-first)
  *
  * All other SDK features (database, realtime, AI, etc.) are Node.js only
  * for security and architectural reasons.
  */
 
-// Hardcoded base URL for browser build
-const FLUXEZ_BASE_URL = 'http://localhost:3000/api/v1';
+// Base URL - will be replaced during build or can be overridden
+const FLUXEZ_BASE_URL = 'https://api.fluxez.com/api/v1';
 
 // Check if we're in a browser environment
 if (typeof window === 'undefined') {
@@ -453,5 +454,466 @@ function generateSessionId(): string {
   return `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// Re-export the loadChatbot function as default for convenience
-export default loadChatbot;
+// ==================== ANALYTICS ====================
+
+export interface AnalyticsOptions {
+  /** Auto-track page views on route changes */
+  autoTrack?: boolean;
+  /** Auto-track page views (SPA-friendly) */
+  trackPageViews?: boolean;
+  /** Track outbound link clicks */
+  trackOutboundLinks?: boolean;
+  /** Track file downloads */
+  trackDownloads?: boolean;
+  /** Respect Do Not Track header */
+  respectDNT?: boolean;
+  /** Custom API endpoint (defaults to Fluxez API) */
+  apiUrl?: string;
+  /** Batch events before sending */
+  batchSize?: number;
+  /** Flush interval in ms */
+  flushInterval?: number;
+  /** Organization ID */
+  organizationId?: string;
+  /** Project ID */
+  projectId?: string;
+  /** App ID */
+  appId?: string;
+  /** Debug mode */
+  debug?: boolean;
+}
+
+export interface TrackEventOptions {
+  /** Custom properties */
+  properties?: Record<string, any>;
+  /** Numeric value (for revenue tracking) */
+  value?: number;
+  /** User ID (if logged in) */
+  userId?: string;
+}
+
+export interface AnalyticsInstance {
+  /** Track a custom event */
+  track(eventName: string, options?: TrackEventOptions): void;
+  /** Track a page view */
+  trackPageView(pathname?: string, referrer?: string): void;
+  /** Identify a user */
+  identify(userId: string, properties?: Record<string, any>): void;
+  /** Flush pending events */
+  flush(): Promise<void>;
+  /** Destroy and cleanup */
+  destroy(): void;
+  /** Enable tracking */
+  enable(): void;
+  /** Disable tracking */
+  disable(): void;
+  /** Check if tracking is enabled */
+  isEnabled(): boolean;
+}
+
+/**
+ * Load Fluxez Analytics - Lightweight, Privacy-First Analytics
+ *
+ * Similar to Plausible/Umami - cookieless, GDPR-friendly
+ *
+ * @param apiKey - Your Fluxez API key (service_ or anon_ prefixed)
+ * @param options - Optional configuration
+ * @returns AnalyticsInstance control interface
+ *
+ * @example
+ * ```typescript
+ * const analytics = loadAnalytics('anon_xxx', {
+ *   autoTrack: true,
+ *   trackPageViews: true,
+ *   trackOutboundLinks: true,
+ * });
+ *
+ * // Track custom events
+ * analytics.track('button_click', { properties: { buttonId: 'signup' } });
+ *
+ * // Identify logged-in users
+ * analytics.identify('user_123', { email: 'user@example.com' });
+ * ```
+ */
+export function loadAnalytics(apiKey: string, options: AnalyticsOptions = {}): AnalyticsInstance {
+  // Validate API key format
+  if (!apiKey.startsWith('service_') && !apiKey.startsWith('anon_')) {
+    throw new Error('Invalid API key format. Expected "service_" or "anon_" prefix.');
+  }
+
+  // Respect Do Not Track if configured
+  if (options.respectDNT && navigator.doNotTrack === '1') {
+    console.log('[Fluxez Analytics] Do Not Track enabled - tracking disabled');
+    return createDisabledInstance();
+  }
+
+  // Configuration
+  const config = {
+    apiUrl: options.apiUrl || FLUXEZ_BASE_URL,
+    autoTrack: options.autoTrack ?? true,
+    trackPageViews: options.trackPageViews ?? true,
+    trackOutboundLinks: options.trackOutboundLinks ?? false,
+    trackDownloads: options.trackDownloads ?? false,
+    batchSize: options.batchSize ?? 10,
+    flushInterval: options.flushInterval ?? 5000,
+    debug: options.debug ?? false,
+  };
+
+  // State
+  let enabled = true;
+  let visitorId = getOrCreateVisitorId();
+  let sessionId = generateAnalyticsSessionId();
+  let userId: string | undefined;
+  let eventQueue: any[] = [];
+  let flushTimer: ReturnType<typeof setInterval> | null = null;
+  let lastPathname = '';
+
+  // Build headers
+  const buildHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+    };
+    if (options.organizationId) headers['x-organization-id'] = options.organizationId;
+    if (options.projectId) headers['x-project-id'] = options.projectId;
+    if (options.appId) headers['x-app-id'] = options.appId;
+    return headers;
+  };
+
+  // Get browser info
+  const getBrowserInfo = () => {
+    const ua = navigator.userAgent;
+    let browser = 'Unknown';
+    let browserVersion = '';
+    let os = 'Unknown';
+    let deviceType: 'desktop' | 'mobile' | 'tablet' = 'desktop';
+
+    // Browser detection
+    if (ua.includes('Firefox/')) {
+      browser = 'Firefox';
+      browserVersion = ua.match(/Firefox\/(\d+)/)?.[1] || '';
+    } else if (ua.includes('Chrome/') && !ua.includes('Edg/')) {
+      browser = 'Chrome';
+      browserVersion = ua.match(/Chrome\/(\d+)/)?.[1] || '';
+    } else if (ua.includes('Safari/') && !ua.includes('Chrome/')) {
+      browser = 'Safari';
+      browserVersion = ua.match(/Version\/(\d+)/)?.[1] || '';
+    } else if (ua.includes('Edg/')) {
+      browser = 'Edge';
+      browserVersion = ua.match(/Edg\/(\d+)/)?.[1] || '';
+    }
+
+    // OS detection
+    if (ua.includes('Windows')) os = 'Windows';
+    else if (ua.includes('Mac OS')) os = 'macOS';
+    else if (ua.includes('Linux')) os = 'Linux';
+    else if (ua.includes('Android')) os = 'Android';
+    else if (ua.includes('iOS') || ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+    // Device detection
+    if (/Mobi|Android/i.test(ua)) deviceType = 'mobile';
+    else if (/Tablet|iPad/i.test(ua)) deviceType = 'tablet';
+
+    return { browser, browserVersion, os, deviceType };
+  };
+
+  // Extract UTM params from URL
+  const getUtmParams = () => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      utmSource: params.get('utm_source') || '',
+      utmMedium: params.get('utm_medium') || '',
+      utmCampaign: params.get('utm_campaign') || '',
+      utmTerm: params.get('utm_term') || '',
+      utmContent: params.get('utm_content') || '',
+    };
+  };
+
+  // Queue an event
+  const queueEvent = (event: any) => {
+    if (!enabled) return;
+
+    const { browser, browserVersion, os, deviceType } = getBrowserInfo();
+    const utm = getUtmParams();
+
+    const fullEvent = {
+      ...event,
+      visitorId,
+      sessionId,
+      userId,
+      hostname: window.location.hostname,
+      referrer: document.referrer,
+      ...utm,
+      browser,
+      browserVersion,
+      os,
+      deviceType,
+      screenWidth: window.screen.width,
+      screenHeight: window.screen.height,
+      timestamp: new Date().toISOString(),
+    };
+
+    eventQueue.push(fullEvent);
+
+    if (config.debug) {
+      console.log('[Fluxez Analytics] Event queued:', fullEvent);
+    }
+
+    // Flush if batch size reached
+    if (eventQueue.length >= config.batchSize) {
+      flush();
+    }
+  };
+
+  // Flush events to server
+  const flush = async (): Promise<void> => {
+    if (eventQueue.length === 0) return;
+
+    const events = [...eventQueue];
+    eventQueue = [];
+
+    try {
+      const response = await fetch(`${config.apiUrl}/analytics/track/batch`, {
+        method: 'POST',
+        headers: buildHeaders(),
+        body: JSON.stringify({ events }),
+        keepalive: true, // Ensure events are sent even on page unload
+      });
+
+      if (!response.ok) {
+        // Re-queue events on failure
+        eventQueue = events.concat(eventQueue);
+        if (config.debug) {
+          console.error('[Fluxez Analytics] Failed to send events:', response.status);
+        }
+      } else if (config.debug) {
+        console.log('[Fluxez Analytics] Flushed', events.length, 'events');
+      }
+    } catch (error) {
+      // Re-queue events on error
+      eventQueue = events.concat(eventQueue);
+      if (config.debug) {
+        console.error('[Fluxez Analytics] Error sending events:', error);
+      }
+    }
+  };
+
+  // Track page view
+  const trackPageView = (pathname?: string, referrer?: string) => {
+    const path = pathname || window.location.pathname;
+    queueEvent({
+      name: 'pageview',
+      type: 'pageview',
+      pathname: path,
+      referrer: referrer || document.referrer,
+    });
+  };
+
+  // Track custom event
+  const track = (eventName: string, options: TrackEventOptions = {}) => {
+    queueEvent({
+      name: eventName,
+      type: 'event',
+      pathname: window.location.pathname,
+      properties: options.properties,
+      value: options.value,
+      ...(options.userId && { userId: options.userId }),
+    });
+  };
+
+  // Identify user
+  const identify = (newUserId: string, properties?: Record<string, any>) => {
+    userId = newUserId;
+    queueEvent({
+      name: '$identify',
+      type: 'identify',
+      userId: newUserId,
+      properties,
+    });
+  };
+
+  // Setup auto-tracking
+  const setupAutoTracking = () => {
+    // Track initial page view
+    if (config.trackPageViews) {
+      trackPageView();
+      lastPathname = window.location.pathname;
+    }
+
+    // Track SPA route changes via History API
+    if (config.autoTrack && config.trackPageViews) {
+      const originalPushState = history.pushState;
+      const originalReplaceState = history.replaceState;
+
+      history.pushState = function (...args) {
+        originalPushState.apply(this, args);
+        const newPath = window.location.pathname;
+        if (newPath !== lastPathname) {
+          trackPageView(newPath);
+          lastPathname = newPath;
+        }
+      };
+
+      history.replaceState = function (...args) {
+        originalReplaceState.apply(this, args);
+        const newPath = window.location.pathname;
+        if (newPath !== lastPathname) {
+          trackPageView(newPath);
+          lastPathname = newPath;
+        }
+      };
+
+      // Handle popstate (back/forward buttons)
+      window.addEventListener('popstate', () => {
+        const newPath = window.location.pathname;
+        if (newPath !== lastPathname) {
+          trackPageView(newPath);
+          lastPathname = newPath;
+        }
+      });
+    }
+
+    // Track outbound links
+    if (config.trackOutboundLinks) {
+      document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const link = target.closest('a');
+        if (link && link.href) {
+          try {
+            const url = new URL(link.href);
+            if (url.hostname !== window.location.hostname) {
+              track('outbound_click', {
+                properties: {
+                  url: link.href,
+                  text: link.textContent?.trim().slice(0, 100),
+                },
+              });
+            }
+          } catch {}
+        }
+      });
+    }
+
+    // Track file downloads
+    if (config.trackDownloads) {
+      const downloadExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.zip', '.rar', '.exe', '.dmg'];
+      document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const link = target.closest('a');
+        if (link && link.href) {
+          const isDownload = downloadExtensions.some(ext => link.href.toLowerCase().includes(ext));
+          if (isDownload) {
+            track('file_download', {
+              properties: {
+                url: link.href,
+                filename: link.href.split('/').pop(),
+              },
+            });
+          }
+        }
+      });
+    }
+  };
+
+  // Flush on page unload
+  const setupUnloadHandler = () => {
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        flush();
+      }
+    });
+
+    window.addEventListener('pagehide', () => {
+      flush();
+    });
+  };
+
+  // Start periodic flush
+  const startFlushTimer = () => {
+    if (flushTimer) clearInterval(flushTimer);
+    flushTimer = setInterval(flush, config.flushInterval);
+  };
+
+  // Initialize
+  setupAutoTracking();
+  setupUnloadHandler();
+  startFlushTimer();
+
+  if (config.debug) {
+    console.log('[Fluxez Analytics] Initialized', {
+      visitorId,
+      sessionId,
+      config,
+    });
+  }
+
+  // Return public interface
+  return {
+    track,
+    trackPageView,
+    identify,
+    flush,
+    destroy: () => {
+      if (flushTimer) clearInterval(flushTimer);
+      flush();
+    },
+    enable: () => { enabled = true; },
+    disable: () => { enabled = false; },
+    isEnabled: () => enabled,
+  };
+}
+
+/**
+ * Create a disabled analytics instance (for DNT or opt-out)
+ */
+function createDisabledInstance(): AnalyticsInstance {
+  return {
+    track: () => {},
+    trackPageView: () => {},
+    identify: () => {},
+    flush: async () => {},
+    destroy: () => {},
+    enable: () => {},
+    disable: () => {},
+    isEnabled: () => false,
+  };
+}
+
+/**
+ * Get or create a visitor ID (stored in localStorage)
+ * Privacy-friendly: uses a random ID, not fingerprinting
+ */
+function getOrCreateVisitorId(): string {
+  const key = '_fx_vid';
+  try {
+    let visitorId = localStorage.getItem(key);
+    if (!visitorId) {
+      visitorId = `v_${Date.now()}_${Math.random().toString(36).substr(2, 12)}`;
+      localStorage.setItem(key, visitorId);
+    }
+    return visitorId;
+  } catch {
+    // localStorage not available, use session-only ID
+    return `v_${Date.now()}_${Math.random().toString(36).substr(2, 12)}`;
+  }
+}
+
+/**
+ * Generate a session ID (new per browser session)
+ */
+function generateAnalyticsSessionId(): string {
+  const key = '_fx_sid';
+  try {
+    let sessionId = sessionStorage.getItem(key);
+    if (!sessionId) {
+      sessionId = `s_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      sessionStorage.setItem(key, sessionId);
+    }
+    return sessionId;
+  } catch {
+    return `s_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+}
+
+// Default export
+export default { loadChatbot, loadAnalytics };
