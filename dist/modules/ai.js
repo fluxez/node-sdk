@@ -20,6 +20,10 @@ class AIModule {
             prompt,
             ...options,
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to generate text');
+        }
         return response.data.data;
     }
     /**
@@ -30,6 +34,10 @@ class AIModule {
             messages,
             ...options,
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to complete chat');
+        }
         return response.data.data;
     }
     /**
@@ -42,6 +50,10 @@ class AIModule {
             framework: options?.framework,
             saveToDatabase: options?.saveToDatabase,
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to generate code');
+        }
         return response.data.data;
     }
     /**
@@ -52,6 +64,10 @@ class AIModule {
             text,
             length: options?.length || 'medium',
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to summarize text');
+        }
         return response.data.data;
     }
     /**
@@ -63,6 +79,10 @@ class AIModule {
             targetLanguage,
             sourceLanguage: options?.sourceLanguage,
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to translate text');
+        }
         return response.data.data;
     }
     /**
@@ -74,6 +94,11 @@ class AIModule {
             text,
             model: options?.model,
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to generate embeddings');
+        }
+        // Return the data from successful response
         return response.data.data;
     }
     // ============= IMAGE AI OPERATIONS =============
@@ -104,6 +129,10 @@ class AIModule {
             question: options?.question || 'What is in this image?',
             detail: options?.detail || 'auto',
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to analyze image');
+        }
         return response.data.data;
     }
     /**
@@ -115,6 +144,10 @@ class AIModule {
             prompt,
             mask: options?.mask,
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to edit image');
+        }
         return response.data.data;
     }
     /**
@@ -125,6 +158,10 @@ class AIModule {
             image: imageData,
             n: options?.n || 1,
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to create image variation');
+        }
         return response.data.data;
     }
     // ============= AUDIO AI OPERATIONS =============
@@ -209,6 +246,10 @@ class AIModule {
                 'Content-Type': 'multipart/form-data',
             },
         });
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to translate audio');
+        }
         return response.data.data;
     }
     /**
@@ -216,6 +257,10 @@ class AIModule {
      */
     async getAvailableVoices() {
         const response = await this.httpClient.get('/ai/audio/voices');
+        // Handle error responses from the API
+        if (response.data?.success === false) {
+            throw new Error(response.data.error || 'Failed to get available voices');
+        }
         return response.data.data;
     }
     // ============= VIDEO AI OPERATIONS =============
