@@ -32,7 +32,14 @@ export class AIModule {
       prompt,
       ...options,
     });
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to generate text');
+    }
+
+    // API returns { success: true, data: { text: "..." }, contentId: ... }
+    return response.data;
   }
 
   /**
@@ -54,7 +61,13 @@ export class AIModule {
       messages,
       ...options,
     });
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to chat');
+    }
+
+    return response.data;
   }
 
   /**
@@ -77,7 +90,13 @@ export class AIModule {
       framework: options?.framework,
       saveToDatabase: options?.saveToDatabase,
     });
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to generate code');
+    }
+
+    return response.data;
   }
 
   /**
@@ -98,7 +117,13 @@ export class AIModule {
       text,
       length: options?.length || 'medium',
     });
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to summarize text');
+    }
+
+    return response.data;
   }
 
   /**
@@ -121,7 +146,13 @@ export class AIModule {
       targetLanguage,
       sourceLanguage: options?.sourceLanguage,
     });
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to translate text');
+    }
+
+    return response.data;
   }
 
   /**
@@ -221,7 +252,13 @@ export class AIModule {
       question: options?.question || 'What is in this image?',
       detail: options?.detail || 'auto',
     });
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to analyze image');
+    }
+
+    return response.data;
   }
 
   /**
@@ -242,7 +279,13 @@ export class AIModule {
       prompt,
       mask: options?.mask,
     });
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to edit image');
+    }
+
+    return response.data;
   }
 
   /**
@@ -260,7 +303,13 @@ export class AIModule {
       image: imageData,
       n: options?.n || 1,
     });
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to create image variation');
+    }
+
+    return response.data;
   }
 
   // ============= AUDIO AI OPERATIONS =============
@@ -409,7 +458,13 @@ export class AIModule {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to translate audio');
+    }
+
+    return response.data;
   }
 
   /**
@@ -421,7 +476,13 @@ export class AIModule {
     gender?: string;
   }>> {
     const response = await this.httpClient.get('/ai/audio/voices');
-    return response.data.data;
+
+    // Handle error responses
+    if (response.success === false) {
+      throw new Error(response.error || 'Failed to get available voices');
+    }
+
+    return response.data;
   }
 
   // ============= VIDEO AI OPERATIONS =============
