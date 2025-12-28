@@ -14,6 +14,7 @@ const ai_1 = require("./modules/ai");
 const workflow_1 = require("./modules/workflow");
 const connectors_1 = require("./modules/connectors");
 const realtime_1 = require("./modules/realtime");
+const channels_1 = require("./modules/channels");
 const push_1 = require("./modules/push");
 const edge_functions_1 = require("./modules/edge-functions");
 const video_conferencing_1 = require("./modules/video-conferencing");
@@ -157,6 +158,7 @@ class FluxezClient {
         this.connectors = new connectors_1.ConnectorClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.schema = new schema_client_1.SchemaClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.realtime = new realtime_1.RealtimeClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+        this.channels = new channels_1.ChannelsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.push = new push_1.PushClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.videoConferencing = new video_conferencing_1.VideoConferencingClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
         this.documents = new documents_1.DocumentsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());

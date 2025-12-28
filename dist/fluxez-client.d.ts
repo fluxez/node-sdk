@@ -10,6 +10,7 @@ import { AIModule } from './modules/ai';
 import { WorkflowClient } from './modules/workflow';
 import { ConnectorClient } from './modules/connectors';
 import { RealtimeClient } from './modules/realtime';
+import { ChannelsClient } from './modules/channels';
 import { PushClient } from './modules/push';
 import { EdgeFunctionsClient } from './modules/edge-functions';
 import { VideoConferencingClient } from './modules/video-conferencing';
@@ -115,6 +116,7 @@ export declare class FluxezClient {
     connectors: ConnectorClient;
     schema: SchemaClient;
     realtime: RealtimeClient;
+    channels: ChannelsClient;
     push: PushClient;
     videoConferencing: VideoConferencingClient;
     documents: DocumentsClient;

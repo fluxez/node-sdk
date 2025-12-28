@@ -36,6 +36,8 @@ export type { ProgressCallback } from './schema/schema';
 export type { SchemaDefinition, SchemaField, FieldConstraints, SearchConfig, AnalyticsConfig, CacheConfig, IndexDefinition, TableConstraint, TableSettings, RegisterSchemaRequest, RegisterSchemaResponse, MigrateSchemaRequest, MigrateSchemaResponse, SchemaMigration, TableConfig, ConfigureTableRequest, ConfigureTableResponse, TableStructure, ColumnInfo, IndexInfo, ConstraintInfo, TriggerInfo, TableSize, TableStats, ListTablesOptions, ListTablesResponse, TableInfo, CreateIndexRequest, CreateIndexResponse, DropTableRequest, DropTableResponse, SchemaError, SchemaValidationError } from './types/schema.types';
 export { RealtimeClient } from './modules/realtime';
 export type { RealtimeConfig, RealtimeMessage, ChannelSubscription, PresenceData, RealtimeOptions } from './modules/realtime';
+export { ChannelsClient } from './modules/channels';
+export type { Channel, ChannelMember, ChannelMessage, ChannelType, CreateChannelOptions, SendMessageOptions as ChannelSendMessageOptions, PublishEventOptions, ChannelQueryOptions, MessageQueryOptions, ChannelsConnectionConfig, ChannelEventCallback, PresenceUser } from './modules/channels';
 export { PushClient } from './modules/push';
 export type { PushNotification, NotificationAction, PushTarget, PushSubscription, SendPushOptions, PushCampaign, PushTemplate, DeviceRegistration, PushStats } from './modules/push';
 export { VideoConferencingClient } from './modules/video-conferencing';

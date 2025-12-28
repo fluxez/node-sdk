@@ -209,6 +209,23 @@ export type {
   RealtimeOptions
 } from './modules/realtime';
 
+// Channels (Pusher-like real-time messaging)
+export { ChannelsClient } from './modules/channels';
+export type {
+  Channel,
+  ChannelMember,
+  ChannelMessage,
+  ChannelType,
+  CreateChannelOptions,
+  SendMessageOptions as ChannelSendMessageOptions,
+  PublishEventOptions,
+  ChannelQueryOptions,
+  MessageQueryOptions,
+  ChannelsConnectionConfig,
+  ChannelEventCallback,
+  PresenceUser
+} from './modules/channels';
+
 // Push Notifications
 export { PushClient } from './modules/push';
 export type {
