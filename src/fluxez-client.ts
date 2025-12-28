@@ -11,6 +11,7 @@ import { AIModule } from './modules/ai';
 import { WorkflowClient } from './modules/workflow';
 import { ConnectorClient } from './modules/connectors';
 import { RealtimeClient } from './modules/realtime';
+import { ChannelsClient } from './modules/channels';
 import { PushClient } from './modules/push';
 import { EdgeFunctionsClient } from './modules/edge-functions';
 import { VideoConferencingClient } from './modules/video-conferencing';
@@ -126,6 +127,7 @@ export class FluxezClient {
   public connectors!: ConnectorClient;
   public schema!: SchemaClient;
   public realtime!: RealtimeClient;
+  public channels!: ChannelsClient;
   public push!: PushClient;
   public videoConferencing!: VideoConferencingClient;
   public documents!: DocumentsClient;
@@ -195,6 +197,7 @@ export class FluxezClient {
     this.connectors = new ConnectorClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.schema = new SchemaClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.realtime = new RealtimeClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
+    this.channels = new ChannelsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.push = new PushClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.videoConferencing = new VideoConferencingClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());
     this.documents = new DocumentsClient(this.httpClient.getAxiosInstance(), this.getClientConfig(), this.createLogger());

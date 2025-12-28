@@ -18,7 +18,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Logger = exports.ErrorCode = exports.ApiError = exports.PaymentClient = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoConferencingClient = exports.PushClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.ConnectorClient = exports.WorkflowClient = exports.VectorClient = exports.AIModule = exports.QueueClient = exports.EmailClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
+exports.Logger = exports.ErrorCode = exports.ApiError = exports.PaymentClient = exports.MigrationCLI = exports.Migrator = exports.ChatbotClient = exports.EdgeFunctionsClient = exports.DocumentsClient = exports.VideoConferencingClient = exports.PushClient = exports.ChannelsClient = exports.RealtimeClient = exports.SchemaModule = exports.SchemaClient = exports.ConnectorClient = exports.WorkflowClient = exports.VectorClient = exports.AIModule = exports.QueueClient = exports.EmailClient = exports.AuthClient = exports.CacheClient = exports.AnalyticsClient = exports.SearchClient = exports.StorageClient = exports.QueryBuilder = exports.FluxezClientLegacy = exports.HttpClient = exports.FluxezClient = void 0;
 // Core Client
 var fluxez_client_1 = require("./fluxez-client");
 Object.defineProperty(exports, "FluxezClient", { enumerable: true, get: function () { return fluxez_client_1.FluxezClient; } });
@@ -79,6 +79,9 @@ Object.defineProperty(exports, "SchemaModule", { enumerable: true, get: function
 // Realtime
 var realtime_1 = require("./modules/realtime");
 Object.defineProperty(exports, "RealtimeClient", { enumerable: true, get: function () { return realtime_1.RealtimeClient; } });
+// Channels (Pusher-like real-time messaging)
+var channels_1 = require("./modules/channels");
+Object.defineProperty(exports, "ChannelsClient", { enumerable: true, get: function () { return channels_1.ChannelsClient; } });
 // Push Notifications
 var push_1 = require("./modules/push");
 Object.defineProperty(exports, "PushClient", { enumerable: true, get: function () { return push_1.PushClient; } });
