@@ -480,7 +480,15 @@ class QueryBuilder {
         return this;
     }
     /**
-     * Execute the query
+     * Execute the query and return full QueryResult
+     *
+     * For SELECT queries, prefer using:
+     * - .get() or .all() - returns T[] (array of results)
+     * - .first() or .one() - returns T | null (single result)
+     *
+     * For INSERT/UPDATE/DELETE, use:
+     * - .execute() - returns QueryResult with .data for returned rows
+     * - .run() - alias for execute()
      */
     async execute() {
         const query = this.buildQuery();
@@ -537,6 +545,27 @@ class QueryBuilder {
         };
     }
     /**
+     * Alias for execute() - runs the query and returns QueryResult
+     * Semantic alias for write operations (INSERT/UPDATE/DELETE)
+     */
+    async run() {
+        return this.execute();
+    }
+    /**
+     * Alias for execute() - common pattern from various ORMs
+     */
+    async exec() {
+        return this.execute();
+    }
+    /**
+     * Execute and return just the data array (for SELECT queries)
+     * Useful when you want execute() behavior but only need the data
+     */
+    async rows() {
+        const result = await this.execute();
+        return result.data || [];
+    }
+    /**
      * Get first result
      */
     async first() {
@@ -550,6 +579,48 @@ class QueryBuilder {
     async get() {
         const result = await this.execute();
         return result.data || [];
+    }
+    /**
+     * Alias for get() - returns all results as array
+     * Common pattern from Knex/Objection.js
+     */
+    async all() {
+        return this.get();
+    }
+    /**
+     * Alias for get() - returns all results as array
+     * Common pattern from various ORMs
+     */
+    async fetch() {
+        return this.get();
+    }
+    /**
+     * Alias for get() - returns all results as array
+     * Common pattern from ActiveRecord/Eloquent
+     */
+    async toArray() {
+        return this.get();
+    }
+    /**
+     * Alias for first() - returns single result or null
+     * Common pattern from Prisma/TypeORM
+     */
+    async one() {
+        return this.first();
+    }
+    /**
+     * Alias for first() - returns single result or null
+     * Common pattern from various ORMs
+     */
+    async find() {
+        return this.first();
+    }
+    /**
+     * Alias for first() - returns single result or null
+     * Common pattern from Drizzle
+     */
+    async findFirst() {
+        return this.first();
     }
     /**
      * Get single value
