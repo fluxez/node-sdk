@@ -219,7 +219,7 @@ export declare class FluxezClient {
      * @param data Data to insert (single object or array)
      * @returns Inserted data
      */
-    insert(tableName: string, data: any | any[]): Promise<import("./query/types").QueryResult<any>>;
+    insert(tableName: string, data: any | any[]): Promise<import(".").QueryResult<any>>;
     /**
      * Select data from a table
      *
@@ -236,7 +236,7 @@ export declare class FluxezClient {
      * @param where WHERE conditions (can be string ID or object with conditions)
      * @returns Updated data
      */
-    update(tableName: string, data: any, where: string | Record<string, any>): Promise<import("./query/types").QueryResult<any>>;
+    update(tableName: string, data: any, where: string | Record<string, any>): Promise<import(".").QueryResult<any>>;
     /**
      * Delete data from a table
      *
@@ -244,7 +244,7 @@ export declare class FluxezClient {
      * @param where WHERE conditions (can be string ID or object with conditions)
      * @returns Deletion result
      */
-    delete(tableName: string, where: string | Record<string, any>): Promise<import("./query/types").QueryResult<any>>;
+    delete(tableName: string, where: string | Record<string, any>): Promise<import(".").QueryResult<any>>;
     /**
      * Find one record from a table
      *

@@ -8,7 +8,7 @@ export { FluxezClient as FluxezClientLegacy } from './core/client';
 export { FluxezConfig, AuthConfig, StorageConfig } from './types/config';
 export * from './types';
 export { QueryBuilder } from './query/query-builder';
-export { SelectQuery, InsertQuery, UpdateQuery, DeleteQuery, JoinType, OrderDirection, AggregateFunction } from './query/types';
+export { SelectQuery, InsertQuery, UpdateQuery, DeleteQuery, JoinType, OrderDirection, AggregateFunction, QueryResult, WhereOperator, WhereCondition } from './query/types';
 export { StorageClient } from './storage/storage-client';
 export { UploadOptions, UploadResult, SignedUrlOptions, ListFilesOptions, FileMetadata } from './storage/types';
 export { SearchClient } from './search/search-client';

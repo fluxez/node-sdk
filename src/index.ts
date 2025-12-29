@@ -16,14 +16,17 @@ export * from './types';
 
 // Query Builder
 export { QueryBuilder } from './query/query-builder';
-export { 
-  SelectQuery, 
-  InsertQuery, 
-  UpdateQuery, 
+export {
+  SelectQuery,
+  InsertQuery,
+  UpdateQuery,
   DeleteQuery,
   JoinType,
   OrderDirection,
-  AggregateFunction
+  AggregateFunction,
+  QueryResult,
+  WhereOperator,
+  WhereCondition
 } from './query/types';
 
 // Storage

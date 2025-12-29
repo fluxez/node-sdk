@@ -204,9 +204,31 @@ export declare class QueryBuilder {
     min(column: string): QueryBuilder;
     max(column: string): QueryBuilder;
     /**
-     * Execute the query
+     * Execute the query and return full QueryResult
+     *
+     * For SELECT queries, prefer using:
+     * - .get() or .all() - returns T[] (array of results)
+     * - .first() or .one() - returns T | null (single result)
+     *
+     * For INSERT/UPDATE/DELETE, use:
+     * - .execute() - returns QueryResult with .data for returned rows
+     * - .run() - alias for execute()
      */
     execute<T = any>(): Promise<QueryResult<T>>;
+    /**
+     * Alias for execute() - runs the query and returns QueryResult
+     * Semantic alias for write operations (INSERT/UPDATE/DELETE)
+     */
+    run<T = any>(): Promise<QueryResult<T>>;
+    /**
+     * Alias for execute() - common pattern from various ORMs
+     */
+    exec<T = any>(): Promise<QueryResult<T>>;
+    /**
+     * Execute and return just the data array (for SELECT queries)
+     * Useful when you want execute() behavior but only need the data
+     */
+    rows<T = any>(): Promise<T[]>;
     /**
      * Get first result
      */
@@ -215,6 +237,36 @@ export declare class QueryBuilder {
      * Get all results
      */
     get<T = any>(): Promise<T[]>;
+    /**
+     * Alias for get() - returns all results as array
+     * Common pattern from Knex/Objection.js
+     */
+    all<T = any>(): Promise<T[]>;
+    /**
+     * Alias for get() - returns all results as array
+     * Common pattern from various ORMs
+     */
+    fetch<T = any>(): Promise<T[]>;
+    /**
+     * Alias for get() - returns all results as array
+     * Common pattern from ActiveRecord/Eloquent
+     */
+    toArray<T = any>(): Promise<T[]>;
+    /**
+     * Alias for first() - returns single result or null
+     * Common pattern from Prisma/TypeORM
+     */
+    one<T = any>(): Promise<T | null>;
+    /**
+     * Alias for first() - returns single result or null
+     * Common pattern from various ORMs
+     */
+    find<T = any>(): Promise<T | null>;
+    /**
+     * Alias for first() - returns single result or null
+     * Common pattern from Drizzle
+     */
+    findFirst<T = any>(): Promise<T | null>;
     /**
      * Get single value
      */

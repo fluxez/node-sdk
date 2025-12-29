@@ -598,7 +598,15 @@ export class QueryBuilder {
   }
   
   /**
-   * Execute the query
+   * Execute the query and return full QueryResult
+   *
+   * For SELECT queries, prefer using:
+   * - .get() or .all() - returns T[] (array of results)
+   * - .first() or .one() - returns T | null (single result)
+   *
+   * For INSERT/UPDATE/DELETE, use:
+   * - .execute() - returns QueryResult with .data for returned rows
+   * - .run() - alias for execute()
    */
   public async execute<T = any>(): Promise<QueryResult<T>> {
     const query = this.buildQuery();
@@ -661,6 +669,30 @@ export class QueryBuilder {
   }
   
   /**
+   * Alias for execute() - runs the query and returns QueryResult
+   * Semantic alias for write operations (INSERT/UPDATE/DELETE)
+   */
+  public async run<T = any>(): Promise<QueryResult<T>> {
+    return this.execute<T>();
+  }
+
+  /**
+   * Alias for execute() - common pattern from various ORMs
+   */
+  public async exec<T = any>(): Promise<QueryResult<T>> {
+    return this.execute<T>();
+  }
+
+  /**
+   * Execute and return just the data array (for SELECT queries)
+   * Useful when you want execute() behavior but only need the data
+   */
+  public async rows<T = any>(): Promise<T[]> {
+    const result = await this.execute<T>();
+    return result.data || [];
+  }
+
+  /**
    * Get first result
    */
   public async first<T = any>(): Promise<T | null> {
@@ -675,6 +707,54 @@ export class QueryBuilder {
   public async get<T = any>(): Promise<T[]> {
     const result = await this.execute<T>();
     return result.data || [];
+  }
+
+  /**
+   * Alias for get() - returns all results as array
+   * Common pattern from Knex/Objection.js
+   */
+  public async all<T = any>(): Promise<T[]> {
+    return this.get<T>();
+  }
+
+  /**
+   * Alias for get() - returns all results as array
+   * Common pattern from various ORMs
+   */
+  public async fetch<T = any>(): Promise<T[]> {
+    return this.get<T>();
+  }
+
+  /**
+   * Alias for get() - returns all results as array
+   * Common pattern from ActiveRecord/Eloquent
+   */
+  public async toArray<T = any>(): Promise<T[]> {
+    return this.get<T>();
+  }
+
+  /**
+   * Alias for first() - returns single result or null
+   * Common pattern from Prisma/TypeORM
+   */
+  public async one<T = any>(): Promise<T | null> {
+    return this.first<T>();
+  }
+
+  /**
+   * Alias for first() - returns single result or null
+   * Common pattern from various ORMs
+   */
+  public async find<T = any>(): Promise<T | null> {
+    return this.first<T>();
+  }
+
+  /**
+   * Alias for first() - returns single result or null
+   * Common pattern from Drizzle
+   */
+  public async findFirst<T = any>(): Promise<T | null> {
+    return this.first<T>();
   }
   
   /**
